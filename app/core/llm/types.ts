@@ -1,3 +1,6 @@
+import type OpenAI from "openai";
+import type { ToolCallItem } from "../tools/types";
+
 export type Role = "system" | "user" | "assistant" | "tool";
 
 export interface ChatMessage {
@@ -26,6 +29,7 @@ export interface LLMResponse {
   model: string;
   content: string;
   finishReason?: string;
+  toolCalls?: ToolCallItem[];
   usage?: TokenUsage;
   latencyMs: number;
 }
@@ -34,6 +38,7 @@ export interface LLMStreamChunk {
   content: string;
   isDone: boolean;
   model?: string;
+  toolCalls?: ToolCallItem[];
   usage?: TokenUsage;
 }
 
@@ -49,6 +54,8 @@ export interface ChatCompletionOptions {
   temperature?: number;
   maxTokens?: number;
   systemPrompt?: string;
+  tools?: OpenAI.Chat.ChatCompletionTool[];
+  toolChoice?: OpenAI.Chat.ChatCompletionToolChoiceOption;
   responseFormat?: { type: "json_object" | "text" };
   signal?: AbortSignal;
 }

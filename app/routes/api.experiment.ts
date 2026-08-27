@@ -2,6 +2,11 @@ import type { ActionFunctionArgs } from "react-router";
 import { LLMClient } from "~/core/llm/client";
 import { runStatelessExperiment } from "~/core/experiments/stateless";
 import { runStructuredExperiment } from "~/core/experiments/structured";
+import {
+  runToolCallingExperiment,
+  testExecuteTool,
+} from "~/core/experiments/tool-calling";
+import { defaultToolRegistry } from "~/core/tools/builtins";
 
 export async function action({ request }: ActionFunctionArgs) {
   if (request.method !== "POST") {
@@ -20,6 +25,11 @@ export async function action({ request }: ActionFunctionArgs) {
       customName,
       customLanguage,
       customJson,
+      userPrompt,
+      systemPrompt,
+      temperature,
+      toolName,
+      toolArgs,
     } = body;
 
     const client = new LLMClient({ apiKey, defaultModel: model });
@@ -36,6 +46,44 @@ export async function action({ request }: ActionFunctionArgs) {
     } else if (type === "structured") {
       const result = await runStructuredExperiment(client, customJson);
       return new Response(JSON.stringify({ success: true, result }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } else if (type === "tool_calling") {
+      if (!userPrompt || !userPrompt.trim()) {
+        return new Response(
+          JSON.stringify({ error: "userPrompt 不能为空" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const result = await runToolCallingExperiment(client, {
+        userPrompt,
+        systemPrompt,
+        model,
+        temperature,
+      });
+
+      return new Response(JSON.stringify({ success: true, result }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } else if (type === "tool_direct_execute") {
+      if (!toolName) {
+        return new Response(JSON.stringify({ error: "toolName 不能为空" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const result = await testExecuteTool(toolName, toolArgs || {});
+      return new Response(JSON.stringify({ success: true, result }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } else if (type === "tool_manifest") {
+      const manifest = defaultToolRegistry.getManifest();
+      return new Response(JSON.stringify({ success: true, manifest }), {
         headers: { "Content-Type": "application/json" },
       });
     } else {

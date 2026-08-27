@@ -17,8 +17,8 @@
 
 ```text
 [x] V0  LLM Chat         ── LLM 原生机制 / Token / Context Window / 记忆本质与结构化输出
-[x] V1  Tool Calling     ── 模型行动力 / Tool Schema 契约与本地 Runtime 执行器 (当前落地)
-[ ] V2  Agent Loop       ── Thought → Action → Observation 闭环与死循环熔断 (下一阶段)
+[x] V1  Tool Calling     ── 模型行动力 / Tool Schema 契约与本地 Runtime 执行器
+[x] V2  Agent Loop       ── Thought → Action → Observation 闭环与死循环熔断 (当前落地)
 [ ] V3  Coding Agent     ── 文件读写、Shell 执行与代码环境自愈纠错
 [ ] V4  Planning/Routing ── 复杂任务拆解、步骤规划与工作流路由
 [ ] V5  Context Engine   ── 上下文膨胀防御、动态检索与摘要压缩
@@ -37,6 +37,7 @@
 - 📑 [课程大纲与总览](./docs/README.md)
 - 📄 [第 01 课：LLM 底层机制、无状态本质与结构化输出](./docs/lessons/01-statelessness-and-structured-output.md)
 - 🛠️ [第 02 课：Tool Calling 机制与行动力破局](./docs/lessons/02-tool-calling-mechanism.md)
+- 🔄 [第 03 课：Agent Loop 与 Thought-Action-Observation 闭环](./docs/lessons/03-agent-loop-and-react.md)
 
 ---
 

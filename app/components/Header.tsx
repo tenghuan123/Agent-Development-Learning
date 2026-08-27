@@ -62,6 +62,13 @@ export function Header({
       icon: Wrench,
       color: "text-cyan-400",
     },
+    {
+      path: "/lessons/v2-agent-loop",
+      tag: "V2",
+      title: "第 03 课: Agent Loop 与 ReAct 闭环",
+      icon: Layers,
+      color: "text-amber-400",
+    },
   ];
 
   return (

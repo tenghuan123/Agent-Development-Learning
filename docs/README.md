@@ -8,9 +8,9 @@
 
 | 阶段 | 课号 | 核心主题 | 状态 | 核心掌握点 |
 | :--- | :--- | :--- | :---: | :--- |
-| **V0** | [第 01 课](./01-statelessness-and-structured-output.md) | **LLM 无状态本质与结构化输出** | ✅ 已完成 | Context Window、Token、无记忆本质、Zod Schema 契约 |
-| **V1** | [第 02 课](./02-tool-calling-mechanism.md) | **Tool Calling 机制与行动力破局** | 🚀 本课落地 | 模型行动力、Tool Schema 契约、本地 Runtime 执行器、错误自愈 |
-| **V2** | 第 03 课 | **Agent Loop 与 Thought-Action-Observation 闭环** | ⏳ 规划中 | ReAct 范式、自主多步循环、死循环熔断机制 |
+| **V0** | [第 01 课](./lessons/01-statelessness-and-structured-output.md) | **LLM 无状态本质与结构化输出** | ✅ 已完成 | Context Window、Token、无记忆本质、Zod Schema 契约 |
+| **V1** | [第 02 课](./lessons/02-tool-calling-mechanism.md) | **Tool Calling 机制与行动力破局** | ✅ 已完成 | 模型行动力、Tool Schema 契约、本地 Runtime 执行器、错误自愈 |
+| **V2** | [第 03 课](./lessons/03-agent-loop-and-react.md) | **Agent Loop 与 Thought-Action-Observation 闭环** | 🚀 本课落地 | ReAct 范式、自主多步循环、死循环熔断机制、自愈纠错 |
 | **V3** | 第 04 课 | **Coding Agent：文件读写与 Shell 自愈纠错** | ⏳ 规划中 | 代码编辑、终端命令执行、构建错误自动排查与自愈 |
 | **V4** | 第 05 课 | **Planning 与复杂工作流路由 (Workflow)** | ⏳ 规划中 | 任务拆解、步骤规划 (Plan & Solve)、路由分发 |
 | **V5** | 第 06 课 | **Context Engine 与上下文膨胀防御** | ⏳ 规划中 | 上下文剪裁、动态检索与长会话摘要压缩 |

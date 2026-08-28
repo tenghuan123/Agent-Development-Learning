@@ -143,8 +143,8 @@ export default function CourseIndex() {
       icon: Layers,
       color: "from-amber-600 to-orange-600",
       borderColor: "border-amber-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "ReAct 循环状态机与自主终止条件判定",
         "滑动窗口死循环熔断器 (LoopDetector & Circuit Breaker)",
@@ -156,18 +156,19 @@ export default function CourseIndex() {
       version: "V3",
       number: "第 04 课",
       title: "Coding Agent 与代码自愈",
-      desc: "从只读进阶到写入与执行：edit_file、run_command 与构建失败自动修复。",
-      path: "#",
+      desc: "从只读进阶到写入与执行：edit_file、run_command 与测试失败自动排查与自愈。",
+      path: "/lessons/v3-coding-agent",
       icon: Code2,
       color: "from-emerald-600 to-teal-600",
-      borderColor: "border-slate-800",
-      status: "upcoming",
-      statusText: "规划中",
+      borderColor: "border-emerald-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
       highlights: [
-        "精准代码差异补丁 (Diff / Line Edit)",
-        "终端命令安全执行与错误日志捕获",
-        "自动化测试驱动的代码自愈修复",
+        "精准代码差异补丁 (Search-and-Replace Diff Editing)",
+        "终端命令安全受控执行与错误日志智能截断",
+        "单元测试与编译报错驱动的自主自愈闭环",
       ],
+      docPath: "docs/lessons/04-coding-agent-and-self-healing.md",
     },
   ];
 
@@ -185,19 +186,19 @@ export default function CourseIndex() {
 
       <main className="flex-1 overflow-y-auto p-6 md:p-10 max-w-6xl mx-auto w-full space-y-10">
         {/* Hero Section */}
-        <div className="relative glass-panel p-8 md:p-10 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-[#0d1222] to-cyan-950/30 overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative glass-panel p-8 md:p-10 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-[#0d1222] to-cyan-950/30 overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative space-y-4 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
               <Sparkles className="w-3.5 h-3.5" />
               <span>演进式手写 Agent 体系课程</span>
             </div>
 
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
               Mini Claude Code <br />
-              <span className="bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
                 从 0 手写一个自主 AI Coding Agent
               </span>
             </h1>
@@ -210,20 +211,28 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v1-tool-calling"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-cyan-600/20 transition transform hover:-translate-y-0.5"
+                to="/lessons/v3-coding-agent"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-emerald-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Wrench className="w-4 h-4" />
-                <span>进入第 02 课：Tool Calling 实验室</span>
+                <Code2 className="w-4 h-4" />
+                <span>进入第 04 课：Coding Agent 实验室</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
               <Link
-                to="/lessons/v0-llm-chat"
+                to="/lessons/v2-agent-loop"
                 className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
               >
-                <Terminal className="w-4 h-4 text-indigo-400" />
-                <span>复习第 01 课：LLM 原生机制</span>
+                <Layers className="w-4 h-4 text-amber-400" />
+                <span>第 03 课：Agent Loop</span>
+              </Link>
+
+              <Link
+                to="/lessons/v1-tool-calling"
+                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+              >
+                <Wrench className="w-4 h-4 text-cyan-400" />
+                <span>第 02 课：Tool Calling</span>
               </Link>
             </div>
           </div>

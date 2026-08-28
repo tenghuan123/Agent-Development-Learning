@@ -13,18 +13,21 @@ import type {
 } from "./types";
 
 const DEFAULT_AGENT_SYSTEM_PROMPT = `You are Mini Claude Code, an autonomous AI Coding Agent.
-You solve coding, architecture, and exploration tasks through multi-step reasoning and tool execution.
+You solve coding, refactoring, testing, and exploration tasks through multi-step reasoning, precise file editing, command execution, and test-driven self-correction.
 
 Guidelines:
 1. ReAct Cycle:
-   - For every step, think clearly about what information you have, what you still need, and what tool to call next.
-   - Analyze the Observation returned from previous tool calls before choosing the next action.
-2. Self-Correction:
-   - If a tool returns an error (e.g. file not found or invalid argument), do NOT give up. Reflect on the error and try an alternative path or directory.
-3. Completion:
-   - Once you have gathered sufficient information to answer the user's task comprehensively, provide your final response directly without calling any more tools.
-4. Output Style:
-   - Keep answers clear, well-structured, and insightful.`;
+   - Think step-by-step: analyze current observations before selecting the next action.
+2. Code Reading & Editing Best Practices:
+   - ALWAYS call 'read_file' to inspect the actual file contents BEFORE calling 'edit_file'. Never guess file content from memory.
+   - When modifying existing code, ALWAYS use 'edit_file' with exact 'targetContent' and 'replacementContent'.
+   - Do NOT include line number prefixes (e.g. '12 | ') from 'read_file' in 'targetContent'.
+   - Use 'write_file' only when creating new files or completely rewriting small configurations.
+3. Command Execution & Self-Healing:
+   - After writing or editing code, use 'run_command' to run tests, typecheck, or verify execution.
+   - If a command fails (exitCode !== 0), carefully read the error output/traceback in Observation, identify which source file contains the root bug (e.g. implementation file vs test runner), and apply a fix using 'edit_file'.
+4. Completion:
+   - Once the code is verified and all goals/tests pass, provide a concise summary of changes and results directly without further tool calls.`;
 
 export class AgentLoopRunner {
   private config: Required<AgentLoopConfig>;
@@ -127,7 +130,21 @@ export class AgentLoopRunner {
           totalCompletionTokens += llmResponse.usage.completionTokens || 0;
         }
 
-        const thoughtText = llmResponse.content || "";
+        let thoughtText = llmResponse.content || "";
+        let toolCalls = llmResponse.toolCalls || [];
+
+        // Fallback: If model outputted tool call JSON in plain text instead of native tool_calls
+        if (toolCalls.length === 0 && thoughtText.trim().length > 0) {
+          const extracted = this.extractToolCallsFromContent(
+            thoughtText,
+            this.registry.list()
+          );
+          if (extracted.extractedToolCalls.length > 0) {
+            toolCalls = extracted.extractedToolCalls;
+            thoughtText = extracted.cleanThought || thoughtText;
+          }
+        }
+
         if (thoughtText) {
           emit({
             type: "thought",
@@ -139,8 +156,41 @@ export class AgentLoopRunner {
         const currentStepAlerts: AgentGuardAlert[] = [];
 
         // 2. Check if Model provided Final Answer (No Tool Calls)
-        const toolCalls = llmResponse.toolCalls || [];
         if (toolCalls.length === 0) {
+          // If on Step 1 the model only gave a planning statement for an action-oriented coding task, nudge it to proceed
+          const isActionTask = /创建|实现|编写|修改|修复|运行|测试|write_file|edit_file|run_command|build|test/i.test(task);
+          const looksLikePlanOnly = /need to|let's|will |i will|步骤|计划|我来|准备/i.test(thoughtText);
+
+          if (currentStep === 1 && isActionTask && looksLikePlanOnly && currentStep < this.config.maxSteps) {
+            const stepRecord: AgentStepRecord = {
+              stepNumber: currentStep,
+              thought: thoughtText,
+              toolCalls: [],
+              toolResults: [],
+              guardAlerts: currentStepAlerts,
+              tokenUsage: llmResponse.usage,
+              durationMs: Date.now() - stepStartTime,
+              messagesSnapshot: [...messages],
+            };
+
+            stepRecords.push(stepRecord);
+            emit({
+              type: "step_end",
+              step: currentStep,
+              stepRecord,
+            });
+
+            messages.push({
+              role: "assistant",
+              content: thoughtText,
+            });
+            messages.push({
+              role: "user",
+              content: "已收到你的分析计划。请立即调用相应的工具（例如 write_file、edit_file 或 run_command）开始落实代码与执行验证。",
+            });
+            continue;
+          }
+
           finalAnswer = thoughtText;
           finishReason = "completed";
 
@@ -226,23 +276,22 @@ export class AgentLoopRunner {
           toolResults,
         });
 
-        // Record step in LoopDetector
-        this.loopDetector.recordStep(currentStep, toolCalls);
-
-        // 6. Check for consecutive errors & self-correction
-        const stepHasError = toolResults.some((r) => r.isError);
-        if (stepHasError) {
+        // 6. Guard Check: Consecutive Error Tracking
+        const hasError = toolResults.some((t) => t.isError);
+        if (hasError) {
           consecutiveErrors++;
           if (consecutiveErrors >= this.config.maxConsecutiveErrors) {
             const alert: AgentGuardAlert = {
               type: "consecutive_errors",
               level: "circuit_break",
-              message: `连续 ${consecutiveErrors} 次工具执行发生错误，超出系统容错上限 (${this.config.maxConsecutiveErrors})。`,
+              message: `连续 ${consecutiveErrors} 次工具执行异常，已达安全阈值`,
               details: {
                 consecutiveErrors,
+                threshold: this.config.maxConsecutiveErrors,
                 step: currentStep,
               },
             };
+
             currentStepAlerts.push(alert);
             allGuardAlerts.push(alert);
             emit({
@@ -352,5 +401,128 @@ export class AgentLoopRunner {
 
     return finalResult;
   }
-}
 
+  /**
+   * Intelligently extract tool calls embedded in model's text (supports raw JSON, function call syntax, XML tags)
+   */
+  private extractToolCallsFromContent(
+    content: string,
+    availableTools: any[]
+  ): {
+    cleanThought: string;
+    extractedToolCalls: any[];
+  } {
+    if (!content || !content.trim()) {
+      return { cleanThought: content, extractedToolCalls: [] };
+    }
+
+    const extractedToolCalls: any[] = [];
+    let remainingText = content;
+
+    // 1. XML style tags: <tool_call>...</tool_call> or <action>...</action>
+    const xmlPattern = /<(?:tool_call|action)(?:\s+name=["']?(\w+)["']?)?>([\s\S]*?)<\/(?:tool_call|action)>/g;
+    let xmlMatch;
+    while ((xmlMatch = xmlPattern.exec(content)) !== null) {
+      const rawTag = xmlMatch[0];
+      const explicitName = xmlMatch[1];
+      const bodyStr = xmlMatch[2].trim();
+
+      try {
+        const parsed = JSON.parse(bodyStr);
+        const toolName = explicitName || parsed.name;
+        const toolArgs = parsed.arguments || parsed.parameters || parsed;
+        if (toolName && availableTools.some((t) => t.name === toolName)) {
+          extractedToolCalls.push({
+            id: `fallback_${Date.now()}_${extractedToolCalls.length}`,
+            type: "function",
+            function: {
+              name: toolName,
+              arguments: typeof toolArgs === "string" ? toolArgs : JSON.stringify(toolArgs),
+            },
+          });
+          remainingText = remainingText.replace(rawTag, "");
+        }
+      } catch {}
+    }
+
+    if (extractedToolCalls.length > 0) {
+      return { cleanThought: remainingText.trim(), extractedToolCalls };
+    }
+
+    // 2. Explicit function syntax: tool_name({...})
+    const funcPattern = /\b([a-zA-Z0-9_]+)\s*\(\s*(\{[\s\S]*?\})\s*\)/g;
+    let funcMatch;
+    while ((funcMatch = funcPattern.exec(content)) !== null) {
+      const rawCall = funcMatch[0];
+      const toolName = funcMatch[1];
+      const rawArgs = funcMatch[2];
+
+      const matchedTool = availableTools.find((t) => t.name === toolName);
+      if (matchedTool) {
+        try {
+          const parsed = JSON.parse(rawArgs);
+          extractedToolCalls.push({
+            id: `fallback_${Date.now()}_${extractedToolCalls.length}`,
+            type: "function",
+            function: {
+              name: toolName,
+              arguments: JSON.stringify(parsed),
+            },
+          });
+          remainingText = remainingText.replace(rawCall, "");
+        } catch {}
+      }
+    }
+
+    if (extractedToolCalls.length > 0) {
+      return { cleanThought: remainingText.trim(), extractedToolCalls };
+    }
+
+    // 3. Raw JSON object matching tool schemas (e.g. `{"dirPath":"scratch/sandbox","recursive":true}`)
+    const jsonObjectRegex = /\{[\s\S]*?\}/g;
+    let jsonMatch;
+    while ((jsonMatch = jsonObjectRegex.exec(content)) !== null) {
+      const rawJson = jsonMatch[0];
+      try {
+        const parsed = JSON.parse(rawJson);
+        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+          if (parsed.name && availableTools.some((t) => t.name === parsed.name)) {
+            const args = parsed.arguments || parsed.parameters || {};
+            extractedToolCalls.push({
+              id: `fallback_${Date.now()}_${extractedToolCalls.length}`,
+              type: "function",
+              function: {
+                name: parsed.name,
+                arguments: typeof args === "string" ? args : JSON.stringify(args),
+              },
+            });
+            remainingText = remainingText.replace(rawJson, "");
+            continue;
+          }
+
+          // Match against tool parameter schemas
+          for (const tool of availableTools) {
+            const validation = tool.schema.safeParse(parsed);
+            if (validation.success) {
+              extractedToolCalls.push({
+                id: `fallback_${Date.now()}_${extractedToolCalls.length}`,
+                type: "function",
+                function: {
+                  name: tool.name,
+                  arguments: JSON.stringify(validation.data),
+                },
+              });
+              remainingText = remainingText.replace(rawJson, "");
+              break;
+            }
+          }
+        }
+      } catch {}
+    }
+
+    return {
+      cleanThought: remainingText.trim(),
+      extractedToolCalls,
+    };
+  }
+}

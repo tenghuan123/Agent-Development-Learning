@@ -3,14 +3,28 @@ import { readFileTool } from "./read-file";
 import { listDirTool } from "./list-dir";
 import { calculateTool } from "./calculate";
 import { systemInfoTool } from "./system-info";
+import { writeFileTool } from "./write-file";
+import { editFileTool } from "./edit-file";
+import { runCommandTool } from "./run-command";
 
-export { readFileTool, listDirTool, calculateTool, systemInfoTool };
+export {
+  readFileTool,
+  listDirTool,
+  calculateTool,
+  systemInfoTool,
+  writeFileTool,
+  editFileTool,
+  runCommandTool,
+};
 
 export const builtinTools = [
   readFileTool,
   listDirTool,
   calculateTool,
   systemInfoTool,
+  writeFileTool,
+  editFileTool,
+  runCommandTool,
 ];
 
 export function createDefaultToolRegistry(): ToolRegistry {
@@ -18,4 +32,5 @@ export function createDefaultToolRegistry(): ToolRegistry {
 }
 
 export const defaultToolRegistry = createDefaultToolRegistry();
+
 

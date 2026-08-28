@@ -9,6 +9,7 @@ import {
   Layers,
   Wrench,
   Terminal,
+  Code2,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -68,6 +69,13 @@ export function Header({
       title: "第 03 课: Agent Loop 与 ReAct 闭环",
       icon: Layers,
       color: "text-amber-400",
+    },
+    {
+      path: "/lessons/v3-coding-agent",
+      tag: "V3",
+      title: "第 04 课: Coding Agent 与代码自愈",
+      icon: Code2,
+      color: "text-emerald-400",
     },
   ];
 

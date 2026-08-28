@@ -50,14 +50,15 @@
    ```
 
 2. **配置环境变量**：
-   复制并在 `.env` 中填入你的 OpenRouter API Key：
+   复制并在 `.env` 中填入你的大模型 API 密钥（兼容智谱 GLM、DeepSeek、OpenAI、OpenRouter 等）：
    ```bash
    cp .env.example .env
    ```
-   在 `.env` 中填写：
+   在 `.env` 中填写（无特定服务商前缀）：
    ```env
-   OPENROUTER_API_KEY=sk-or-v1-你的密钥
-   DEFAULT_MODEL=anthropic/claude-3.5-sonnet
+   LLM_API_KEY=你的API密钥
+   LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+   LLM_MODEL=glm-4-flash
    ```
 
 3. **启动开发服务器**：

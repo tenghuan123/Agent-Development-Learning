@@ -2,14 +2,12 @@ import type { LoaderFunctionArgs } from "react-router";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const hasServerKey = Boolean(
-    process.env.OPENROUTER_API_KEY &&
-      process.env.OPENROUTER_API_KEY.trim().length > 0
+    process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel =
-    process.env.DEFAULT_MODEL || "anthropic/claude-3.5-sonnet";
+  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
   const baseURL =
-    process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
+    process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
   return Response.json({
     hasServerKey,
@@ -17,40 +15,58 @@ export async function loader({ request }: LoaderFunctionArgs) {
     baseURL,
     supportedModels: [
       {
-        id: "anthropic/claude-3.5-sonnet",
-        name: "Claude 3.5 Sonnet",
-        provider: "Anthropic",
-        tag: "推荐 (Coding / Reasoning)",
+        id: "glm-4-flash",
+        name: "GLM-4-Flash",
+        provider: "智谱清言 (Zhipu)",
+        tag: "推荐 (极速/免费)",
       },
       {
-        id: "deepseek/deepseek-chat",
-        name: "DeepSeek V3",
-        provider: "DeepSeek",
+        id: "glm-4-plus",
+        name: "GLM-4-Plus",
+        provider: "智谱清言 (Zhipu)",
+        tag: "旗舰 (Coding 最强)",
+      },
+      {
+        id: "glm-4-air",
+        name: "GLM-4-Air",
+        provider: "智谱清言 (Zhipu)",
         tag: "高性价比",
       },
       {
-        id: "deepseek/deepseek-r1",
+        id: "glm-4-long",
+        name: "GLM-4-Long",
+        provider: "智谱清言 (Zhipu)",
+        tag: "1M 超长上下文",
+      },
+      {
+        id: "deepseek-chat",
+        name: "DeepSeek V3",
+        provider: "DeepSeek",
+        tag: "代码与推理",
+      },
+      {
+        id: "deepseek-reasoner",
         name: "DeepSeek R1",
         provider: "DeepSeek",
-        tag: "深度思考 / 推理",
+        tag: "深度思考",
       },
       {
-        id: "openai/gpt-4o",
+        id: "gpt-4o",
         name: "GPT-4o",
         provider: "OpenAI",
-        tag: "多功能",
+        tag: "通用旗舰",
       },
       {
-        id: "openai/gpt-4o-mini",
+        id: "gpt-4o-mini",
         name: "GPT-4o Mini",
         provider: "OpenAI",
         tag: "轻量快速",
       },
       {
-        id: "meta-llama/llama-3.3-70b-instruct",
-        name: "Llama 3.3 70B",
-        provider: "Meta",
-        tag: "开源顶尖",
+        id: "claude-3-5-sonnet-20241022",
+        name: "Claude 3.5 Sonnet",
+        provider: "Anthropic",
+        tag: "Agent 顶尖",
       },
     ],
   });

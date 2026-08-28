@@ -6,6 +6,7 @@ import { systemInfoTool } from "./system-info";
 import { writeFileTool } from "./write-file";
 import { editFileTool } from "./edit-file";
 import { runCommandTool } from "./run-command";
+import { createManagePlanTool } from "./manage-plan";
 
 export {
   readFileTool,
@@ -15,6 +16,7 @@ export {
   writeFileTool,
   editFileTool,
   runCommandTool,
+  createManagePlanTool,
 };
 
 export const builtinTools = [

@@ -19,6 +19,7 @@ export async function action({ request }: ActionFunctionArgs) {
       model,
       systemPrompt,
       apiKey,
+      baseURL,
       temperature,
       enableTools = false,
     }: {
@@ -26,11 +27,12 @@ export async function action({ request }: ActionFunctionArgs) {
       model?: string;
       systemPrompt?: string;
       apiKey?: string;
+      baseURL?: string;
       temperature?: number;
       enableTools?: boolean;
     } = body;
 
-    const client = new LLMClient({ apiKey, defaultModel: model });
+    const client = new LLMClient({ apiKey, baseURL, defaultModel: model });
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({

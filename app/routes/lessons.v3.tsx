@@ -46,72 +46,86 @@ import {
 
 export async function loader() {
   const hasServerKey = Boolean(
-    process.env.OPENROUTER_API_KEY &&
-      process.env.OPENROUTER_API_KEY.trim().length > 0
+    process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel =
-    process.env.DEFAULT_MODEL || "anthropic/claude-3.5-sonnet";
+  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const defaultBaseURL =
+    process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
   const supportedModels = [
     {
-      id: "openai/gpt-oss-20b",
-      name: "GPT-OSS 20B",
-      provider: "OpenAI/OSS",
-      tag: "默认可用",
+      id: "glm-4-flash",
+      name: "GLM-4-Flash",
+      provider: "智谱清言 (Zhipu)",
+      tag: "推荐 (极速/免费)",
     },
     {
-      id: "deepseek/deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
+      id: "glm-4-plus",
+      name: "GLM-4-Plus",
+      provider: "智谱清言 (Zhipu)",
+      tag: "旗舰 (Coding 最强)",
+    },
+    {
+      id: "glm-4-air",
+      name: "GLM-4-Air",
+      provider: "智谱清言 (Zhipu)",
       tag: "高性价比",
     },
     {
-      id: "openai/gpt-4o-mini",
-      name: "GPT-4o Mini",
-      provider: "OpenAI",
-      tag: "轻量快速",
+      id: "glm-4-long",
+      name: "GLM-4-Long",
+      provider: "智谱清言 (Zhipu)",
+      tag: "1M 超长上下文",
     },
     {
-      id: "meta-llama/llama-3.3-70b-instruct",
-      name: "Llama 3.3 70B",
-      provider: "Meta",
-      tag: "开源顶尖",
+      id: "deepseek-chat",
+      name: "DeepSeek V3",
+      provider: "DeepSeek",
+      tag: "代码与推理",
     },
     {
-      id: "anthropic/claude-3.5-sonnet",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "推荐 (Coding / Agent)",
+      id: "deepseek-reasoner",
+      name: "DeepSeek R1",
+      provider: "DeepSeek",
+      tag: "深度思考",
     },
     {
-      id: "openai/gpt-4o",
+      id: "gpt-4o",
       name: "GPT-4o",
       provider: "OpenAI",
       tag: "通用旗舰",
     },
     {
-      id: "deepseek/deepseek-r1",
-      name: "DeepSeek R1",
-      provider: "DeepSeek",
-      tag: "深度思考 (Reasoning)",
+      id: "gpt-4o-mini",
+      name: "GPT-4o Mini",
+      provider: "OpenAI",
+      tag: "轻量快速",
+    },
+    {
+      id: "claude-3-5-sonnet-20241022",
+      name: "Claude 3.5 Sonnet",
+      provider: "Anthropic",
+      tag: "Agent 顶尖",
     },
   ];
 
   return {
     hasServerKey,
     defaultModel,
+    defaultBaseURL,
     supportedModels,
   };
 }
 
 export default function LessonV3() {
-  const { hasServerKey, defaultModel, supportedModels } =
+  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
     useLoaderData<typeof loader>();
 
   const [activeTab, setActiveTab] = useState<"lab" | "sandbox" | "mechanics">("lab");
   const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [customApiKey, setCustomApiKey] = useState("");
+  const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
 
   // Challenge & Task
   const [selectedChallenge, setSelectedChallenge] = useState<CodingChallengePreset>(
@@ -166,9 +180,17 @@ export default function LessonV3() {
   >([]);
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("MINI_CLAUDE_OPENROUTER_KEY");
+    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
     if (savedKey) {
       setCustomApiKey(savedKey);
+    }
+    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
+    if (savedURL) {
+      setCustomBaseURL(savedURL);
+    }
+    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
+    if (savedModel) {
+      setSelectedModel(savedModel);
     }
     // Auto initialize first sandbox challenge
     handleResetSandbox(CODING_CHALLENGES[0].id);
@@ -176,7 +198,34 @@ export default function LessonV3() {
 
   const saveLocalKey = (key: string) => {
     setCustomApiKey(key);
-    localStorage.setItem("MINI_CLAUDE_OPENROUTER_KEY", key);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", key);
+  };
+
+  const saveLocalBaseURL = (url: string) => {
+    setCustomBaseURL(url);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
+  };
+
+  const handleModelChange = (model: string) => {
+    setSelectedModel(model);
+    localStorage.setItem("MINI_CLAUDE_MODEL", model);
+  };
+
+  const handleSaveSettings = ({
+    apiKey,
+    baseURL,
+    model,
+  }: {
+    apiKey: string;
+    baseURL: string;
+    model: string;
+  }) => {
+    setCustomApiKey(apiKey);
+    setCustomBaseURL(baseURL);
+    setSelectedModel(model);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
+    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   const handleSelectChallenge = (c: CodingChallengePreset) => {
@@ -286,6 +335,7 @@ export default function LessonV3() {
           task: customTaskPrompt,
           model: selectedModel,
           apiKey: customApiKey || undefined,
+          baseURL: customBaseURL || undefined,
           maxSteps,
           enableSelfCorrection,
         }),

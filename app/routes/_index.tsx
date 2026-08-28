@@ -15,86 +15,136 @@ import {
   ShieldCheck,
   ChevronRight,
   Zap,
+  Compass,
 } from "lucide-react";
 
 export async function loader() {
   const hasServerKey = Boolean(
-    process.env.OPENROUTER_API_KEY &&
-      process.env.OPENROUTER_API_KEY.trim().length > 0
+    process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel =
-    process.env.DEFAULT_MODEL || "anthropic/claude-3.5-sonnet";
+  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const defaultBaseURL =
+    process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
   const supportedModels = [
     {
-      id: "openai/gpt-oss-20b",
-      name: "GPT-OSS 20B",
-      provider: "OpenAI/OSS",
-      tag: "默认可用",
+      id: "glm-4-flash",
+      name: "GLM-4-Flash",
+      provider: "智谱清言 (Zhipu)",
+      tag: "推荐 (极速/免费)",
     },
     {
-      id: "deepseek/deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
+      id: "glm-4-plus",
+      name: "GLM-4-Plus",
+      provider: "智谱清言 (Zhipu)",
+      tag: "旗舰 (Coding 最强)",
+    },
+    {
+      id: "glm-4-air",
+      name: "GLM-4-Air",
+      provider: "智谱清言 (Zhipu)",
       tag: "高性价比",
     },
     {
-      id: "openai/gpt-4o-mini",
-      name: "GPT-4o Mini",
-      provider: "OpenAI",
-      tag: "轻量快速",
+      id: "glm-4-long",
+      name: "GLM-4-Long",
+      provider: "智谱清言 (Zhipu)",
+      tag: "1M 超长上下文",
     },
     {
-      id: "meta-llama/llama-3.3-70b-instruct",
-      name: "Llama 3.3 70B",
-      provider: "Meta",
-      tag: "开源顶尖",
+      id: "deepseek-chat",
+      name: "DeepSeek V3",
+      provider: "DeepSeek",
+      tag: "代码与推理",
     },
     {
-      id: "anthropic/claude-3.5-sonnet",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "推荐 (Coding / Agent)",
+      id: "deepseek-reasoner",
+      name: "DeepSeek R1",
+      provider: "DeepSeek",
+      tag: "深度思考",
     },
     {
-      id: "openai/gpt-4o",
+      id: "gpt-4o",
       name: "GPT-4o",
       provider: "OpenAI",
       tag: "通用旗舰",
     },
     {
-      id: "deepseek/deepseek-r1",
-      name: "DeepSeek R1",
-      provider: "DeepSeek",
-      tag: "深度思考 (Reasoning)",
+      id: "gpt-4o-mini",
+      name: "GPT-4o Mini",
+      provider: "OpenAI",
+      tag: "轻量快速",
+    },
+    {
+      id: "claude-3-5-sonnet-20241022",
+      name: "Claude 3.5 Sonnet",
+      provider: "Anthropic",
+      tag: "Agent 顶尖",
     },
   ];
 
   return {
     hasServerKey,
     defaultModel,
+    defaultBaseURL,
     supportedModels,
   };
 }
 
 export default function CourseIndex() {
-  const { hasServerKey, defaultModel, supportedModels } =
+  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
     useLoaderData<typeof loader>();
 
   const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [customApiKey, setCustomApiKey] = useState("");
+  const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("MINI_CLAUDE_OPENROUTER_KEY");
+    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
     if (savedKey) {
       setCustomApiKey(savedKey);
+    }
+    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
+    if (savedURL) {
+      setCustomBaseURL(savedURL);
+    }
+    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
+    if (savedModel) {
+      setSelectedModel(savedModel);
     }
   }, []);
 
   const saveLocalKey = (key: string) => {
     setCustomApiKey(key);
-    localStorage.setItem("MINI_CLAUDE_OPENROUTER_KEY", key);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", key);
+  };
+
+  const saveLocalBaseURL = (url: string) => {
+    setCustomBaseURL(url);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
+  };
+
+  const handleModelChange = (model: string) => {
+    setSelectedModel(model);
+    localStorage.setItem("MINI_CLAUDE_MODEL", model);
+  };
+
+  const handleSaveSettings = ({
+    apiKey,
+    baseURL,
+    model,
+  }: {
+    apiKey: string;
+    baseURL: string;
+    model: string;
+  }) => {
+    setCustomApiKey(apiKey);
+    setCustomBaseURL(baseURL);
+    setSelectedModel(model);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
+    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   const LESSONS = [
@@ -161,8 +211,8 @@ export default function CourseIndex() {
       icon: Code2,
       color: "from-emerald-600 to-teal-600",
       borderColor: "border-emerald-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "精准代码差异补丁 (Search-and-Replace Diff Editing)",
         "终端命令安全受控执行与错误日志智能截断",
@@ -170,35 +220,57 @@ export default function CourseIndex() {
       ],
       docPath: "docs/lessons/04-coding-agent-and-self-healing.md",
     },
+    {
+      version: "V4",
+      number: "第 05 课",
+      title: "Planning 与复杂任务工作流路由",
+      desc: "攻克长流程复杂任务：确定性有限状态机 (FSM)、Attention Anchor 进度锚点注入与动态重规划。",
+      path: "/lessons/v4-planning",
+      icon: Compass,
+      color: "from-purple-600 to-indigo-600",
+      borderColor: "border-purple-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "确定性 Task 有限状态机与单一 Focus 约束",
+        "Attention Anchor 进度锚点注入 (抗目标漂移与早停)",
+        "动态重规划 (Dynamic Re-plan) 与 Workflow 智能路由",
+      ],
+      docPath: "docs/lessons/05-planning-and-workflow-routing.md",
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-cyan-500/30 flex flex-col">
+    <div className="min-h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-purple-500/30 flex flex-col">
       <Header
         hasServerKey={hasServerKey}
         defaultModel={defaultModel}
+        defaultBaseURL={defaultBaseURL}
         supportedModels={supportedModels}
         selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
+        onModelChange={handleModelChange}
         customApiKey={customApiKey}
         onSaveApiKey={saveLocalKey}
+        customBaseURL={customBaseURL}
+        onSaveBaseURL={saveLocalBaseURL}
+        onSaveSettings={handleSaveSettings}
       />
 
       <main className="flex-1 overflow-y-auto p-6 md:p-10 max-w-6xl mx-auto w-full space-y-10">
         {/* Hero Section */}
-        <div className="relative glass-panel p-8 md:p-10 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-[#0d1222] to-cyan-950/30 overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative glass-panel p-8 md:p-10 rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-[#0d1222] to-indigo-950/30 overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative space-y-4 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono">
               <Sparkles className="w-3.5 h-3.5" />
               <span>演进式手写 Agent 体系课程</span>
             </div>
 
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
               Mini Claude Code <br />
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">
                 从 0 手写一个自主 AI Coding Agent
               </span>
             </h1>
@@ -211,12 +283,20 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v3-coding-agent"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-emerald-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v4-planning"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Code2 className="w-4 h-4" />
-                <span>进入第 04 课：Coding Agent 实验室</span>
+                <Compass className="w-4 h-4" />
+                <span>进入第 05 课：Planning 实验室</span>
                 <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                to="/lessons/v3-coding-agent"
+                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+              >
+                <Code2 className="w-4 h-4 text-emerald-400" />
+                <span>第 04 课：Coding Agent</span>
               </Link>
 
               <Link
@@ -360,11 +440,11 @@ export default function CourseIndex() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {[
               { v: "V0", name: "LLM Chat", status: "done" },
-              { v: "V1", name: "Tool Calling", status: "current" },
-              { v: "V2", name: "Agent Loop", status: "next" },
-              { v: "V3", name: "Coding Agent", status: "todo" },
-              { v: "V4", name: "Planning & Workflow", status: "todo" },
-              { v: "V5", name: "Context Engine", status: "todo" },
+              { v: "V1", name: "Tool Calling", status: "done" },
+              { v: "V2", name: "Agent Loop", status: "done" },
+              { v: "V3", name: "Coding Agent", status: "done" },
+              { v: "V4", name: "Planning & Workflow", status: "current" },
+              { v: "V5", name: "Context Engine", status: "next" },
               { v: "V6", name: "Memory & State", status: "todo" },
               { v: "V7", name: "Harness & Sandbox", status: "todo" },
               { v: "V8", name: "MCP 标准协议", status: "todo" },

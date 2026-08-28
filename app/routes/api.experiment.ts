@@ -22,6 +22,7 @@ export async function action({ request }: ActionFunctionArgs) {
       type,
       model,
       apiKey,
+      baseURL,
       customName,
       customLanguage,
       customJson,
@@ -32,7 +33,7 @@ export async function action({ request }: ActionFunctionArgs) {
       toolArgs,
     } = body;
 
-    const client = new LLMClient({ apiKey, defaultModel: model });
+    const client = new LLMClient({ apiKey, baseURL, defaultModel: model });
 
     if (type === "stateless") {
       const result = await runStatelessExperiment(

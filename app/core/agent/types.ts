@@ -45,6 +45,7 @@ export interface AgentLoopConfig {
   systemPrompt?: string;
   temperature?: number;
   apiKey?: string;
+  baseURL?: string;
   enableLoopProtection?: boolean;
   enableSelfCorrection?: boolean;
   workspaceDir?: string;

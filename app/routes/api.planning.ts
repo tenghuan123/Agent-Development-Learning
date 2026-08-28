@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs } from "react-router";
-import { AgentLoopRunner } from "~/core/agent";
+import { PlanningAgentRunner } from "~/core/agent";
 
 export async function action({ request }: ActionFunctionArgs) {
   if (request.method !== "POST") {
@@ -16,13 +16,14 @@ export async function action({ request }: ActionFunctionArgs) {
       model,
       apiKey,
       baseURL,
-      maxSteps = 8,
+      maxSteps = 35,
       loopDetectThreshold = 3,
       maxConsecutiveErrors = 3,
       systemPrompt,
       temperature = 0.1,
       enableLoopProtection = true,
       enableSelfCorrection = true,
+      forcedMode = "auto",
     } = body;
 
     if (!task || typeof task !== "string") {
@@ -32,7 +33,7 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
-    const runner = new AgentLoopRunner({
+    const runner = new PlanningAgentRunner({
       model,
       apiKey,
       baseURL,
@@ -44,6 +45,7 @@ export async function action({ request }: ActionFunctionArgs) {
       enableLoopProtection,
       enableSelfCorrection,
       workspaceDir: process.cwd(),
+      forcedMode,
     });
 
     const encoder = new TextEncoder();
@@ -77,7 +79,8 @@ export async function action({ request }: ActionFunctionArgs) {
   } catch (error: any) {
     return new Response(
       JSON.stringify({
-        error: error.message || "Internal server error in Agent execution",
+        error:
+          error.message || "Internal server error in Planning Agent execution",
       }),
       {
         status: 500,

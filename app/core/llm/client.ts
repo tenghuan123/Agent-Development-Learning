@@ -62,20 +62,14 @@ export class LLMClient {
   public defaultModel: string;
 
   constructor(config?: LLMClientConfig) {
-    const apiKey =
-      config?.apiKey ||
-      process.env.OPENROUTER_API_KEY ||
-      process.env.OPENAI_API_KEY ||
-      "";
+    const apiKey = config?.apiKey || process.env.LLM_API_KEY || "";
     const baseURL =
       config?.baseURL ||
-      process.env.OPENROUTER_BASE_URL ||
-      "https://openrouter.ai/api/v1";
+      process.env.LLM_BASE_URL ||
+      "https://open.bigmodel.cn/api/paas/v4";
 
     this.defaultModel =
-      config?.defaultModel ||
-      process.env.DEFAULT_MODEL ||
-      "anthropic/claude-3.5-sonnet";
+      config?.defaultModel || process.env.LLM_MODEL || "glm-4-flash";
 
     this.openai = new OpenAI({
       apiKey,
@@ -90,6 +84,14 @@ export class LLMClient {
 
   public get apiKeyConfigured(): boolean {
     return Boolean(this.openai.apiKey && this.openai.apiKey.trim().length > 0);
+  }
+
+  private ensureApiKeyConfigured(): void {
+    if (!this.apiKeyConfigured) {
+      throw new Error(
+        "未配置 LLM API Key，请在页面右上角设置，或在根目录 .env 文件中配置 LLM_API_KEY"
+      );
+    }
   }
 
   private prepareMessages(
@@ -132,6 +134,7 @@ export class LLMClient {
    * Execute standard single completion request (supports tools & reasoning extraction)
    */
   async chatCompletion(options: ChatCompletionOptions): Promise<LLMResponse> {
+    this.ensureApiKeyConfigured();
     const startTime = Date.now();
     const model = options.model || this.defaultModel;
     const formattedMessages = this.prepareMessages(
@@ -199,6 +202,7 @@ export class LLMClient {
   async *chatStream(
     options: ChatCompletionOptions
   ): AsyncGenerator<LLMStreamChunk, void, unknown> {
+    this.ensureApiKeyConfigured();
     const model = options.model || this.defaultModel;
     const formattedMessages = this.prepareMessages(
       options.messages,

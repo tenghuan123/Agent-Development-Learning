@@ -44,10 +44,14 @@ export class AgentLoopRunner {
       maxSteps: config.maxSteps ?? 8,
       maxConsecutiveErrors: config.maxConsecutiveErrors ?? 3,
       loopDetectThreshold: config.loopDetectThreshold ?? 3,
-      model: config.model || process.env.DEFAULT_MODEL || "anthropic/claude-3.5-sonnet",
+      model: config.model || process.env.LLM_MODEL || "glm-4-flash",
       systemPrompt: config.systemPrompt || DEFAULT_AGENT_SYSTEM_PROMPT,
       temperature: config.temperature ?? 0.1,
-      apiKey: config.apiKey || "",
+      apiKey: config.apiKey || process.env.LLM_API_KEY || "",
+      baseURL:
+        config.baseURL ||
+        process.env.LLM_BASE_URL ||
+        "https://open.bigmodel.cn/api/paas/v4",
       enableLoopProtection: config.enableLoopProtection ?? true,
       enableSelfCorrection: config.enableSelfCorrection ?? true,
       workspaceDir: config.workspaceDir || process.cwd(),
@@ -59,6 +63,7 @@ export class AgentLoopRunner {
     });
     this.llmClient = new LLMClient({
       apiKey: this.config.apiKey,
+      baseURL: this.config.baseURL,
       defaultModel: this.config.model,
     });
     this.loopDetector = new LoopDetector();

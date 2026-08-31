@@ -65,7 +65,9 @@ export const writeFileTool: ToolDefinition<WriteFileInput, string> = {
 
       return `[文件写入成功] 文件 '${filePath}' 已成功写入 (${lineCount} 行, ${byteSize} 字节)。`;
     } catch (err: any) {
-      throw new Error(`写入文件 '${filePath}' 失败: ${err.message}`);
+      throw new Error(`写入文件 '${filePath}' 失败: ${err.message}`, {
+        cause: err,
+      });
     }
   },
 };

@@ -80,10 +80,13 @@ export const readFileTool: ToolDefinition<ReadFileInput, string> = {
     } catch (err: any) {
       if (err.code === "ENOENT") {
         throw new Error(
-          `文件不存在: '${filePath}'。请使用 list_dir 工具确认目录中存在的文件路径。`
+          `文件不存在: '${filePath}'。请使用 list_dir 工具确认目录中存在的文件路径。`,
+          { cause: err }
         );
       }
-      throw new Error(`读取文件 '${filePath}' 失败: ${err.message}`);
+      throw new Error(`读取文件 '${filePath}' 失败: ${err.message}`, {
+        cause: err,
+      });
     }
   },
 };

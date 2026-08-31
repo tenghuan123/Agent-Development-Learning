@@ -74,7 +74,7 @@ export async function runStructuredExperiment(
     messages: [{ role: "user", content: promptOnlyMessage }],
   });
 
-  let parsedDirectly = false;
+  let parsedDirectly: boolean;
   let parseError: string | undefined;
 
   try {

@@ -113,11 +113,14 @@ export class LLMClient {
       } else if (msg.role === "user") {
         list.push({ role: "user", content: msg.content });
       } else if (msg.role === "assistant") {
-        list.push({
+        const assistantMsg: any = {
           role: "assistant",
           content: msg.content || null,
-          tool_calls: msg.tool_calls as any,
-        });
+        };
+        if (msg.tool_calls && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
+          assistantMsg.tool_calls = msg.tool_calls;
+        }
+        list.push(assistantMsg);
       } else if (msg.role === "tool") {
         list.push({
           role: "tool",
@@ -142,14 +145,16 @@ export class LLMClient {
       options.systemPrompt
     );
 
+    const hasTools = Boolean(options.tools && options.tools.length > 0);
+
     const completion = await withRetry(() =>
       this.openai.chat.completions.create({
         model,
         messages: formattedMessages,
         temperature: options.temperature ?? 0.7,
         max_tokens: options.maxTokens,
-        tools: options.tools && options.tools.length > 0 ? options.tools : undefined,
-        tool_choice: options.toolChoice,
+        tools: hasTools ? options.tools : undefined,
+        tool_choice: hasTools ? options.toolChoice : undefined,
         response_format: options.responseFormat,
       })
     );
@@ -197,6 +202,13 @@ export class LLMClient {
   }
 
   /**
+   * Alias for chatCompletion
+   */
+  async chat(options: ChatCompletionOptions): Promise<LLMResponse> {
+    return this.chatCompletion(options);
+  }
+
+  /**
    * Stream completion token by token
    */
   async *chatStream(
@@ -209,14 +221,16 @@ export class LLMClient {
       options.systemPrompt
     );
 
+    const hasTools = Boolean(options.tools && options.tools.length > 0);
+
     const stream = await withRetry(() =>
       this.openai.chat.completions.create({
         model,
         messages: formattedMessages,
         temperature: options.temperature ?? 0.7,
         max_tokens: options.maxTokens,
-        tools: options.tools && options.tools.length > 0 ? options.tools : undefined,
-        tool_choice: options.toolChoice,
+        tools: hasTools ? options.tools : undefined,
+        tool_choice: hasTools ? options.toolChoice : undefined,
         stream: true,
         stream_options: { include_usage: true },
       })
@@ -287,7 +301,7 @@ Rules:
         systemPrompt: enhancedSystemPrompt,
         responseFormat: format as any,
       });
-    } catch (err: any) {
+    } catch {
       response = await this.chatCompletion({
         ...options,
         model,
@@ -309,7 +323,8 @@ Rules:
       parsedJson = JSON.parse(cleaned);
     } catch (err: any) {
       throw new Error(
-        `Failed to parse model response as JSON: ${err.message}. Raw output: ${response.content}`
+        `Failed to parse model response as JSON: ${err.message}. Raw output: ${response.content}`,
+        { cause: err }
       );
     }
 

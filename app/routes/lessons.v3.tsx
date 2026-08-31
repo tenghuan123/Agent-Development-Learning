@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { useLoaderData, Link } from "react-router";
+import { useState, useEffect } from "react";
+import { useLoaderData } from "react-router";
 import { Header } from "~/components/Header";
 import type {
-  AgentGuardAlert,
   AgentLoopResult,
   AgentStepRecord,
   AgentStreamEvent,
@@ -17,31 +16,21 @@ import {
   Play,
   CheckCircle2,
   RefreshCw,
-  Trash2,
   BookOpen,
-  ArrowRight,
-  ArrowLeft,
   Wrench,
-  FileText,
   Check,
-  AlertTriangle,
-  Flame,
   Zap,
   Activity,
-  Layers,
   Sparkles,
   ChevronRight,
   ChevronDown,
   RotateCcw,
-  ShieldCheck,
   Split,
   FileCode,
   CheckCircle,
   XCircle,
   Clock,
-  Eye,
   Sliders,
-  Send,
 } from "lucide-react";
 
 export async function loader() {
@@ -133,7 +122,7 @@ export default function LessonV3() {
   );
   const [customTaskPrompt, setCustomTaskPrompt] = useState(CODING_CHALLENGES[0].prompt);
   const [maxSteps, setMaxSteps] = useState(8);
-  const [enableSelfCorrection, setEnableSelfCorrection] = useState(true);
+  const [enableSelfCorrection] = useState(true);
 
   // Execution State
   const [isRunning, setIsRunning] = useState(false);
@@ -179,60 +168,22 @@ export default function LessonV3() {
     }>
   >([]);
 
-  useEffect(() => {
-    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
-    if (savedKey) {
-      setCustomApiKey(savedKey);
+  const fetchSandboxFile = async (filePath: string) => {
+    try {
+      const res = await fetch("/api/sandbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "read_file", filePath }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSandboxFileContent(data.content || "");
+      } else {
+        setSandboxFileContent(`// 文件尚未创建或读取失败: ${data.error || ""}`);
+      }
+    } catch (err: any) {
+      setSandboxFileContent(`// 读取异常: ${err.message}`);
     }
-    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
-    if (savedURL) {
-      setCustomBaseURL(savedURL);
-    }
-    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
-    if (savedModel) {
-      setSelectedModel(savedModel);
-    }
-    // Auto initialize first sandbox challenge
-    handleResetSandbox(CODING_CHALLENGES[0].id);
-  }, []);
-
-  const saveLocalKey = (key: string) => {
-    setCustomApiKey(key);
-    localStorage.setItem("MINI_CLAUDE_API_KEY", key);
-  };
-
-  const saveLocalBaseURL = (url: string) => {
-    setCustomBaseURL(url);
-    localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
-  };
-
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
-  const handleSaveSettings = ({
-    apiKey,
-    baseURL,
-    model,
-  }: {
-    apiKey: string;
-    baseURL: string;
-    model: string;
-  }) => {
-    setCustomApiKey(apiKey);
-    setCustomBaseURL(baseURL);
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
-    localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
-  const handleSelectChallenge = (c: CodingChallengePreset) => {
-    setSelectedChallenge(c);
-    setCustomTaskPrompt(c.prompt);
-    setActiveSandboxFile(c.targetFiles[0] || "");
-    handleResetSandbox(c.id);
   };
 
   const handleResetSandbox = async (challengeId: string = selectedChallenge.id) => {
@@ -258,22 +209,34 @@ export default function LessonV3() {
     }
   };
 
-  const fetchSandboxFile = async (filePath: string) => {
-    try {
-      const res = await fetch("/api/sandbox", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "read_file", filePath }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSandboxFileContent(data.content || "");
-      } else {
-        setSandboxFileContent(`// 文件尚未创建或读取失败: ${data.error || ""}`);
-      }
-    } catch (err: any) {
-      setSandboxFileContent(`// 读取异常: ${err.message}`);
+  useEffect(() => {
+    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
+    if (savedKey) {
+      setCustomApiKey(savedKey);
     }
+    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
+    if (savedURL) {
+      setCustomBaseURL(savedURL);
+    }
+    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
+    if (savedModel) {
+      setSelectedModel(savedModel);
+    }
+    // Auto initialize first sandbox challenge
+    handleResetSandbox(CODING_CHALLENGES[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const saveLocalKey = (key: string) => {
+    setCustomApiKey(key);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", key);
+  };
+
+  const handleSelectChallenge = (c: CodingChallengePreset) => {
+    setSelectedChallenge(c);
+    setCustomTaskPrompt(c.prompt);
+    setActiveSandboxFile(c.targetFiles[0] || "");
+    handleResetSandbox(c.id);
   };
 
   const handleManualVerify = async (command: string = selectedChallenge.expectedCommand) => {
@@ -441,9 +404,6 @@ export default function LessonV3() {
   // Determine current Self-Healing phase
   const hasEditAction = stepsHistory.some((s) =>
     s.toolCalls?.some((t) => t.function.name === "edit_file" || t.function.name === "write_file")
-  );
-  const hasCommandRun = stepsHistory.some((s) =>
-    s.toolCalls?.some((t) => t.function.name === "run_command")
   );
   const hasPassedRun = stepsHistory.some((s) =>
     s.toolResults?.some(
@@ -855,7 +815,9 @@ export default function LessonV3() {
                                       parsedArgs = JSON.parse(
                                         call.function.arguments || "{}"
                                       );
-                                    } catch {}
+                                    } catch {
+                                      // ignore malformed tool arguments
+                                    }
 
                                     return (
                                       <div

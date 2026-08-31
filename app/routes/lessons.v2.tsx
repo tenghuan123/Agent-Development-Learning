@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLoaderData, Link } from "react-router";
 import { Header } from "~/components/Header";
 import type {
-  AgentGuardAlert,
   AgentLoopResult,
   AgentStepRecord,
   AgentStreamEvent,
@@ -15,26 +14,16 @@ import {
   RefreshCw,
   Send,
   Trash2,
-  Code2,
   BookOpen,
-  ArrowRight,
   ArrowLeft,
   Eye,
   ShieldCheck,
-  FileText,
-  FolderTree,
   Calculator,
-  Clock,
-  ChevronRight,
   ChevronDown,
-  Check,
   AlertTriangle,
-  Flame,
-  Cpu,
   Terminal,
   Activity,
   Zap,
-  Info,
   ShieldAlert,
   Compass,
 } from "lucide-react";
@@ -371,7 +360,6 @@ export default function LessonV2() {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let finalRes: AgentLoopResult | null = null;
 
       if (reader) {
         while (true) {
@@ -390,7 +378,6 @@ export default function LessonV2() {
             try {
               const event: AgentStreamEvent = JSON.parse(jsonStr);
               if (event.type === "agent_done") {
-                finalRes = event.result;
                 setChatMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === assistantMsgId
@@ -403,7 +390,9 @@ export default function LessonV2() {
                   )
                 );
               }
-            } catch (e) {}
+            } catch {
+              // ignore malformed stream chunks
+            }
           }
         }
       }

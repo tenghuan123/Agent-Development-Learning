@@ -19,12 +19,9 @@
 [x] V0  LLM Chat         ── LLM 原生机制 / Token / Context Window / 记忆本质与结构化输出
 [x] V1  Tool Calling     ── 模型行动力 / Tool Schema 契约与本地 Runtime 执行器
 [x] V2  Agent Loop       ── Thought → Action → Observation 闭环与死循环熔断
-[x] V3  Coding Agent     ── 文件读写、Shell 执行与代码环境自愈纠错 (当前落地)
-[ ] V4  Planning/Routing ── 复杂任务拆解、步骤规划与工作流路由
-[ ] V5  Context Engine   ── 上下文膨胀防御、动态检索与摘要压缩
-[ ] V6  Memory & State   ── 会话持久化与状态机 (Context / Memory / State)
-[ ] V7  Harness & Safety ── 权限系统、危险命令拦截与沙箱隔离
-[ ] V8  MCP 标准协议     ── 工具解耦与手写 Mini Code MCP Server
+[x] V3  Coding Agent     ── 文件读写、Shell 执行与代码环境自愈纠错
+[x] V4  Planning/Routing ── 复杂任务拆解、步骤规划与工作流路由
+[x] V5  Context Engine   ── 上下文膨胀防御、动态检索与摘要压缩 (当前落地)
 [ ] V9  Durable Exec     ── 崩溃恢复、幂等性与 LangGraph / Checkpoint
 [ ] V10 Eval & Tracing   ── 自动化评测基准数据集与全链路可观测性
 [ ] V11 Production Agent ── 并发、限流、成本控制与生产部署
@@ -39,8 +36,8 @@
 - 🛠️ [第 02 课：Tool Calling 机制与行动力破局](./docs/lessons/02-tool-calling-mechanism.md)
 - 🔄 [第 03 课：Agent Loop 与 Thought-Action-Observation 闭环](./docs/lessons/03-agent-loop-and-react.md)
 - 💻 [第 04 课：Coding Agent 与代码自愈闭环](./docs/lessons/04-coding-agent-and-self-healing.md)
-
----
+- 🧭 [第 05 课：Planning 与复杂任务工作流路由](./docs/lessons/05-planning-and-workflow-routing.md)
+- ✂️ [第 06 课：Context Engine 与上下文膨胀防御](./docs/lessons/06-context-engineering-and-compression.md)
 
 ## 🚀 快速启动
 

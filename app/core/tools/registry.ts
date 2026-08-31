@@ -56,7 +56,7 @@ export class ToolRegistry {
           parameters: tool.schema as any,
         });
         return formatted as OpenAI.Chat.ChatCompletionTool;
-      } catch (err) {
+      } catch {
         // Fallback standard definition
         return {
           type: "function",
@@ -70,11 +70,18 @@ export class ToolRegistry {
   }
 
   /**
+   * Alias for toOpenAITools()
+   */
+  getDefinitions(): OpenAI.Chat.ChatCompletionTool[] {
+    return this.toOpenAITools();
+  }
+
+  /**
    * Get tool manifest metadata for UI visualization
    */
   getManifest() {
     return this.list().map((tool) => {
-      let schemaJson: any = {};
+      let schemaJson: any;
       try {
         const formatted = zodFunction({
           name: tool.name,
@@ -82,7 +89,7 @@ export class ToolRegistry {
           parameters: tool.schema as any,
         });
         schemaJson = formatted.function.parameters;
-      } catch (e) {
+      } catch {
         schemaJson = { name: tool.name };
       }
 

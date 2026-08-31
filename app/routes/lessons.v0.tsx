@@ -16,7 +16,6 @@ import {
   XCircle,
   AlertCircle,
   Info,
-  BookOpen,
   ArrowRight,
 } from "lucide-react";
 
@@ -278,7 +277,7 @@ export default function LessonV0() {
               if (data.usage) {
                 finalUsage = data.usage;
               }
-            } catch (err) {
+            } catch {
               console.warn("Failed to parse SSE payload:", dataStr);
             }
           }

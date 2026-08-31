@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router";
 import {
   Sparkles,
   Cpu,
-  Key,
   ChevronDown,
   Layers,
   Wrench,
@@ -14,7 +13,7 @@ import {
   Eye,
   EyeOff,
   Check,
-  Zap,
+  Scissors,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -159,6 +158,13 @@ export function Header({
       title: "第 05 课: Planning 与复杂任务规划",
       icon: Compass,
       color: "text-purple-400",
+    },
+    {
+      path: "/lessons/v5-context-engine",
+      tag: "V5",
+      title: "第 06 课: Context Engine 与上下文防御",
+      icon: Scissors,
+      color: "text-cyan-400",
     },
   ];
 

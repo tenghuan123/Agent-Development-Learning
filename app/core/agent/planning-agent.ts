@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { LLMClient } from "../llm/client";
-import type { ChatMessage, TokenUsage } from "../llm/types";
+import type { ChatMessage } from "../llm/types";
 import { builtinTools } from "../tools/builtins";
 import { createManagePlanTool } from "../tools/builtins/manage-plan";
 import { ToolExecutor } from "../tools/executor";
@@ -14,7 +14,6 @@ import type {
 import { PlanManager } from "../planner/plan-manager";
 import { WorkflowRouter } from "../planner/workflow-router";
 import type {
-  Plan,
   PlanningAgentResult,
   PlanningStreamEvent,
   RoutingDecision,
@@ -441,7 +440,7 @@ CRITICAL RULES:
                 plan: updatedPlan,
               });
             }
-          } catch (e) {
+          } catch {
             // ignore
           }
         }
@@ -664,7 +663,9 @@ CRITICAL RULES:
           });
           remainingText = remainingText.replace(blockMatch[0], "");
         }
-      } catch {}
+      } catch {
+        // ignore malformed tool block
+      }
     }
 
     if (extractedToolCalls.length > 0) {
@@ -714,7 +715,9 @@ CRITICAL RULES:
             }
           }
         }
-      } catch {}
+      } catch {
+        // ignore malformed JSON objects
+      }
     }
 
     return {

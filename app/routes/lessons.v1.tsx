@@ -10,7 +10,6 @@ import {
   Layers,
   Sparkles,
   Play,
-  CheckCircle2,
   RefreshCw,
   Send,
   Trash2,
@@ -307,7 +306,7 @@ export default function LessonV1() {
               if (data.usage) {
                 finalUsage = data.usage;
               }
-            } catch (err) {
+            } catch {
               console.warn("Failed to parse SSE payload:", dataStr);
             }
           }
@@ -385,11 +384,11 @@ export default function LessonV1() {
     setSandboxResult(null);
 
     try {
-      let parsed = {};
+      let parsed: any;
       try {
         parsed = JSON.parse(sandboxArgsInput);
       } catch (e) {
-        throw new Error("参数格式错误，必须为合法的 JSON 格式");
+        throw new Error("参数格式错误，必须为合法的 JSON 格式", { cause: e });
       }
 
       const res = await fetch("/api/experiment", {

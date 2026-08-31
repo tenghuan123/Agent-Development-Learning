@@ -17,9 +17,6 @@ export type CalculateInput = z.infer<typeof CalculateInputSchema>;
 function safeCalculate(expr: string): number {
   const sanitized = expr.trim();
 
-  // Allow only digits, basic operators, parentheses, whitespace, Math constants/functions
-  const safeRegex = /^[\d\s\+\-\*\/\%\(\)\.\,\^]|Math\.(abs|sin|cos|tan|sqrt|pow|round|floor|ceil|min|max|PI|E)/;
-  
   // Basic security check: disallow letters other than Math.*
   const testLetters = sanitized.replace(/Math\.(abs|sin|cos|tan|sqrt|pow|round|floor|ceil|min|max|PI|E)/g, "");
   if (/[a-zA-Z_$]/.test(testLetters)) {
@@ -50,7 +47,7 @@ export const calculateTool: ToolDefinition<CalculateInput, string> = {
       const result = safeCalculate(args.expression);
       return `计算表达式: ${args.expression}\n计算结果: ${result}`;
     } catch (err: any) {
-      throw new Error(`计算失败: ${err.message}`);
+      throw new Error(`计算失败: ${err.message}`, { cause: err });
     }
   },
 };

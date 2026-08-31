@@ -1,6 +1,4 @@
-import type { LoaderFunctionArgs } from "react-router";
-
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader() {
   const hasServerKey = Boolean(
     process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );

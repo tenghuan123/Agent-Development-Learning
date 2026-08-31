@@ -1,5 +1,5 @@
 import { LLMClient } from "../llm/client";
-import type { RoutingDecision, WorkflowMode } from "./types";
+import type { RoutingDecision } from "./types";
 import { z } from "zod";
 
 export const RoutingDecisionSchema = z.object({

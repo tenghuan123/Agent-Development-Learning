@@ -275,10 +275,13 @@ export const editFileTool: ToolDefinition<EditFileInput, string> = {
     } catch (err: any) {
       if (err.code === "ENOENT") {
         throw new Error(
-          `文件不存在: '${filePath}'。如果要创建新文件，请使用 write_file 工具。`
+          `文件不存在: '${filePath}'。如果要创建新文件，请使用 write_file 工具。`,
+          { cause: err }
         );
       }
-      throw new Error(`编辑文件 '${filePath}' 失败: ${err.message}`);
+      throw new Error(`编辑文件 '${filePath}' 失败: ${err.message}`, {
+        cause: err,
+      });
     }
   },
 };

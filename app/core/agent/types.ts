@@ -35,6 +35,7 @@ export interface AgentStepRecord {
   tokenUsage?: TokenUsage;
   durationMs: number;
   messagesSnapshot: ChatMessage[];
+  isFinishStep?: boolean;
 }
 
 export interface AgentLoopConfig {

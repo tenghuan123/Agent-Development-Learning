@@ -6,7 +6,6 @@ import type {
   PlanningAgentResult,
   PlanningStreamEvent,
   RoutingDecision,
-  TaskItem,
   WorkflowMode,
 } from "~/core/planner/types";
 import {
@@ -19,29 +18,14 @@ import {
   ListTodo,
   Play,
   RotateCcw,
-  Sparkles,
-  Layers,
-  ArrowRight,
   ArrowLeft,
   ChevronRight,
-  ChevronDown,
   Terminal,
-  Activity,
-  AlertTriangle,
   Flame,
-  Check,
-  Zap,
-  Send,
   Sliders,
-  ShieldCheck,
   GitBranch,
-  Split,
-  Eye,
-  CheckCircle,
   XCircle,
   Clock,
-  Wrench,
-  BookOpen,
 } from "lucide-react";
 
 export async function loader() {
@@ -187,15 +171,12 @@ export default function Lesson05PlanningWorkbench() {
     useState<RoutingDecision | null>(null);
   const [currentPlan, setCurrentPlan] = useState<Plan | null>(null);
   const [events, setEvents] = useState<PlanningStreamEvent[]>([]);
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [, setCurrentStep] = useState<number>(0);
   const [agentResult, setAgentResult] = useState<PlanningAgentResult | null>(
     null
   );
   const [activeTab, setActiveTab] = useState<"kanban" | "stream" | "anchor">(
     "kanban"
-  );
-  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>(
-    {}
   );
 
   const streamEndRef = useRef<HTMLDivElement>(null);
@@ -300,10 +281,6 @@ export default function Lesson05PlanningWorkbench() {
     } finally {
       setIsRunning(false);
     }
-  };
-
-  const toggleTaskExpand = (taskId: string) => {
-    setExpandedTasks((prev) => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
   const calculateProgress = (plan: Plan | null) => {
@@ -677,7 +654,6 @@ export default function Lesson05PlanningWorkbench() {
                     </div>
                   ) : (
                     currentPlan.tasks.map((task) => {
-                      const isExpanded = Boolean(expandedTasks[task.id]);
                       return (
                         <div
                           key={task.id}

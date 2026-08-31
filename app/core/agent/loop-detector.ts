@@ -26,7 +26,7 @@ function normalizeValue(value: any): any {
  */
 export function getToolCallSignature(call: ToolCallItem): string {
   const toolName = call.function.name;
-  let parsedArgs: any = {};
+  let parsedArgs: any;
   try {
     parsedArgs = JSON.parse(call.function.arguments || "{}");
   } catch {
@@ -53,8 +53,43 @@ export class LoopDetector {
     signatures: string[];
     rawCalls: ToolCallItem[];
   }> = [];
+  private windowSize: number = 8;
+  private threshold: number = 3;
 
-  constructor() {}
+  constructor(options?: { windowSize?: number; threshold?: number }) {
+    if (options?.windowSize) this.windowSize = options.windowSize;
+    if (options?.threshold) this.threshold = options.threshold;
+  }
+
+  /**
+   * Convenience method to record tool calls and check for loops
+   */
+  record(
+    thought: string,
+    calls: ToolCallItem[]
+  ): { type: string; level: string; reason: string; action: string; details: any } | null {
+    if (!calls || calls.length === 0) return null;
+    const step = this.history.length + 1;
+    const loopResult = this.detectLoop(calls, this.threshold);
+    this.recordStep(step, calls);
+
+    if (loopResult.isLoop) {
+      const isStrict = loopResult.repeatCount > this.threshold;
+      return {
+        type: "repeated_loop",
+        level: isStrict ? "circuit_break" : "warning",
+        reason: loopResult.reason || `检测到工具重复调用死循环 (${loopResult.signature})`,
+        action: isStrict ? "circuit_break" : "warning",
+        details: {
+          signature: loopResult.signature,
+          repeatCount: loopResult.repeatCount,
+          threshold: this.threshold,
+          step,
+        },
+      };
+    }
+    return null;
+  }
 
   /**
    * Record tool calls made in a specific step

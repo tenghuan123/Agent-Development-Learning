@@ -43,7 +43,7 @@ export class ToolExecutor {
       };
     }
 
-    let parsedArgs: any = {};
+    let parsedArgs: any;
     try {
       parsedArgs = JSON.parse(rawArgs);
     } catch (err: any) {

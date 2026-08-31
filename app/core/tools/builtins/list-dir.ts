@@ -130,9 +130,11 @@ export const listDirTool: ToolDefinition<ListDirInput, string> = {
       return `=== 目录结构: '${dirPath}' (共 ${entries.length} 个条目) ===\n` + lines.join("\n");
     } catch (err: any) {
       if (err.code === "ENOENT") {
-        throw new Error(`目录不存在: '${dirPath}'。`);
+        throw new Error(`目录不存在: '${dirPath}'。`, { cause: err });
       }
-      throw new Error(`列出目录 '${dirPath}' 失败: ${err.message}`);
+      throw new Error(`列出目录 '${dirPath}' 失败: ${err.message}`, {
+        cause: err,
+      });
     }
   },
 };

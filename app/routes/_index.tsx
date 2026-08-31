@@ -9,13 +9,10 @@ import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
-  Cpu,
   Code2,
-  FolderTree,
-  ShieldCheck,
   ChevronRight,
-  Zap,
   Compass,
+  Scissors,
 } from "lucide-react";
 
 export async function loader() {
@@ -229,14 +226,32 @@ export default function CourseIndex() {
       icon: Compass,
       color: "from-purple-600 to-indigo-600",
       borderColor: "border-purple-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "确定性 Task 有限状态机与单一 Focus 约束",
         "Attention Anchor 进度锚点注入 (抗目标漂移与早停)",
         "动态重规划 (Dynamic Re-plan) 与 Workflow 智能路由",
       ],
       docPath: "docs/lessons/05-planning-and-workflow-routing.md",
+    },
+    {
+      version: "V5",
+      number: "第 06 课",
+      title: "Context Engine 与上下文膨胀防御",
+      desc: "解决长流程开发与大代码库下 Agent 的上下文爆炸、注意力稀释与巨量日志冲垮窗口问题。",
+      path: "/lessons/v5-context-engine",
+      icon: Scissors,
+      color: "from-cyan-600 to-indigo-600",
+      borderColor: "border-cyan-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "Smart Truncator 智能日志截断与错误调用栈强力保留",
+        "Repo Map 仓库轻量级 AST 签名全景图 (导航防漫游)",
+        "历史动态修剪 (Pruning) 与高水位渐进式摘要压缩 (Compaction)",
+      ],
+      docPath: "docs/lessons/06-context-engineering-and-compression.md",
     },
   ];
 
@@ -283,12 +298,20 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v4-planning"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v5-context-engine"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-cyan-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Compass className="w-4 h-4" />
-                <span>进入第 05 课：Planning 实验室</span>
+                <Scissors className="w-4 h-4" />
+                <span>进入第 06 课：Context Engine 实验室</span>
                 <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                to="/lessons/v4-planning"
+                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+              >
+                <Compass className="w-4 h-4 text-purple-400" />
+                <span>第 05 课：Planning</span>
               </Link>
 
               <Link
@@ -443,9 +466,9 @@ export default function CourseIndex() {
               { v: "V1", name: "Tool Calling", status: "done" },
               { v: "V2", name: "Agent Loop", status: "done" },
               { v: "V3", name: "Coding Agent", status: "done" },
-              { v: "V4", name: "Planning & Workflow", status: "current" },
-              { v: "V5", name: "Context Engine", status: "next" },
-              { v: "V6", name: "Memory & State", status: "todo" },
+              { v: "V4", name: "Planning & Workflow", status: "done" },
+              { v: "V5", name: "Context Engine", status: "current" },
+              { v: "V6", name: "Memory & State", status: "next" },
               { v: "V7", name: "Harness & Sandbox", status: "todo" },
               { v: "V8", name: "MCP 标准协议", status: "todo" },
               { v: "V9", name: "Durable Exec", status: "todo" },

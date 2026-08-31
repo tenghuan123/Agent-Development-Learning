@@ -1,4 +1,4 @@
-import type { Plan, PlanStatus, TaskItem, TaskStatus } from "./types";
+import type { Plan, TaskItem, TaskStatus } from "./types";
 
 export class PlanManager {
   private plan: Plan | null = null;

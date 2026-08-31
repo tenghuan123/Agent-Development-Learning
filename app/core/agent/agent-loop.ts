@@ -1,5 +1,5 @@
 import { LLMClient } from "../llm/client";
-import type { ChatMessage, TokenUsage } from "../llm/types";
+import type { ChatMessage } from "../llm/types";
 import { defaultToolRegistry } from "../tools/builtins";
 import { ToolExecutor } from "../tools/executor";
 import type { ToolRegistry } from "../tools/registry";
@@ -447,7 +447,9 @@ export class AgentLoopRunner {
           });
           remainingText = remainingText.replace(rawTag, "");
         }
-      } catch {}
+      } catch {
+        // ignore malformed tool call blocks
+      }
     }
 
     if (extractedToolCalls.length > 0) {
@@ -475,7 +477,9 @@ export class AgentLoopRunner {
             },
           });
           remainingText = remainingText.replace(rawCall, "");
-        } catch {}
+        } catch {
+          // ignore malformed function call arguments
+        }
       }
     }
 
@@ -522,7 +526,9 @@ export class AgentLoopRunner {
             }
           }
         }
-      } catch {}
+      } catch {
+        // ignore malformed JSON objects
+      }
     }
 
     return {

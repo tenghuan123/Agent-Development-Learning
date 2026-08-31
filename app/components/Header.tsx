@@ -18,24 +18,15 @@ import {
 
 export interface HeaderProps {
   hasServerKey: boolean;
-  defaultModel: string;
+  model: string;
   defaultBaseURL?: string;
-  supportedModels: Array<{
-    id: string;
-    name: string;
-    provider: string;
-    tag: string;
-  }>;
-  selectedModel: string;
-  onModelChange: (model: string) => void;
-  customApiKey: string;
-  onSaveApiKey: (key: string) => void;
+  customApiKey?: string;
+  onSaveApiKey?: (key: string) => void;
   customBaseURL?: string;
   onSaveBaseURL?: (url: string) => void;
   onSaveSettings?: (settings: {
     apiKey: string;
     baseURL: string;
-    model: string;
   }) => void;
   currentLesson?: {
     id: string;
@@ -44,52 +35,11 @@ export interface HeaderProps {
   };
 }
 
-const PROVIDER_PRESETS = [
-  {
-    name: "智谱 GLM",
-    baseURL: "https://open.bigmodel.cn/api/paas/v4",
-    defaultModel: "glm-4-flash",
-    tag: "推荐 (极速/免费)",
-    icon: "⚡",
-  },
-  {
-    name: "DeepSeek",
-    baseURL: "https://api.deepseek.com/v1",
-    defaultModel: "deepseek-chat",
-    tag: "高性价比",
-    icon: "🌊",
-  },
-  {
-    name: "OpenAI",
-    baseURL: "https://api.openai.com/v1",
-    defaultModel: "gpt-4o",
-    tag: "通用旗舰",
-    icon: "🤖",
-  },
-  {
-    name: "OpenRouter",
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultModel: "anthropic/claude-3.5-sonnet",
-    tag: "多模型聚合",
-    icon: "🔀",
-  },
-  {
-    name: "硅基流动",
-    baseURL: "https://api.siliconflow.cn/v1",
-    defaultModel: "deepseek-ai/DeepSeek-V3",
-    tag: "国内高速",
-    icon: "🚀",
-  },
-];
-
 export function Header({
   hasServerKey,
-  defaultModel,
+  model,
   defaultBaseURL = "https://open.bigmodel.cn/api/paas/v4",
-  supportedModels,
-  selectedModel,
-  onModelChange,
-  customApiKey,
+  customApiKey = "",
   onSaveApiKey,
   customBaseURL = "",
   onSaveBaseURL,
@@ -106,7 +56,6 @@ export function Header({
   const [modalBaseURL, setModalBaseURL] = useState(
     customBaseURL || defaultBaseURL
   );
-  const [modalModel, setModalModel] = useState(selectedModel || defaultModel);
 
   useEffect(() => {
     setModalApiKey(customApiKey);
@@ -115,10 +64,6 @@ export function Header({
   useEffect(() => {
     setModalBaseURL(customBaseURL || defaultBaseURL);
   }, [customBaseURL, defaultBaseURL]);
-
-  useEffect(() => {
-    setModalModel(selectedModel || defaultModel);
-  }, [selectedModel, defaultModel]);
 
   const effectiveApiKey = customApiKey || "";
   const isKeyAvailable = hasServerKey || Boolean(effectiveApiKey.trim().length > 0);
@@ -168,36 +113,24 @@ export function Header({
     },
   ];
 
-  const handleApplyPreset = (preset: (typeof PROVIDER_PRESETS)[0]) => {
-    setModalBaseURL(preset.baseURL);
-    setModalModel(preset.defaultModel);
-  };
-
   const handleSaveModal = () => {
     const trimmedKey = modalApiKey.trim();
     const trimmedURL = modalBaseURL.trim();
-    const trimmedModel = modalModel.trim();
 
-    onSaveApiKey(trimmedKey);
+    if (onSaveApiKey) {
+      onSaveApiKey(trimmedKey);
+    }
     if (onSaveBaseURL) {
       onSaveBaseURL(trimmedURL);
-    }
-    if (trimmedModel && trimmedModel !== selectedModel) {
-      onModelChange(trimmedModel);
     }
     if (onSaveSettings) {
       onSaveSettings({
         apiKey: trimmedKey,
         baseURL: trimmedURL,
-        model: trimmedModel,
       });
     }
     setShowConfigModal(false);
   };
-
-  const isSelectedModelInPresets = supportedModels.some(
-    (m) => m.id === selectedModel
-  );
 
   return (
     <>
@@ -299,36 +232,18 @@ export function Header({
           </div>
         </div>
 
-        {/* Right: Model Selector & Connection Config */}
+        {/* Right: Active Model Badge & Connection Config */}
         <div className="flex items-center gap-2.5">
-          {/* Model Selector */}
-          <div className="flex items-center gap-2 bg-[#131929] border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs">
+          {/* Active Model Indicator (Read-only from ENV) */}
+          <div
+            className="flex items-center gap-2 bg-[#131929] border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs font-mono"
+            title="当前模型由本地环境变量 LLM_MODEL 设定"
+          >
             <Cpu className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-            <select
-              value={selectedModel}
-              onChange={(e) => {
-                if (e.target.value === "__custom__") {
-                  setShowConfigModal(true);
-                } else {
-                  onModelChange(e.target.value);
-                }
-              }}
-              className="bg-transparent text-slate-200 outline-none font-mono text-xs cursor-pointer max-w-[200px] truncate"
-            >
-              {supportedModels.map((m) => (
-                <option key={m.id} value={m.id} className="bg-[#131929]">
-                  {m.name} ({m.provider})
-                </option>
-              ))}
-              {!isSelectedModelInPresets && selectedModel && (
-                <option value={selectedModel} className="bg-[#131929]">
-                  {selectedModel} (自定义)
-                </option>
-              )}
-              <option value="__custom__" className="bg-[#1a233a] text-purple-300">
-                ⚙️ + 自定义模型 / 连接配置...
-              </option>
-            </select>
+            <span className="text-slate-400 text-[11px]">模型:</span>
+            <span className="font-semibold text-purple-300 max-w-[180px] truncate">
+              {model}
+            </span>
           </div>
 
           {/* Connection Settings Button */}
@@ -339,7 +254,7 @@ export function Header({
                 ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/50"
                 : "bg-amber-950/40 text-amber-300 border-amber-500/40 hover:bg-amber-900/50 animate-pulse"
             }`}
-            title="配置 API 密钥、调用地址与模型"
+            title="查看或配置 LLM 接口连接"
           >
             <Settings2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">
@@ -365,10 +280,10 @@ export function Header({
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-base">
-                    LLM 接口连接与模型配置
+                    LLM 接口连接配置
                   </h3>
                   <p className="text-[11px] text-slate-400">
-                    兼容智谱 GLM、DeepSeek、OpenAI 等任意兼容标准接口的服务商
+                    模型已由本地环境变量 <code>LLM_MODEL</code> 全局设定
                   </p>
                 </div>
               </div>
@@ -380,28 +295,22 @@ export function Header({
               </button>
             </div>
 
-            {/* Quick Provider Presets */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-mono text-slate-400 block">
-                常用服务商一键配置:
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                {PROVIDER_PRESETS.map((p) => (
-                  <button
-                    key={p.name}
-                    type="button"
-                    onClick={() => handleApplyPreset(p)}
-                    className={`p-2 rounded-lg border text-center transition flex flex-col items-center gap-0.5 ${
-                      modalBaseURL === p.baseURL
-                        ? "bg-purple-950/40 border-purple-500/60 text-purple-200"
-                        : "bg-[#131929] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
-                    }`}
-                  >
-                    <span className="text-sm">{p.icon}</span>
-                    <span className="text-[11px] font-semibold">{p.name}</span>
-                  </button>
-                ))}
+            {/* Current Active Model Info Card */}
+            <div className="p-3 rounded-xl bg-[#131929] border border-purple-500/30 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Cpu className="w-4 h-4 text-purple-400" />
+                <div>
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    当前生效模型 (LLM_MODEL)
+                  </div>
+                  <div className="text-sm font-mono font-bold text-purple-200">
+                    {model}
+                  </div>
+                </div>
               </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                环境变量驱动
+              </span>
             </div>
 
             {/* Form Fields */}
@@ -450,30 +359,16 @@ export function Header({
                 </div>
               </div>
 
-              {/* Model Name */}
-              <div className="space-y-1">
-                <label className="text-xs font-mono text-slate-300 flex items-center justify-between">
-                  <span>调用模型名称 (Model):</span>
-                </label>
-                <input
-                  type="text"
-                  value={modalModel}
-                  onChange={(e) => setModalModel(e.target.value)}
-                  placeholder="glm-4-flash / glm-4-plus / deepseek-chat"
-                  className="w-full bg-[#131929] border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono outline-none focus:border-purple-500 transition"
-                />
-              </div>
-
               {/* Environment Variable Hint */}
               <div className="p-3 rounded-xl bg-[#090d18] border border-slate-800 text-[11px] text-slate-400 space-y-1">
                 <div className="text-slate-300 font-semibold flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span>免填直接配置：根目录 <code>.env</code> 环境变量</span>
+                  <span>根目录 <code>.env</code> 环境变量配置示例:</span>
                 </div>
                 <pre className="text-[10px] text-purple-300/90 font-mono overflow-x-auto p-1.5 bg-[#0f1526] rounded border border-slate-800">
 {`LLM_API_KEY=你的API密钥
 LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-LLM_MODEL=glm-4-flash`}
+LLM_MODEL=${model}`}
                 </pre>
               </div>
             </div>

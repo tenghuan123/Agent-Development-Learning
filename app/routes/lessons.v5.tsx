@@ -36,63 +36,22 @@ export async function loader() {
     process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const model = process.env.LLM_MODEL || "glm-4-flash";
   const defaultBaseURL =
     process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
-  const supportedModels = [
-    {
-      id: "glm-4-flash",
-      name: "GLM-4-Flash",
-      provider: "智谱清言 (Zhipu)",
-      tag: "推荐 (极速/免费)",
-    },
-    {
-      id: "glm-4-plus",
-      name: "GLM-4-Plus",
-      provider: "智谱清言 (Zhipu)",
-      tag: "旗舰 (Coding 最强)",
-    },
-    {
-      id: "glm-4-air",
-      name: "GLM-4-Air",
-      provider: "智谱清言 (Zhipu)",
-      tag: "高性价比",
-    },
-    {
-      id: "deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
-      tag: "代码与推理",
-    },
-    {
-      id: "gpt-4o",
-      name: "GPT-4o",
-      provider: "OpenAI",
-      tag: "通用旗舰",
-    },
-    {
-      id: "claude-3-5-sonnet-20241022",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "Agent 顶尖",
-    },
-  ];
-
   return {
     hasServerKey,
-    defaultModel,
+    model,
     defaultBaseURL,
-    supportedModels,
   };
 }
 
 export default function LessonV5Page() {
-  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
+  const { hasServerKey, model, defaultBaseURL } =
     useLoaderData<typeof loader>();
 
   // API Config State
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [customApiKey, setCustomApiKey] = useState("");
   const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
 
@@ -101,8 +60,6 @@ export default function LessonV5Page() {
     if (storedKey) setCustomApiKey(storedKey);
     const storedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
     if (storedURL) setCustomBaseURL(storedURL);
-    const storedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
-    if (storedModel) setSelectedModel(storedModel);
   }, []);
 
   const handleSaveApiKey = (key: string) => {
@@ -115,26 +72,17 @@ export default function LessonV5Page() {
     localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
   };
 
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
   const handleSaveSettings = ({
     apiKey,
     baseURL,
-    model,
   }: {
     apiKey: string;
     baseURL: string;
-    model: string;
   }) => {
     setCustomApiKey(apiKey);
     setCustomBaseURL(baseURL);
-    setSelectedModel(model);
     localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
     localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   // Tab State: 'workbench' | 'benchmarks' | 'playgrounds' | 'lecture'
@@ -233,7 +181,7 @@ TypeError: Cannot read properties of undefined (reading 'verifyJwtSignature')
         body: JSON.stringify({
           actionType: "run-agent",
           task: textToExecute,
-          model: selectedModel,
+          model,
           apiKey: customApiKey,
           baseURL: customBaseURL,
           maxSteps,
@@ -411,11 +359,8 @@ TypeError: Cannot read properties of undefined (reading 'verifyJwtSignature')
     <div className="min-h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-purple-500/30 flex flex-col">
       <Header
         hasServerKey={hasServerKey}
-        defaultModel={defaultModel}
+        model={model}
         defaultBaseURL={defaultBaseURL}
-        supportedModels={supportedModels}
-        selectedModel={selectedModel}
-        onModelChange={handleModelChange}
         customApiKey={customApiKey}
         onSaveApiKey={handleSaveApiKey}
         customBaseURL={customBaseURL}

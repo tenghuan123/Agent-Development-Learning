@@ -34,72 +34,14 @@ export async function loader() {
     process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const model = process.env.LLM_MODEL || "glm-4-flash";
   const defaultBaseURL =
     process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
-  const supportedModels = [
-    {
-      id: "glm-4-flash",
-      name: "GLM-4-Flash",
-      provider: "智谱清言 (Zhipu)",
-      tag: "推荐 (极速/免费)",
-    },
-    {
-      id: "glm-4-plus",
-      name: "GLM-4-Plus",
-      provider: "智谱清言 (Zhipu)",
-      tag: "旗舰 (Coding 最强)",
-    },
-    {
-      id: "glm-4-air",
-      name: "GLM-4-Air",
-      provider: "智谱清言 (Zhipu)",
-      tag: "高性价比",
-    },
-    {
-      id: "glm-4-long",
-      name: "GLM-4-Long",
-      provider: "智谱清言 (Zhipu)",
-      tag: "1M 超长上下文",
-    },
-    {
-      id: "deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
-      tag: "代码与推理",
-    },
-    {
-      id: "deepseek-reasoner",
-      name: "DeepSeek R1",
-      provider: "DeepSeek",
-      tag: "深度思考",
-    },
-    {
-      id: "gpt-4o",
-      name: "GPT-4o",
-      provider: "OpenAI",
-      tag: "通用旗舰",
-    },
-    {
-      id: "gpt-4o-mini",
-      name: "GPT-4o Mini",
-      provider: "OpenAI",
-      tag: "轻量快速",
-    },
-    {
-      id: "claude-3-5-sonnet-20241022",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "Agent 顶尖",
-    },
-  ];
-
   return {
     hasServerKey,
-    defaultModel,
+    model,
     defaultBaseURL,
-    supportedModels,
   };
 }
 
@@ -117,11 +59,10 @@ const SYSTEM_PROMPT_PRESETS = [
 ];
 
 export default function LessonV1() {
-  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
+  const { hasServerKey, model, defaultBaseURL } =
     useLoaderData<typeof loader>();
 
   const [activeTab, setActiveTab] = useState<"lab" | "chat" | "toolbox">("lab");
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [customApiKey, setCustomApiKey] = useState("");
   const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
   const [systemPrompt, setSystemPrompt] = useState(
@@ -183,10 +124,6 @@ export default function LessonV1() {
     if (savedURL) {
       setCustomBaseURL(savedURL);
     }
-    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
-    if (savedModel) {
-      setSelectedModel(savedModel);
-    }
   }, []);
 
   const effectiveApiKey = customApiKey || "";
@@ -202,26 +139,17 @@ export default function LessonV1() {
     localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
   };
 
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
   const handleSaveSettings = ({
     apiKey,
     baseURL,
-    model,
   }: {
     apiKey: string;
     baseURL: string;
-    model: string;
   }) => {
     setCustomApiKey(apiKey);
     setCustomBaseURL(baseURL);
-    setSelectedModel(model);
     localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
     localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   // Chat Send Handler
@@ -257,7 +185,7 @@ export default function LessonV1() {
             role,
             content,
           })),
-          model: selectedModel,
+          model,
           systemPrompt,
           apiKey: effectiveApiKey,
           baseURL: customBaseURL,
@@ -356,7 +284,7 @@ export default function LessonV1() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "tool_calling",
-          model: selectedModel,
+          model,
           apiKey: effectiveApiKey,
           baseURL: customBaseURL,
           userPrompt: toolPrompt,
@@ -418,11 +346,8 @@ export default function LessonV1() {
     <div className="flex flex-col h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-cyan-500/30">
       <Header
         hasServerKey={hasServerKey}
-        defaultModel={defaultModel}
+        model={model}
         defaultBaseURL={defaultBaseURL}
-        supportedModels={supportedModels}
-        selectedModel={selectedModel}
-        onModelChange={handleModelChange}
         customApiKey={customApiKey}
         onSaveApiKey={saveLocalKey}
         customBaseURL={customBaseURL}
@@ -925,7 +850,7 @@ export default function LessonV1() {
                       <span>
                         {msg.role === "user"
                           ? "👤 User"
-                          : `🤖 Assistant (${selectedModel})`}
+                          : `🤖 Assistant (${model})`}
                       </span>
                       {msg.latencyMs && (
                         <span className="text-slate-500">

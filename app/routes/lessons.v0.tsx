@@ -24,72 +24,14 @@ export async function loader() {
     process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const model = process.env.LLM_MODEL || "glm-4-flash";
   const defaultBaseURL =
     process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
-  const supportedModels = [
-    {
-      id: "glm-4-flash",
-      name: "GLM-4-Flash",
-      provider: "智谱清言 (Zhipu)",
-      tag: "推荐 (极速/免费)",
-    },
-    {
-      id: "glm-4-plus",
-      name: "GLM-4-Plus",
-      provider: "智谱清言 (Zhipu)",
-      tag: "旗舰 (Coding 最强)",
-    },
-    {
-      id: "glm-4-air",
-      name: "GLM-4-Air",
-      provider: "智谱清言 (Zhipu)",
-      tag: "高性价比",
-    },
-    {
-      id: "glm-4-long",
-      name: "GLM-4-Long",
-      provider: "智谱清言 (Zhipu)",
-      tag: "1M 超长上下文",
-    },
-    {
-      id: "deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
-      tag: "代码与推理",
-    },
-    {
-      id: "deepseek-reasoner",
-      name: "DeepSeek R1",
-      provider: "DeepSeek",
-      tag: "深度思考",
-    },
-    {
-      id: "gpt-4o",
-      name: "GPT-4o",
-      provider: "OpenAI",
-      tag: "通用旗舰",
-    },
-    {
-      id: "gpt-4o-mini",
-      name: "GPT-4o Mini",
-      provider: "OpenAI",
-      tag: "轻量快速",
-    },
-    {
-      id: "claude-3-5-sonnet-20241022",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "Agent 顶尖",
-    },
-  ];
-
   return {
     hasServerKey,
-    defaultModel,
+    model,
     defaultBaseURL,
-    supportedModels,
   };
 }
 
@@ -100,27 +42,27 @@ const SYSTEM_PROMPT_PRESETS = [
       "你是一个专业的 AI Coding 编程助手。你的回答需要简明扼要、准确严谨，代码需附带简要说明与最佳实践。",
   },
   {
-    name: "Mini Claude Code V0",
+    name: "Structured JSON Analyzer",
     prompt:
-      "你是 Mini Claude Code V0，一个刚处于起步阶段的 AI 助手。你乐于向开发者解释 Token、Context Window 与大模型记忆机制。",
+      "你是一个严格遵循结构化输出的分析引擎。无论何时，始终以干净标准的 JSON 格式响应，禁止包含任何自然语言客套话或 markdown 代码块包裹。",
   },
   {
-    name: "极简技术专家",
+    name: "Terminal Shell Expert",
     prompt:
-      "你是一个极致精简的架构师，回答直接命中问题核心，不讲客套话与废话。",
+      "你是一个熟练的 Linux/macOS 命令行专家。直接给出安全、高效的 bash/zsh 命令解决方案，并注明关键参数作用。",
   },
 ];
 
-export default function LessonV0() {
-  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
+export default function Lesson0Page() {
+  const { hasServerKey, model, defaultBaseURL } =
     useLoaderData<typeof loader>();
 
-  const [activeTab, setActiveTab] = useState<"chat" | "stateless" | "structured">(
-    "chat"
-  );
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
+  // API Config State
   const [customApiKey, setCustomApiKey] = useState("");
   const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
+
+  // Lesson UI State
+  const [activeTab, setActiveTab] = useState<"chat" | "stateless" | "structured">("chat");
   const [systemPrompt, setSystemPrompt] = useState(
     SYSTEM_PROMPT_PRESETS[0].prompt
   );
@@ -164,10 +106,6 @@ export default function LessonV0() {
     if (savedURL) {
       setCustomBaseURL(savedURL);
     }
-    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
-    if (savedModel) {
-      setSelectedModel(savedModel);
-    }
   }, []);
 
   const effectiveApiKey = customApiKey || "";
@@ -183,26 +121,17 @@ export default function LessonV0() {
     localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
   };
 
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
   const handleSaveSettings = ({
     apiKey,
     baseURL,
-    model,
   }: {
     apiKey: string;
     baseURL: string;
-    model: string;
   }) => {
     setCustomApiKey(apiKey);
     setCustomBaseURL(baseURL);
-    setSelectedModel(model);
     localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
     localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   // Chat Send Handler
@@ -236,7 +165,7 @@ export default function LessonV0() {
             role,
             content,
           })),
-          model: selectedModel,
+          model,
           systemPrompt,
           apiKey: effectiveApiKey,
           baseURL: customBaseURL,
@@ -325,7 +254,7 @@ export default function LessonV0() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "stateless",
-          model: selectedModel,
+          model,
           apiKey: effectiveApiKey,
           baseURL: customBaseURL,
           customName: expName,
@@ -362,7 +291,7 @@ export default function LessonV0() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "structured",
-          model: selectedModel,
+          model,
           apiKey: effectiveApiKey,
           baseURL: customBaseURL,
         }),
@@ -385,11 +314,8 @@ export default function LessonV0() {
     <div className="flex flex-col h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-indigo-500/30">
       <Header
         hasServerKey={hasServerKey}
-        defaultModel={defaultModel}
+        model={model}
         defaultBaseURL={defaultBaseURL}
-        supportedModels={supportedModels}
-        selectedModel={selectedModel}
-        onModelChange={handleModelChange}
         customApiKey={customApiKey}
         onSaveApiKey={saveLocalKey}
         customBaseURL={customBaseURL}
@@ -529,7 +455,7 @@ export default function LessonV0() {
                       <span>
                         {msg.role === "user"
                           ? "👤 User"
-                          : `🤖 Assistant (${selectedModel})`}
+                          : `🤖 Assistant (${model})`}
                       </span>
                       {msg.latencyMs && (
                         <span className="text-slate-500">

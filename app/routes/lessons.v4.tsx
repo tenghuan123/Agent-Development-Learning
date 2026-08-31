@@ -33,80 +33,21 @@ export async function loader() {
     process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const model = process.env.LLM_MODEL || "glm-4-flash";
   const defaultBaseURL =
     process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
-  const supportedModels = [
-    {
-      id: "glm-4-flash",
-      name: "GLM-4-Flash",
-      provider: "智谱清言 (Zhipu)",
-      tag: "推荐 (极速/免费)",
-    },
-    {
-      id: "glm-4-plus",
-      name: "GLM-4-Plus",
-      provider: "智谱清言 (Zhipu)",
-      tag: "旗舰 (Coding 最强)",
-    },
-    {
-      id: "glm-4-air",
-      name: "GLM-4-Air",
-      provider: "智谱清言 (Zhipu)",
-      tag: "高性价比",
-    },
-    {
-      id: "glm-4-long",
-      name: "GLM-4-Long",
-      provider: "智谱清言 (Zhipu)",
-      tag: "1M 超长上下文",
-    },
-    {
-      id: "deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
-      tag: "代码与推理",
-    },
-    {
-      id: "deepseek-reasoner",
-      name: "DeepSeek R1",
-      provider: "DeepSeek",
-      tag: "深度思考",
-    },
-    {
-      id: "gpt-4o",
-      name: "GPT-4o",
-      provider: "OpenAI",
-      tag: "通用旗舰",
-    },
-    {
-      id: "gpt-4o-mini",
-      name: "GPT-4o Mini",
-      provider: "OpenAI",
-      tag: "轻量快速",
-    },
-    {
-      id: "claude-3-5-sonnet-20241022",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "Agent 顶尖",
-    },
-  ];
-
   return {
     hasServerKey,
-    defaultModel,
+    model,
     defaultBaseURL,
-    supportedModels,
   };
 }
 
 export default function Lesson05PlanningWorkbench() {
-  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
+  const { hasServerKey, model, defaultBaseURL } =
     useLoaderData<typeof loader>();
 
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [customApiKey, setCustomApiKey] = useState("");
   const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
 
@@ -118,10 +59,6 @@ export default function Lesson05PlanningWorkbench() {
     const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
     if (savedURL) {
       setCustomBaseURL(savedURL);
-    }
-    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
-    if (savedModel) {
-      setSelectedModel(savedModel);
     }
   }, []);
 
@@ -135,26 +72,17 @@ export default function Lesson05PlanningWorkbench() {
     localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
   };
 
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
   const handleSaveSettings = ({
     apiKey,
     baseURL,
-    model,
   }: {
     apiKey: string;
     baseURL: string;
-    model: string;
   }) => {
     setCustomApiKey(apiKey);
     setCustomBaseURL(baseURL);
-    setSelectedModel(model);
     localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
     localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   // Benchmark preset selection
@@ -208,7 +136,7 @@ export default function Lesson05PlanningWorkbench() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           task: customPrompt,
-          model: selectedModel,
+          model,
           apiKey: customApiKey,
           baseURL: customBaseURL,
           maxSteps,
@@ -297,11 +225,8 @@ export default function Lesson05PlanningWorkbench() {
     <div className="min-h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-purple-500/30 flex flex-col">
       <Header
         hasServerKey={hasServerKey}
-        defaultModel={defaultModel}
+        model={model}
         defaultBaseURL={defaultBaseURL}
-        supportedModels={supportedModels}
-        selectedModel={selectedModel}
-        onModelChange={handleModelChange}
         customApiKey={customApiKey}
         onSaveApiKey={saveLocalKey}
         customBaseURL={customBaseURL}

@@ -33,72 +33,14 @@ export async function loader() {
     process.env.LLM_API_KEY && process.env.LLM_API_KEY.trim().length > 0
   );
 
-  const defaultModel = process.env.LLM_MODEL || "glm-4-flash";
+  const model = process.env.LLM_MODEL || "glm-4-flash";
   const defaultBaseURL =
     process.env.LLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4";
 
-  const supportedModels = [
-    {
-      id: "glm-4-flash",
-      name: "GLM-4-Flash",
-      provider: "智谱清言 (Zhipu)",
-      tag: "推荐 (极速/免费)",
-    },
-    {
-      id: "glm-4-plus",
-      name: "GLM-4-Plus",
-      provider: "智谱清言 (Zhipu)",
-      tag: "旗舰 (Coding 最强)",
-    },
-    {
-      id: "glm-4-air",
-      name: "GLM-4-Air",
-      provider: "智谱清言 (Zhipu)",
-      tag: "高性价比",
-    },
-    {
-      id: "glm-4-long",
-      name: "GLM-4-Long",
-      provider: "智谱清言 (Zhipu)",
-      tag: "1M 超长上下文",
-    },
-    {
-      id: "deepseek-chat",
-      name: "DeepSeek V3",
-      provider: "DeepSeek",
-      tag: "代码与推理",
-    },
-    {
-      id: "deepseek-reasoner",
-      name: "DeepSeek R1",
-      provider: "DeepSeek",
-      tag: "深度思考",
-    },
-    {
-      id: "gpt-4o",
-      name: "GPT-4o",
-      provider: "OpenAI",
-      tag: "通用旗舰",
-    },
-    {
-      id: "gpt-4o-mini",
-      name: "GPT-4o Mini",
-      provider: "OpenAI",
-      tag: "轻量快速",
-    },
-    {
-      id: "claude-3-5-sonnet-20241022",
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      tag: "Agent 顶尖",
-    },
-  ];
-
   return {
     hasServerKey,
-    defaultModel,
+    model,
     defaultBaseURL,
-    supportedModels,
   };
 }
 
@@ -142,11 +84,10 @@ const AGENT_PRESETS = [
 ];
 
 export default function LessonV2() {
-  const { hasServerKey, defaultModel, defaultBaseURL, supportedModels } =
+  const { hasServerKey, model, defaultBaseURL } =
     useLoaderData<typeof loader>();
 
   const [activeTab, setActiveTab] = useState<"lab" | "chat" | "mechanics">("lab");
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [customApiKey, setCustomApiKey] = useState("");
   const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
   const [taskInput, setTaskInput] = useState(AGENT_PRESETS[0].task);
@@ -186,10 +127,6 @@ export default function LessonV2() {
     if (savedURL) {
       setCustomBaseURL(savedURL);
     }
-    const savedModel = localStorage.getItem("MINI_CLAUDE_MODEL");
-    if (savedModel) {
-      setSelectedModel(savedModel);
-    }
   }, []);
 
   const saveLocalKey = (key: string) => {
@@ -202,26 +139,17 @@ export default function LessonV2() {
     localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
   };
 
-  const handleModelChange = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
-  };
-
   const handleSaveSettings = ({
     apiKey,
     baseURL,
-    model,
   }: {
     apiKey: string;
     baseURL: string;
-    model: string;
   }) => {
     setCustomApiKey(apiKey);
     setCustomBaseURL(baseURL);
-    setSelectedModel(model);
     localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
     localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-    localStorage.setItem("MINI_CLAUDE_MODEL", model);
   };
 
   const handleRunAgent = async (taskToRun: string = taskInput) => {
@@ -242,7 +170,7 @@ export default function LessonV2() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           task: taskToRun,
-          model: selectedModel,
+          model,
           apiKey: customApiKey || undefined,
           baseURL: customBaseURL || undefined,
           maxSteps,
@@ -343,7 +271,7 @@ export default function LessonV2() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           task: userMsg,
-          model: selectedModel,
+          model,
           apiKey: customApiKey || undefined,
           baseURL: customBaseURL || undefined,
           maxSteps,
@@ -413,11 +341,8 @@ export default function LessonV2() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
       <Header
         hasServerKey={hasServerKey}
-        defaultModel={defaultModel}
+        model={model}
         defaultBaseURL={defaultBaseURL}
-        supportedModels={supportedModels}
-        selectedModel={selectedModel}
-        onModelChange={handleModelChange}
         customApiKey={customApiKey}
         onSaveApiKey={saveLocalKey}
         customBaseURL={customBaseURL}
@@ -450,19 +375,11 @@ export default function LessonV2() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 text-xs">
               <span className="text-slate-400">模型:</span>
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="bg-slate-800/90 border border-slate-700 text-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-amber-500"
-              >
-                {supportedModels.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name} ({m.tag})
-                  </option>
-                ))}
-              </select>
+              <span className="font-mono text-amber-300 font-semibold bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+                {model}
+              </span>
             </div>
 
             <div className="flex items-center gap-2">

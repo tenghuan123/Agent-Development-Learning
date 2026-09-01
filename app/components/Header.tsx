@@ -14,6 +14,7 @@ import {
   EyeOff,
   Check,
   Scissors,
+  Brain,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -110,6 +111,13 @@ export function Header({
       title: "第 06 课: Context Engine 与上下文防御",
       icon: Scissors,
       color: "text-cyan-400",
+    },
+    {
+      path: "/lessons/v6-memory",
+      tag: "V6",
+      title: "第 07 课: Memory 与状态机持久化",
+      icon: Brain,
+      color: "text-purple-400",
     },
   ];
 

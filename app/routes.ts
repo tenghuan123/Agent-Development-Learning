@@ -11,12 +11,14 @@ export default [
   route("lessons/v3-coding-agent", "routes/lessons.v3.tsx"),
   route("lessons/v4-planning", "routes/lessons.v4.tsx"),
   route("lessons/v5-context-engine", "routes/lessons.v5.tsx"),
+  route("lessons/v6-memory", "routes/lessons.v6.tsx"),
 
   // Backend API endpoints
   route("api/chat", "routes/api.chat.ts"),
   route("api/agent", "routes/api.agent.ts"),
   route("api/planning", "routes/api.planning.ts"),
   route("api/context", "routes/api.context.ts"),
+  route("api/memory", "routes/api.memory.ts"),
   route("api/experiment", "routes/api.experiment.ts"),
   route("api/sandbox", "routes/api.sandbox.ts"),
   route("api/config", "routes/api.config.ts"),

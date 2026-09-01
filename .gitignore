@@ -37,3 +37,4 @@ pnpm-debug.log*
 
 # Scratch experiment runtime directory
 scratch/
+.mini-claude-state/

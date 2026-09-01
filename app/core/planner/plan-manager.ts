@@ -37,6 +37,14 @@ export class PlanManager {
   }
 
   /**
+   * Load an existing plan state into the manager
+   */
+  public loadPlan(plan: Plan): void {
+    this.plan = JSON.parse(JSON.stringify(plan));
+    this.notify();
+  }
+
+  /**
    * Create a new execution plan
    */
   public createPlan(

@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Compass,
   Scissors,
+  Brain,
 } from "lucide-react";
 
 export async function loader() {
@@ -172,14 +173,32 @@ export default function CourseIndex() {
       icon: Scissors,
       color: "from-cyan-600 to-indigo-600",
       borderColor: "border-cyan-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "Smart Truncator 智能日志截断与错误调用栈强力保留",
         "Repo Map 仓库轻量级 AST 签名全景图 (导航防漫游)",
         "历史动态修剪 (Pruning) 与高水位渐进式摘要压缩 (Compaction)",
       ],
       docPath: "docs/lessons/06-context-engineering-and-compression.md",
+    },
+    {
+      version: "V6",
+      number: "第 07 课",
+      title: "Memory 与状态机持久化",
+      desc: "解决跨会话失忆、排错经验无法沉淀与任务崩溃无法续跑：构建 L1 工作记忆、L2 会话状态机与 L3 长期知识库。",
+      path: "/lessons/v6-memory",
+      icon: Brain,
+      color: "from-purple-600 to-indigo-600",
+      borderColor: "border-purple-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "L3 Semantic Memory Bank 长期知识库与前置相关性召回",
+        "L1 Working Memory & Scratchpad 临时假设与事实维护",
+        "L2 Episodic Session Checkpointing 断点热恢复与 Auto-Reflection 反思提炼",
+      ],
+      docPath: "docs/lessons/07-memory-and-state-persistence.md",
     },
   ];
 
@@ -223,12 +242,20 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v5-context-engine"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-cyan-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v6-memory"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Scissors className="w-4 h-4" />
-                <span>进入第 06 课：Context Engine 实验室</span>
+                <Brain className="w-4 h-4" />
+                <span>进入第 07 课：Memory 实验台</span>
                 <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                to="/lessons/v5-context-engine"
+                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+              >
+                <Scissors className="w-4 h-4 text-cyan-400" />
+                <span>第 06 课：Context Engine</span>
               </Link>
 
               <Link
@@ -392,9 +419,9 @@ export default function CourseIndex() {
               { v: "V2", name: "Agent Loop", status: "done" },
               { v: "V3", name: "Coding Agent", status: "done" },
               { v: "V4", name: "Planning & Workflow", status: "done" },
-              { v: "V5", name: "Context Engine", status: "current" },
-              { v: "V6", name: "Memory & State", status: "next" },
-              { v: "V7", name: "Harness & Sandbox", status: "todo" },
+              { v: "V5", name: "Context Engine", status: "done" },
+              { v: "V6", name: "Memory & State", status: "current" },
+              { v: "V7", name: "Harness & Sandbox", status: "next" },
               { v: "V8", name: "MCP 标准协议", status: "todo" },
               { v: "V9", name: "Durable Exec", status: "todo" },
               { v: "V10", name: "Eval & Tracing", status: "todo" },

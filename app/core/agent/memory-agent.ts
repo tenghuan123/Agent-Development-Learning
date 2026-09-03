@@ -4,7 +4,6 @@ import { builtinTools } from "../tools/builtins";
 import { ToolExecutor } from "../tools/executor";
 import { ToolRegistry } from "../tools/registry";
 import { LoopDetector } from "./loop-detector";
-import type { AgentGuardAlert } from "./types";
 import { PlanManager } from "../planner/plan-manager";
 import { createManagePlanTool } from "../tools/builtins/manage-plan";
 import { ContextEngine } from "../context/context-engine";
@@ -216,7 +215,7 @@ export class MemoryAgent {
     const sessionId = session.sessionId;
     let currentStep = session.currentStep;
     let consecutiveErrors = 0;
-    let totalUsage: TokenUsage = { ...session.tokenUsage };
+    const totalUsage: TokenUsage = { ...session.tokenUsage };
     let finalAnswer = "";
     let status: MemoryAgentResult["status"] = "completed";
 
@@ -235,7 +234,7 @@ export class MemoryAgent {
     }
 
     // 2. Initialize Messages if fresh session
-    let messages: ChatMessage[] = session.messages.length > 0 ? [...session.messages] : [];
+    const messages: ChatMessage[] = session.messages.length > 0 ? [...session.messages] : [];
     if (messages.length === 0) {
       const systemPromptText = this.buildSystemPrompt(recalledMemories);
       messages.push({ role: "system", content: systemPromptText });
@@ -323,7 +322,7 @@ export class MemoryAgent {
       // Case B: Model called tools
       const toolCall = response.toolCalls[0];
       const toolName = toolCall.function.name;
-      let toolArgs: Record<string, any> = {};
+      let toolArgs: Record<string, any>;
       try {
         toolArgs =
           typeof toolCall.function.arguments === "string"

@@ -12,14 +12,12 @@ import {
   MemoryBank,
   WorkingMemoryManager,
   SessionStore,
-  ReflectionEngine,
   createManageMemoryTool,
   createScratchpadTool,
 } from "../memory";
 import {
   PermissionGuard,
   PathJailer,
-  RiskClassifier,
   EgressSanitizer,
   type ApprovalDecision,
   type ApprovalRequest,
@@ -167,7 +165,7 @@ export class HarnessAgent {
     const sessionId = options?.sessionId || `harness-${Date.now()}`;
     const emit = options?.onEvent || (() => {});
 
-    let totalUsage: TokenUsage = {
+    const totalUsage: TokenUsage = {
       promptTokens: 0,
       completionTokens: 0,
       totalTokens: 0,
@@ -182,7 +180,6 @@ export class HarnessAgent {
 
     let stepIndex = 0;
     let consecutiveErrors = 0;
-    let finalAnswer = "";
 
     while (stepIndex < this.config.maxSteps) {
       stepIndex++;
@@ -299,7 +296,7 @@ export class HarnessAgent {
           continue;
         }
 
-        finalAnswer = thought || "（任务已执行完毕，模型未产生额外输出）";
+        const finalAnswer = thought || "（任务已执行完毕，模型未产生额外输出）";
         emit({ type: "finished", status: "completed", finalAnswer });
         return {
           sessionId,

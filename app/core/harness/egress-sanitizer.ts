@@ -4,7 +4,7 @@
 export const SECRET_PATTERNS = [
   { name: "OpenAI/OpenRouter Key", regex: /\b(sk-[a-zA-Z0-9_-]{20,64})\b/g },
   { name: "GitHub Token", regex: /\b(gh[pousr]-[A-Za-z0-9_]{36,255})\b/g },
-  { name: "Generic API Key/Bearer", regex: /\b(bearer\s+[a-zA-Z0-9_\-\.]{20,})/gi },
+  { name: "Generic API Key/Bearer", regex: /\b(bearer\s+[a-zA-Z0-9_\-.]{20,})/gi },
   { name: "Private RSA Key", regex: /-----BEGIN (RSA )?PRIVATE KEY-----[\s\S]*?-----END (RSA )?PRIVATE KEY-----/g },
   { name: "AWS Secret Key", regex: /\b(aws_secret_access_key|AWS_SECRET_ACCESS_KEY)\s*[:=]\s*['"]?[a-zA-Z0-9/+=]{40}['"]?/g },
   { name: "Password Assignment", regex: /\b(password|passwd|db_pass)\s*[:=]\s*['"][^'"]{6,}['"]/gi },

@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Network,
   ShieldAlert,
+  Flame,
 } from "lucide-react";
 
 export async function loader() {
@@ -248,14 +249,32 @@ export default function CourseIndex() {
       icon: ShieldAlert,
       color: "from-purple-600 to-rose-600",
       borderColor: "border-purple-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "有向状态图 (StateGraph) 节点流转与原子 WAL Checkpointing",
         "容灾演习：崩溃模拟、幂等缓存重放 vs 盲目重跑灾难对比",
         "时间旅行调试器 (Time-Travel Scrubber) 与断点分支推演 (Fork)",
       ],
       docPath: "docs/lessons/10-durable-execution-and-checkpointing.md",
+    },
+    {
+      version: "V10",
+      number: "第 11 课",
+      title: "Agent 评测体系与全链路 Tracing",
+      desc: "告别“凭感觉调优 Prompt”：基于 OpenTelemetry 树状调用栈、火焰图瀑布流、细粒度 Token 计费与三层评测金字塔，打造工业级可观测性闭环。",
+      path: "/lessons/v10-eval-tracing",
+      icon: Flame,
+      color: "from-purple-600 to-cyan-600",
+      borderColor: "border-purple-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "OpenTelemetry 标准树状 Trace/Span 采集与火焰图 (Flamegraph)",
+        "三层评测金字塔：确定性断言 + 轨迹经济学 + LLM-as-a-Judge",
+        "5 大基准用例 Benchmark 套件、五维能力雷达图与 A/B 策略竞技场",
+      ],
+      docPath: "docs/lessons/11-eval-and-tracing.md",
     },
   ];
 
@@ -299,20 +318,28 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v6-memory"
+                to="/lessons/v10-eval-tracing"
                 className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Brain className="w-4 h-4" />
-                <span>进入第 07 课：Memory 实验台</span>
+                <Flame className="w-4 h-4" />
+                <span>进入第 11 课：Eval & Tracing 实验台</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
               <Link
-                to="/lessons/v5-context-engine"
+                to="/lessons/v9-durable-exec"
                 className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
               >
-                <Scissors className="w-4 h-4 text-cyan-400" />
-                <span>第 06 课：Context Engine</span>
+                <ShieldAlert className="w-4 h-4 text-purple-400" />
+                <span>第 10 课：Durable Execution</span>
+              </Link>
+
+              <Link
+                to="/lessons/v8-mcp"
+                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+              >
+                <Network className="w-4 h-4 text-cyan-400" />
+                <span>第 09 课：MCP Standard</span>
               </Link>
 
               <Link

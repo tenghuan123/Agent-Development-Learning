@@ -17,7 +17,7 @@
 | **V6** | [第 07 课](./lessons/07-memory-and-state-persistence.md) | **Memory 与状态机持久化** | ✅ 已完成 | L1 工作记忆、L2 会话 Checkpointing、L3 长期知识库与自主反思 |
 | **V7** | [第 08 课](./lessons/08-harness-and-sandbox-security.md) | **Harness 与安全沙箱权限隔离** | ✅ 已完成 | 多级风险定级 (L0~L3)、人机审批 (HITL)、PathJailer 与凭证脱敏 |
 | **V8** | [第 09 课](./lessons/09-mcp-standard-and-plugin-architecture.md) | **MCP (Model Context Protocol) 标准协议** | ✅ 已完成 | MCP Client/Server 解耦、JSON-RPC 2.0 帧级抓包、手写 Mini Code Server |
-| **V9** | [第 10 课](./lessons/10-durable-execution-and-checkpointing.md) | **Durable Execution 与容灾断点续跑** | 🚀 本课落地 | LangGraph StateGraph、WAL 原子检查点、幂等账本、时间旅行分支推演 |
-| **V10** | 第 11 课 | **Agent 评测体系与全链路 Tracing** | ⏳ 规划中 | Benchmark 评测集、Token/延迟追踪、可观测性看板 |
+| **V9** | [第 10 课](./lessons/10-durable-execution-and-checkpointing.md) | **Durable Execution 与容灾断点续跑** | ✅ 已完成 | LangGraph StateGraph、WAL 原子检查点、幂等账本、时间旅行分支推演 |
+| **V10** | [第 11 课](./lessons/11-eval-and-tracing.md) | **Agent 评测体系与全链路 Tracing** | 🚀 本课落地 | OpenTelemetry 树状调用栈、火焰图瀑布流、三层评测金字塔、Benchmark 基准套件与 A/B 竞技场 |
 | **V11** | 第 12 课 | **Production Agent 生产级落地** | ⏳ 规划中 | 高并发、多租户限流、Token 成本控制与云原生部署 |
 

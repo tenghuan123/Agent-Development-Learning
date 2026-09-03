@@ -15,6 +15,8 @@ import {
   Check,
   Scissors,
   Brain,
+  ShieldCheck,
+  Network,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -118,6 +120,20 @@ export function Header({
       title: "第 07 课: Memory 与状态机持久化",
       icon: Brain,
       color: "text-purple-400",
+    },
+    {
+      path: "/lessons/v7-harness",
+      tag: "V7",
+      title: "第 08 课: Harness 与安全沙箱权限隔离",
+      icon: ShieldCheck,
+      color: "text-rose-400",
+    },
+    {
+      path: "/lessons/v8-mcp",
+      tag: "V8",
+      title: "第 09 课: MCP 标准协议与插件解耦",
+      icon: Network,
+      color: "text-cyan-400",
     },
   ];
 

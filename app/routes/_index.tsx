@@ -15,6 +15,7 @@ import {
   Scissors,
   Brain,
   ShieldCheck,
+  Network,
 } from "lucide-react";
 
 export async function loader() {
@@ -210,14 +211,32 @@ export default function CourseIndex() {
       icon: ShieldCheck,
       color: "from-rose-600 to-amber-600",
       borderColor: "border-rose-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "四重防御矩阵：L0 只读放行 / L1 局部修改 / L2 HITL / L3 毁灭硬熔断",
         "Human-in-the-Loop (HITL) 审批流与用户驳回指示吸收自愈",
         "PathJailer 工作区路径边界物理隔离与 Egress 凭据脱敏",
       ],
       docPath: "docs/lessons/08-harness-and-sandbox-security.md",
+    },
+    {
+      version: "V8",
+      number: "第 09 课",
+      title: "MCP 标准协议与插件解耦",
+      desc: "告别单体工具硬编码与依赖冲突：基于 JSON-RPC 2.0 构建标准 MCP Client/Server，动态发现与热拔插代码外设。",
+      path: "/lessons/v8-mcp",
+      icon: Network,
+      color: "from-cyan-600 to-purple-600",
+      borderColor: "border-cyan-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "JSON-RPC 2.0 帧级抓包与报文透视 (Wire Protocol Inspector)",
+        "自研独立 Mini Code MCP Server 与 Mock 数据库/浏览器外设",
+        "动态能力发现 (Tool Discovery) 与热拔插 ReAct 闭环",
+      ],
+      docPath: "docs/lessons/09-mcp-standard-and-plugin-architecture.md",
     },
   ];
 
@@ -439,10 +458,10 @@ export default function CourseIndex() {
               { v: "V3", name: "Coding Agent", status: "done" },
               { v: "V4", name: "Planning & Workflow", status: "done" },
               { v: "V5", name: "Context Engine", status: "done" },
-              { v: "V6", name: "Memory & State", status: "current" },
-              { v: "V7", name: "Harness & Sandbox", status: "next" },
-              { v: "V8", name: "MCP 标准协议", status: "todo" },
-              { v: "V9", name: "Durable Exec", status: "todo" },
+              { v: "V6", name: "Memory & State", status: "done" },
+              { v: "V7", name: "Harness & Sandbox", status: "done" },
+              { v: "V8", name: "MCP 标准协议", status: "current" },
+              { v: "V9", name: "Durable Exec", status: "next" },
               { v: "V10", name: "Eval & Tracing", status: "todo" },
               { v: "V11", name: "Production Agent", status: "todo" },
             ].map((item) => (

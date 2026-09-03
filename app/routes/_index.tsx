@@ -16,6 +16,7 @@ import {
   Brain,
   ShieldCheck,
   Network,
+  ShieldAlert,
 } from "lucide-react";
 
 export async function loader() {
@@ -229,14 +230,32 @@ export default function CourseIndex() {
       icon: Network,
       color: "from-cyan-600 to-purple-600",
       borderColor: "border-cyan-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "JSON-RPC 2.0 帧级抓包与报文透视 (Wire Protocol Inspector)",
         "自研独立 Mini Code MCP Server 与 Mock 数据库/浏览器外设",
         "动态能力发现 (Tool Discovery) 与热拔插 ReAct 闭环",
       ],
       docPath: "docs/lessons/09-mcp-standard-and-plugin-architecture.md",
+    },
+    {
+      version: "V9",
+      number: "第 10 课",
+      title: "Durable Execution 与容灾断点续跑",
+      desc: "解决长任务崩溃导致的非幂等重跑灾难：基于 LangGraph 状态图、WAL 检查点、幂等锁与时间旅行调试。",
+      path: "/lessons/v9-durable-exec",
+      icon: ShieldAlert,
+      color: "from-purple-600 to-rose-600",
+      borderColor: "border-purple-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "有向状态图 (StateGraph) 节点流转与原子 WAL Checkpointing",
+        "容灾演习：崩溃模拟、幂等缓存重放 vs 盲目重跑灾难对比",
+        "时间旅行调试器 (Time-Travel Scrubber) 与断点分支推演 (Fork)",
+      ],
+      docPath: "docs/lessons/10-durable-execution-and-checkpointing.md",
     },
   ];
 
@@ -460,9 +479,9 @@ export default function CourseIndex() {
               { v: "V5", name: "Context Engine", status: "done" },
               { v: "V6", name: "Memory & State", status: "done" },
               { v: "V7", name: "Harness & Sandbox", status: "done" },
-              { v: "V8", name: "MCP 标准协议", status: "current" },
-              { v: "V9", name: "Durable Exec", status: "next" },
-              { v: "V10", name: "Eval & Tracing", status: "todo" },
+              { v: "V8", name: "MCP 标准协议", status: "done" },
+              { v: "V9", name: "Durable Exec", status: "current" },
+              { v: "V10", name: "Eval & Tracing", status: "next" },
               { v: "V11", name: "Production Agent", status: "todo" },
             ].map((item) => (
               <div

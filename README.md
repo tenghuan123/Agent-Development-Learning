@@ -26,8 +26,8 @@
 [x] V7  Harness/Sandbox  ── 多级权限矩阵、人机协同审批 (HITL) 与沙箱隔离
 [x] V8  MCP Standard     ── Model Context Protocol 标准客户端与插件解耦
 [x] V9  Durable Exec     ── 崩溃恢复、幂等性与 LangGraph / Checkpoint
-[x] V10 Eval & Tracing   ── 自动化评测基准数据集与全链路可观测性 (当前落地)
-[ ] V11 Production Agent ── 并发、限流、成本控制与生产部署
+[x] V10 Eval & Tracing   ── 自动化评测基准数据集与全链路可观测性
+[x] V11 Production Agent ── 多租户公平队列、双轨令牌桶限流、预算硬顶、断路器与防篡改审计
 ```
 
 ---
@@ -46,6 +46,7 @@
 - 🔌 [第 09 课：MCP 标准协议与插件解耦](./docs/lessons/09-mcp-standard-and-plugin-architecture.md)
 - ⚡ [第 10 课：Durable Execution 与容灾断点续跑](./docs/lessons/10-durable-execution-and-checkpointing.md)
 - 📊 [第 11 课：Agent 评测体系与全链路 Tracing](./docs/lessons/11-eval-and-tracing.md)
+- 🚀 [第 12 课：Production Agent 生产级落地](./docs/lessons/12-production-agent.md)
 
 ## 🚀 快速启动
 

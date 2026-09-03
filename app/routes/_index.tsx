@@ -18,6 +18,7 @@ import {
   Network,
   ShieldAlert,
   Flame,
+  Server,
 } from "lucide-react";
 
 export async function loader() {
@@ -267,14 +268,32 @@ export default function CourseIndex() {
       icon: Flame,
       color: "from-purple-600 to-cyan-600",
       borderColor: "border-purple-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "OpenTelemetry 标准树状 Trace/Span 采集与火焰图 (Flamegraph)",
         "三层评测金字塔：确定性断言 + 轨迹经济学 + LLM-as-a-Judge",
         "5 大基准用例 Benchmark 套件、五维能力雷达图与 A/B 策略竞技场",
       ],
       docPath: "docs/lessons/11-eval-and-tracing.md",
+    },
+    {
+      version: "V11",
+      number: "第 12 课",
+      title: "Production Agent 生产级落地",
+      desc: "终局之战：构建企业级 Agent Production Runtime，攻克高并发惊群、恶邻资源挤兑、天价账单与单点雪崩，实现密码学防篡改审计。",
+      path: "/lessons/v11-production-agent",
+      icon: Server,
+      color: "from-purple-600 to-emerald-600",
+      borderColor: "border-emerald-500/50",
+      status: "current",
+      statusText: "🎓 终局压轴",
+      highlights: [
+        "多租户加权公平排队 (WFQ) 与防饥饿动态老化算法",
+        "RPM 频控与 TPM 吞吐双轨令牌桶，租户并发槽位隔离",
+        "Token 预算硬顶熔断、三态断路器 (Jitter 退避) 与 SHA-256 哈希审计账本",
+      ],
+      docPath: "docs/lessons/12-production-agent.md",
     },
   ];
 
@@ -318,20 +337,20 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v10-eval-tracing"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v11-production-agent"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Flame className="w-4 h-4" />
-                <span>进入第 11 课：Eval & Tracing 实验台</span>
+                <Server className="w-4 h-4" />
+                <span>进入第 12 课：Production Agent 生产级落地</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
               <Link
-                to="/lessons/v9-durable-exec"
+                to="/lessons/v10-eval-tracing"
                 className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
               >
-                <ShieldAlert className="w-4 h-4 text-purple-400" />
-                <span>第 10 课：Durable Execution</span>
+                <Flame className="w-4 h-4 text-cyan-400" />
+                <span>第 11 课：Eval & Tracing</span>
               </Link>
 
               <Link

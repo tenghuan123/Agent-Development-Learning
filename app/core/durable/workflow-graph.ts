@@ -1,5 +1,4 @@
 import type {
-  DurableState,
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,

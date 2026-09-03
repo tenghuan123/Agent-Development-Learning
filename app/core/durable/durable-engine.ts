@@ -4,7 +4,6 @@ import type {
   DurableEngineEvent,
   DurableState,
   WorkflowDefinition,
-  WorkflowNode,
 } from "./types";
 import { CheckpointStore } from "./checkpoint-store";
 import { IdempotencyVault } from "./idempotency-vault";
@@ -240,7 +239,7 @@ export class DurableEngine {
     crashConfig?: CrashInjectionConfig;
     onEvent?: (event: DurableEngineEvent) => void;
   }): Promise<{ state: DurableState; latestCheckpoint: CheckpointSnapshot | null }> {
-    let state = params.currentState;
+    const state = params.currentState;
     let currNodeId: string | null = params.currentNodeId;
     let parentCpId = params.parentCheckpointId;
     let step = params.stepIndex;

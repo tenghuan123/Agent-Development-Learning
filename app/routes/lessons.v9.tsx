@@ -5,7 +5,6 @@ import type {
   CheckpointSnapshot,
   DurableEngineEvent,
   DurableRunStatus,
-  DurableState,
   IdempotencyRecord,
   WorkflowDefinition,
 } from "~/core/durable/types";
@@ -16,21 +15,14 @@ import {
   Zap,
   CheckCircle2,
   XCircle,
-  Wrench,
   BookOpen,
   Layers,
-  ArrowRight,
-  RefreshCw,
   Database,
   Globe,
-  Code2,
   Play,
   FileCode,
   Send,
   Trash2,
-  Search,
-  Server,
-  Sparkles,
   GitFork,
   Clock,
   Flame,
@@ -38,8 +30,6 @@ import {
   AlertTriangle,
   History,
   Lock,
-  ChevronRight,
-  Share2,
 } from "lucide-react";
 
 export async function loader() {
@@ -166,6 +156,7 @@ export default function LessonV9Page() {
 
   useEffect(() => {
     fetchStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Run Workflow with SSE Streaming
@@ -445,6 +436,7 @@ export default function LessonV9Page() {
         model={model}
         defaultBaseURL={defaultBaseURL}
         customApiKey={customApiKey}
+        customBaseURL={customBaseURL}
         onSaveApiKey={saveLocalKey}
         onSaveBaseURL={saveLocalBaseURL}
         onSaveSettings={handleSaveSettings}
@@ -984,7 +976,7 @@ export default function LessonV9Page() {
                   </div>
 
                   <div className="space-y-2">
-                    {checkpoints.map((cp, idx) => {
+                    {checkpoints.map((cp) => {
                       const isSelected =
                         selectedCheckpoint?.checkpointId === cp.checkpointId;
                       return (

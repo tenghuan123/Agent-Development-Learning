@@ -5,10 +5,8 @@ import type {
   SessionState,
   SessionStep,
   SessionSummary,
-  WorkingMemory,
 } from "./types";
-import type { ChatMessage, TokenUsage } from "../llm/types";
-import type { Plan } from "../planner/types";
+import type { ChatMessage } from "../llm/types";
 
 export class SessionStore {
   private sessions: Map<string, SessionSnapshot> = new Map();

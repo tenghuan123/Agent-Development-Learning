@@ -4,15 +4,11 @@ import { Header } from "~/components/Header";
 import type {
   HarnessStreamEvent,
   RiskClassification,
-  RiskLevel,
   SecurityAuditLog,
   SecurityMode,
   ApprovalRequest,
 } from "~/core/harness/types";
-import {
-  HARNESS_BENCHMARKS,
-  type HarnessBenchmarkPreset,
-} from "~/core/experiments/harness-benchmarks";
+import { HARNESS_BENCHMARKS } from "~/core/experiments/harness-benchmarks";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -20,30 +16,14 @@ import {
   Play,
   Terminal,
   Activity,
-  AlertTriangle,
-  Flame,
-  Zap,
   CheckCircle2,
   XCircle,
-  Wrench,
   BookOpen,
   Layers,
-  Search,
-  RotateCcw,
-  Clock,
-  FileText,
-  Compass,
-  ArrowRight,
   RefreshCw,
-  Sliders,
-  Check,
-  Info,
   Lock,
-  Unlock,
-  Eye,
   FileCode,
   FolderLock,
-  Cpu,
   UserCheck,
 } from "lucide-react";
 
@@ -117,13 +97,8 @@ export default function LessonV7Page() {
   const [isRunning, setIsRunning] = useState(false);
   const [streamLogs, setStreamLogs] = useState<HarnessStreamEvent[]>([]);
   const [auditLogs, setAuditLogs] = useState<SecurityAuditLog[]>([]);
-  const [finalAnswer, setFinalAnswer] = useState<string>("");
-
-  // HITL Modal State
-  const [pendingApproval, setPendingApproval] = useState<ApprovalRequest | null>(
-    null
-  );
-  const [rejectFeedback, setRejectFeedback] = useState("");
+  const [, setFinalAnswer] = useState<string>("");
+  const [, setPendingApproval] = useState<ApprovalRequest | null>(null);
 
   // Matrix Interactive Tester State
   const [testToolName, setTestToolName] = useState("run_command");

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLoaderData, Link } from "react-router";
+import { useLoaderData } from "react-router";
 import { Header } from "~/components/Header";
 import type {
   MemoryCategory,
@@ -10,10 +10,7 @@ import type {
   SessionSummary,
   WorkingMemory,
 } from "~/core/memory/types";
-import {
-  MEMORY_BENCHMARKS,
-  type MemoryBenchmarkPreset,
-} from "~/core/experiments/memory-benchmarks";
+import { MEMORY_BENCHMARKS } from "~/core/experiments/memory-benchmarks";
 import {
   Sparkles,
   Play,
@@ -21,10 +18,6 @@ import {
   Activity,
   AlertTriangle,
   Flame,
-  Zap,
-  ShieldCheck,
-  CheckCircle,
-  XCircle,
   Wrench,
   BookOpen,
   Brain,
@@ -35,15 +28,11 @@ import {
   Trash2,
   Edit3,
   RotateCcw,
-  Clock,
   Tag,
   FileText,
-  Compass,
-  ArrowRight,
   RefreshCw,
   Sliders,
   Check,
-  Info,
   CheckCircle2,
 } from "lucide-react";
 
@@ -118,10 +107,10 @@ export default function LessonV6Page() {
   const [isRunning, setIsRunning] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [streamLogs, setStreamLogs] = useState<MemoryStreamEvent[]>([]);
-  const [finalAnswer, setFinalAnswer] = useState<string>("");
+  const [, setFinalAnswer] = useState<string>("");
   const [latestWorkingMemory, setLatestWorkingMemory] = useState<WorkingMemory | null>(null);
   const [recalledList, setRecalledList] = useState<MemoryItem[]>([]);
-  const [latestReflection, setLatestReflection] = useState<ReflectionResult | null>(null);
+  const [, setLatestReflection] = useState<ReflectionResult | null>(null);
 
   // Memory Bank State
   const [memoryItems, setMemoryItems] = useState<MemoryItem[]>([]);

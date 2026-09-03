@@ -1,5 +1,4 @@
 import { LLMClient } from "../llm/client";
-import type { ChatMessage } from "../llm/types";
 import type { MemoryBank } from "./memory-bank";
 import type { LearnedInsight, ReflectionResult, SessionSnapshot } from "./types";
 

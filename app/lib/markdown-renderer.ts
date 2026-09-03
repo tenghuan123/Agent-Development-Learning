@@ -140,7 +140,7 @@ export function markdownToHtml(md: string, title: string): string {
 
     // Blockquotes
     if (line.startsWith("> ")) {
-      let bqContent = line.slice(2);
+      const bqContent = line.slice(2);
       htmlOut.push(
         `<blockquote class="border-l-4 border-purple-500 bg-purple-950/20 px-4 py-3 my-4 rounded-r-lg text-slate-300 text-sm leading-relaxed">${formatInline(
           bqContent

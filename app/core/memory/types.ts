@@ -1,5 +1,4 @@
 import type { ChatMessage, TokenUsage } from "../llm/types";
-import type { AgentStepRecord } from "../agent/types";
 import type { Plan } from "../planner/types";
 
 /**

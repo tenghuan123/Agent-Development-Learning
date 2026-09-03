@@ -2,7 +2,6 @@ import { z } from "zod";
 import type { ToolDefinition } from "../../tools/types";
 import type { MemoryBank } from "../memory-bank";
 import type { WorkingMemoryManager } from "../working-memory";
-import type { MemoryCategory } from "../types";
 
 /**
  * Manage Memory Tool Schema

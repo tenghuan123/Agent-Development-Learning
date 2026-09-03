@@ -21,7 +21,10 @@
 [x] V2  Agent Loop       ── Thought → Action → Observation 闭环与死循环熔断
 [x] V3  Coding Agent     ── 文件读写、Shell 执行与代码环境自愈纠错
 [x] V4  Planning/Routing ── 复杂任务拆解、步骤规划与工作流路由
-[x] V5  Context Engine   ── 上下文膨胀防御、动态检索与摘要压缩 (当前落地)
+[x] V5  Context Engine   ── 上下文膨胀防御、动态检索与摘要压缩
+[x] V6  Memory           ── L1 工作记忆、L2 会话 Checkpoint 与 L3 长期知识库反思
+[x] V7  Harness/Sandbox  ── 多级权限矩阵、人机协同审批 (HITL) 与沙箱隔离 (当前落地)
+[ ] V8  MCP Standard     ── Model Context Protocol 标准客户端与插件解耦
 [ ] V9  Durable Exec     ── 崩溃恢复、幂等性与 LangGraph / Checkpoint
 [ ] V10 Eval & Tracing   ── 自动化评测基准数据集与全链路可观测性
 [ ] V11 Production Agent ── 并发、限流、成本控制与生产部署
@@ -38,6 +41,8 @@
 - 💻 [第 04 课：Coding Agent 与代码自愈闭环](./docs/lessons/04-coding-agent-and-self-healing.md)
 - 🧭 [第 05 课：Planning 与复杂任务工作流路由](./docs/lessons/05-planning-and-workflow-routing.md)
 - ✂️ [第 06 课：Context Engine 与上下文膨胀防御](./docs/lessons/06-context-engineering-and-compression.md)
+- 🧠 [第 07 课：Memory 与状态机持久化](./docs/lessons/07-memory-and-state-persistence.md)
+- 🛡️ [第 08 课：Harness 与安全沙箱权限隔离](./docs/lessons/08-harness-and-sandbox-security.md)
 
 ## 🚀 快速启动
 

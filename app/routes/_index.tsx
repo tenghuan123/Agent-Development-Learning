@@ -14,6 +14,7 @@ import {
   Compass,
   Scissors,
   Brain,
+  ShieldCheck,
 } from "lucide-react";
 
 export async function loader() {
@@ -191,14 +192,32 @@ export default function CourseIndex() {
       icon: Brain,
       color: "from-purple-600 to-indigo-600",
       borderColor: "border-purple-500/50",
-      status: "current",
-      statusText: "🚀 当前落地",
+      status: "completed",
+      statusText: "已完成",
       highlights: [
         "L3 Semantic Memory Bank 长期知识库与前置相关性召回",
         "L1 Working Memory & Scratchpad 临时假设与事实维护",
         "L2 Episodic Session Checkpointing 断点热恢复与 Auto-Reflection 反思提炼",
       ],
       docPath: "docs/lessons/07-memory-and-state-persistence.md",
+    },
+    {
+      version: "V7",
+      number: "第 08 课",
+      title: "Harness 与安全沙箱权限隔离",
+      desc: "解决不可控危险破坏与权限越界：多级风险定级 (L0~L3)、人机协同审批 (HITL)、工作区边界隔离与敏感凭证防泄露。",
+      path: "/lessons/v7-harness",
+      icon: ShieldCheck,
+      color: "from-rose-600 to-amber-600",
+      borderColor: "border-rose-500/50",
+      status: "current",
+      statusText: "🚀 当前落地",
+      highlights: [
+        "四重防御矩阵：L0 只读放行 / L1 局部修改 / L2 HITL / L3 毁灭硬熔断",
+        "Human-in-the-Loop (HITL) 审批流与用户驳回指示吸收自愈",
+        "PathJailer 工作区路径边界物理隔离与 Egress 凭据脱敏",
+      ],
+      docPath: "docs/lessons/08-harness-and-sandbox-security.md",
     },
   ];
 

@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   Flame,
   Server,
+  Zap,
 } from "lucide-react";
 
 export async function loader() {
@@ -77,6 +78,30 @@ export default function CourseIndex() {
     localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
     localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
   };
+
+  const [activeSemester, setActiveSemester] = useState<"semester2" | "semester1">("semester2");
+
+  const SEMESTER_2_LESSONS = [
+    {
+      version: "V12",
+      number: "第 13 课",
+      title: "Agent Loop vs Coding Agent Runtime (Pi 架构篇)",
+      desc: "走出单体 while(true) 齿轮：通过 AgentCore、Runtime、Session 树、SafeToolExecutor 与 EventStream 彻底解耦，征服中途插话、Ctrl+C Abort 级联取消与并发状态冲刷。",
+      path: "/lessons/v12-agent-runtime",
+      icon: Zap,
+      color: "from-cyan-600 to-indigo-600",
+      borderColor: "border-cyan-500/50",
+      status: "current",
+      statusText: "⚡ 第二学期破局首发",
+      badge: "Pi Runtime",
+      highlights: [
+        "破坏实验室：中途插话、Ctrl+C 级联终止与并发事件双轨对比",
+        "5 大核心齿轮透视：AgentCore / Runtime / Session / ToolExecutor / EventStream",
+        "可交互的极简终端工作台：支持实时 Interrupt、Abort 与断点恢复",
+      ],
+      docPath: "docs/lessons/13-agent-loop-vs-runtime.md",
+    },
+  ];
 
   const LESSONS = [
     {
@@ -337,12 +362,20 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v11-production-agent"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v12-agent-runtime"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-cyan-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Server className="w-4 h-4" />
-                <span>进入第 12 课：Production Agent 生产级落地</span>
+                <Zap className="w-4 h-4 text-amber-300" />
+                <span>进入第 13 课：Agent Loop vs Coding Agent Runtime (Pi 架构)</span>
                 <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                to="/lessons/v11-production-agent"
+                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+              >
+                <Server className="w-4 h-4 text-emerald-400" />
+                <span>第 12 课：Production Agent 结课压轴</span>
               </Link>
 
               <Link
@@ -352,66 +385,55 @@ export default function CourseIndex() {
                 <Flame className="w-4 h-4 text-cyan-400" />
                 <span>第 11 课：Eval & Tracing</span>
               </Link>
-
-              <Link
-                to="/lessons/v8-mcp"
-                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
-              >
-                <Network className="w-4 h-4 text-cyan-400" />
-                <span>第 09 课：MCP Standard</span>
-              </Link>
-
-              <Link
-                to="/lessons/v4-planning"
-                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
-              >
-                <Compass className="w-4 h-4 text-purple-400" />
-                <span>第 05 课：Planning</span>
-              </Link>
-
-              <Link
-                to="/lessons/v3-coding-agent"
-                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
-              >
-                <Code2 className="w-4 h-4 text-emerald-400" />
-                <span>第 04 课：Coding Agent</span>
-              </Link>
-
-              <Link
-                to="/lessons/v2-agent-loop"
-                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
-              >
-                <Layers className="w-4 h-4 text-amber-400" />
-                <span>第 03 课：Agent Loop</span>
-              </Link>
-
-              <Link
-                to="/lessons/v1-tool-calling"
-                className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
-              >
-                <Wrench className="w-4 h-4 text-cyan-400" />
-                <span>第 02 课：Tool Calling</span>
-              </Link>
             </div>
           </div>
         </div>
 
-        {/* Lessons Grid */}
+        {/* Lessons Grid with Semester Switcher */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-indigo-400" />
                 <span>课程章节与独立运行实验台</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                每节课都有独立的代码实现与交互式可视化工作台
+                每节课都有独立的代码实现、架构推导演进与交互式可视化工作台
               </p>
+            </div>
+
+            {/* Semester Switcher Tabs */}
+            <div className="inline-flex p-1 rounded-xl bg-[#0c1120] border border-slate-800 shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveSemester("semester2")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  activeSemester === "semester2"
+                    ? "bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-md shadow-cyan-500/20"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-300" />
+                <span>第二学期 · Runtime 工程</span>
+                <span className="text-[10px] px-1 py-0.2 rounded bg-cyan-400/20 text-cyan-200 font-mono">新</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSemester("semester1")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  activeSemester === "semester1"
+                    ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>第一学期 · 手写引擎 (12课)</span>
+              </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {LESSONS.map((lesson) => {
+            {(activeSemester === "semester2" ? SEMESTER_2_LESSONS : LESSONS).map((lesson) => {
               const Icon = lesson.icon;
               const isAvailable = lesson.path !== "#";
 

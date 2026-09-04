@@ -148,15 +148,18 @@ export class LLMClient {
     const hasTools = Boolean(options.tools && options.tools.length > 0);
 
     const completion = await withRetry(() =>
-      this.openai.chat.completions.create({
-        model,
-        messages: formattedMessages,
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.maxTokens,
-        tools: hasTools ? options.tools : undefined,
-        tool_choice: hasTools ? options.toolChoice : undefined,
-        response_format: options.responseFormat,
-      })
+      this.openai.chat.completions.create(
+        {
+          model,
+          messages: formattedMessages,
+          temperature: options.temperature ?? 0.7,
+          max_tokens: options.maxTokens,
+          tools: hasTools ? options.tools : undefined,
+          tool_choice: hasTools ? options.toolChoice : undefined,
+          response_format: options.responseFormat,
+        },
+        options.signal ? { signal: options.signal } : undefined
+      )
     );
 
     const latencyMs = Date.now() - startTime;

@@ -17,6 +17,10 @@ import {
   Brain,
   ShieldCheck,
   Network,
+  ShieldAlert,
+  Flame,
+  Server,
+  Zap,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -71,7 +75,18 @@ export function Header({
   const effectiveApiKey = customApiKey || "";
   const isKeyAvailable = hasServerKey || Boolean(effectiveApiKey.trim().length > 0);
 
-  const lessons = [
+  const semester2Lessons = [
+    {
+      path: "/lessons/v12-agent-runtime",
+      tag: "V12",
+      title: "第 13 课: Agent Loop vs Coding Agent Runtime",
+      icon: Zap,
+      color: "text-cyan-300",
+      badge: "Pi 架构",
+    },
+  ];
+
+  const semester1Lessons = [
     {
       path: "/lessons/v0-llm-chat",
       tag: "V0",
@@ -134,6 +149,27 @@ export function Header({
       title: "第 09 课: MCP 标准协议与插件解耦",
       icon: Network,
       color: "text-cyan-400",
+    },
+    {
+      path: "/lessons/v9-durable-exec",
+      tag: "V9",
+      title: "第 10 课: Durable Execution 与状态恢复",
+      icon: ShieldAlert,
+      color: "text-amber-400",
+    },
+    {
+      path: "/lessons/v10-eval-tracing",
+      tag: "V10",
+      title: "第 11 课: Agent 评测体系与全链路 Tracing",
+      icon: Flame,
+      color: "text-rose-400",
+    },
+    {
+      path: "/lessons/v11-production-agent",
+      tag: "V11",
+      title: "第 12 课: Production Agent 生产级韧性",
+      icon: Server,
+      color: "text-emerald-400",
     },
   ];
 
@@ -211,7 +247,7 @@ export function Header({
                   className="fixed inset-0 z-40"
                   onClick={() => setShowLessonDropdown(false)}
                 />
-                <div className="absolute left-0 mt-2 w-72 rounded-xl bg-[#0f1526] border border-slate-700 shadow-2xl p-2 z-50 space-y-1">
+                <div className="absolute left-0 mt-2 w-80 max-h-[82vh] overflow-y-auto rounded-xl bg-[#0f1526] border border-slate-700 shadow-2xl p-2 z-50 space-y-1">
                   <Link
                     to="/"
                     onClick={() => setShowLessonDropdown(false)}
@@ -225,9 +261,44 @@ export function Header({
                     <span>🗺️ 课程总览 & 演进全景路线</span>
                   </Link>
 
-                  <div className="my-1 border-t border-slate-800" />
+                  {/* Semester 2 */}
+                  <div className="pt-2 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-cyan-400 border-t border-slate-800 uppercase">
+                    <span>第二学期 · Runtime 工程</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-normal">进行中</span>
+                  </div>
 
-                  {lessons.map((lesson) => {
+                  {semester2Lessons.map((lesson) => {
+                    const Icon = lesson.icon;
+                    const isActive = location.pathname === lesson.path;
+                    return (
+                      <Link
+                        key={lesson.path}
+                        to={lesson.path}
+                        onClick={() => setShowLessonDropdown(false)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition border ${
+                          isActive
+                            ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 font-medium"
+                            : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-cyan-200"
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${lesson.color}`} />
+                        <div className="flex-1 flex items-center justify-between">
+                          <div className="font-medium truncate">{lesson.title}</div>
+                          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">
+                            {lesson.badge}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+
+                  {/* Semester 1 */}
+                  <div className="pt-3 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-slate-400 border-t border-slate-800 uppercase">
+                    <span>第一学期 · 手写 Agent 引擎</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-normal">已结课</span>
+                  </div>
+
+                  {semester1Lessons.map((lesson) => {
                     const Icon = lesson.icon;
                     const isActive = location.pathname === lesson.path;
                     return (

@@ -68,6 +68,7 @@ export class PureAgentCore implements AgentCore {
         type: "call_tools",
         thought,
         toolCalls,
+        usage: response.usage,
       };
     }
 
@@ -75,6 +76,7 @@ export class PureAgentCore implements AgentCore {
       type: "finish",
       thought,
       finalAnswer: thought || "[任务执行完毕，无进一步工具调用]",
+      usage: response.usage,
     };
   }
 }

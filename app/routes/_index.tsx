@@ -91,8 +91,8 @@ export default function CourseIndex() {
       icon: Zap,
       color: "from-cyan-600 to-indigo-600",
       borderColor: "border-cyan-500/50",
-      status: "current",
-      statusText: "⚡ 第二学期破局首发",
+      status: "completed",
+      statusText: "已完成",
       badge: "Pi Runtime",
       highlights: [
         "破坏实验室：中途插话、Ctrl+C 级联终止与并发事件双轨对比",
@@ -100,6 +100,25 @@ export default function CourseIndex() {
         "可交互的极简终端工作台：支持实时 Interrupt、Abort 与断点恢复",
       ],
       docPath: "docs/lessons/13-agent-loop-vs-runtime.md",
+    },
+    {
+      version: "V13",
+      number: "第 14 课",
+      title: "Agent 为什么必须是 Event-Driven？(Pi 观察平面)",
+      desc: "彻底告别 Callback 回调噩梦：通过强类型单向事件总线、FaultBarrier 故障沙箱隔离与 Event Sourcing 投影回放，实现多端无感可观测性与时间旅行回放。",
+      path: "/lessons/v13-event-driven",
+      icon: Network,
+      color: "from-indigo-600 to-purple-600",
+      borderColor: "border-indigo-500/50",
+      status: "current",
+      statusText: "⚡ 最新首发",
+      badge: "Pi 观察平面",
+      highlights: [
+        "混沌对照实验机：异常穿透灾难、慢速 I/O 拖死推理与动态热插拔对比",
+        "多观察者视界：Console Tracer (CLI)、Telemetry 指标画像与 Audit Log 四重视角",
+        "时间旅行回放器：纯粹基于事件流 100% 确定性复原任意历史时刻状态",
+      ],
+      docPath: "docs/lessons/14-event-driven-architecture.md",
     },
   ];
 

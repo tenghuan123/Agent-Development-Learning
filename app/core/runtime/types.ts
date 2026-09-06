@@ -147,16 +147,19 @@ export type StepDecision =
       type: "call_tools";
       thought: string;
       toolCalls: ToolCallItem[];
+      usage?: TokenUsage;
     }
   | {
       type: "finish";
       thought: string;
       finalAnswer: string;
+      usage?: TokenUsage;
     }
   | {
       type: "ask_user";
       thought: string;
       question: string;
+      usage?: TokenUsage;
     };
 
 export interface AgentCore {

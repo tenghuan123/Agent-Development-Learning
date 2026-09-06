@@ -84,6 +84,14 @@ export function Header({
       color: "text-cyan-300",
       badge: "Pi 架构",
     },
+    {
+      path: "/lessons/v13-event-driven",
+      tag: "V13",
+      title: "第 14 课: Agent 为什么必须是 Event-Driven？",
+      icon: Network,
+      color: "text-indigo-400",
+      badge: "Pi 观察平面",
+    },
   ];
 
   const semester1Lessons = [

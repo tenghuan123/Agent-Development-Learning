@@ -324,6 +324,7 @@ export class AgentRuntime {
           runId,
           stepNumber,
           thought: decision.thought,
+          usage: decision.usage,
           timestamp: Date.now(),
         });
 

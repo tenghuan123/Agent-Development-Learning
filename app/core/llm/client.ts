@@ -195,9 +195,18 @@ export class LLMClient {
       toolCalls,
       usage: completion.usage
         ? {
-            promptTokens: completion.usage.prompt_tokens,
-            completionTokens: completion.usage.completion_tokens,
-            totalTokens: completion.usage.total_tokens,
+            promptTokens:
+              (completion.usage as any).prompt_tokens ??
+              (completion.usage as any).promptTokens ??
+              0,
+            completionTokens:
+              (completion.usage as any).completion_tokens ??
+              (completion.usage as any).completionTokens ??
+              0,
+            totalTokens:
+              (completion.usage as any).total_tokens ??
+              (completion.usage as any).totalTokens ??
+              0,
           }
         : undefined,
       latencyMs,

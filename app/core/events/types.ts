@@ -1,4 +1,4 @@
-import type { ChatMessage, TokenUsage } from "../llm/types";
+import type { TokenUsage } from "../llm/types";
 
 // ==========================================
 // 1. 工业级强类型 AgentEvent (带序时与因果追踪)

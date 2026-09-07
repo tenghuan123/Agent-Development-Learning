@@ -1,8 +1,7 @@
 import { TypedEventBus } from "./event-bus";
 import { ConsoleTracerObserver } from "./observers/console-tracer";
 import { TelemetryObserver } from "./observers/telemetry-observer";
-import { EventStoreObserver } from "./observers/event-store";
-import { generateId, type AgentEvent } from "./types";
+import { generateId } from "./types";
 
 export type ChaosScenarioType =
   | "fault_contagion"
@@ -223,7 +222,7 @@ export class ChaosExperimentRunner {
       id: "slow-audit-observer",
       name: "Slow Remote Audit Observer",
       enabled: true,
-      onEvent: async (event) => {
+      onEvent: async () => {
         // 观察者自身很慢，但主循环使用 emitSync 分发或并发解耦
         await new Promise((r) => setTimeout(r, 150));
       },

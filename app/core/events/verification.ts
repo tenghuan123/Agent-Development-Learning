@@ -2,7 +2,7 @@ import { TypedEventBus } from "./event-bus";
 import { ConsoleTracerObserver } from "./observers/console-tracer";
 import { TelemetryObserver } from "./observers/telemetry-observer";
 import { EventStoreObserver } from "./observers/event-store";
-import { generateId, type AgentEvent } from "./types";
+import { generateId } from "./types";
 
 export interface VerificationTestResult {
   id: string;
@@ -131,7 +131,7 @@ export class EventDrivenVerificationSuite {
     });
 
     // 发射事件
-    let runtimeSurvived = false;
+    let runtimeSurvived: boolean;
     try {
       await bus.emit({ type: "run:start", runId, inputPrompt: "故障隔离测试" });
       await bus.emit({ type: "step:start", runId, stepNumber: 1 });

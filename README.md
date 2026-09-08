@@ -28,6 +28,9 @@
 [x] V9  Durable Exec     ── 崩溃恢复、幂等性与 LangGraph / Checkpoint
 [x] V10 Eval & Tracing   ── 自动化评测基准数据集与全链路可观测性
 [x] V11 Production Agent ── 多租户公平队列、双轨令牌桶限流、预算硬顶、断路器与防篡改审计
+[x] V12 Agent Runtime    ── AgentCore、Runtime、Session 树、ToolExecutor、EventStream 五齿轮解耦 (Pi 架构篇)
+[x] V13 Event-Driven     ── 强类型事件总线、FaultBarrier 故障沙箱与 Event Sourcing 投影回放 (Pi 观察平面)
+[x] V14 Session State    ── Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256) 与时空分支树
 ```
 
 ---
@@ -47,6 +50,9 @@
 - ⚡ [第 10 课：Durable Execution 与容灾断点续跑](./docs/lessons/10-durable-execution-and-checkpointing.md)
 - 📊 [第 11 课：Agent 评测体系与全链路 Tracing](./docs/lessons/11-eval-and-tracing.md)
 - 🚀 [第 12 课：Production Agent 生产级落地](./docs/lessons/12-production-agent.md)
+- ⚡ [第 13 课：Agent Loop vs Coding Agent Runtime (Pi 架构篇)](./docs/lessons/13-agent-loop-vs-runtime.md)
+- 🌐 [第 14 课：Agent 为什么必须是 Event-Driven？(Pi 观察平面)](./docs/lessons/14-event-driven-architecture.md)
+- 🪐 [第 15 课：Session 为什么不是 Messages？(Pi 时空架构)](./docs/lessons/15-session-vs-messages.md)
 
 ## 🚀 快速启动
 

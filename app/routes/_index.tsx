@@ -20,6 +20,7 @@ import {
   Flame,
   Server,
   Zap,
+  FolderTree,
 } from "lucide-react";
 
 export async function loader() {
@@ -110,8 +111,8 @@ export default function CourseIndex() {
       icon: Network,
       color: "from-indigo-600 to-purple-600",
       borderColor: "border-indigo-500/50",
-      status: "current",
-      statusText: "⚡ 最新首发",
+      status: "completed",
+      statusText: "已完成",
       badge: "Pi 观察平面",
       highlights: [
         "混沌对照实验机：异常穿透灾难、慢速 I/O 拖死推理与动态热插拔对比",
@@ -119,6 +120,25 @@ export default function CourseIndex() {
         "时间旅行回放器：纯粹基于事件流 100% 确定性复原任意历史时刻状态",
       ],
       docPath: "docs/lessons/14-event-driven-architecture.md",
+    },
+    {
+      version: "V14",
+      number: "第 15 课",
+      title: "Session 为什么不是 Messages？(Pi 时空架构)",
+      desc: "解构 Coding Agent 的时空实体与真理来源：深入剖析 Message History ≠ Session ≠ Runtime State，攻克幽灵状态灾难、上下文压缩真相丢失与非线性分支树推演。",
+      path: "/lessons/v14-session-management",
+      icon: FolderTree,
+      color: "from-emerald-600 to-teal-600",
+      borderColor: "border-emerald-500/50",
+      status: "current",
+      statusText: "⚡ 最新首发",
+      badge: "Pi 时空架构",
+      highlights: [
+        "时空倾斜破坏台：幽灵状态崩溃、上下文压缩真相抹杀与非线性分支推演",
+        "三层状态机矩阵：Session 聚合根、物理工作区快照指纹 (SHA-256) 与原子 Checkpoint",
+        "对标 Pi (wayfind/pi-mono) 磁盘分层、只追加 events.jsonl 与因果分支规范",
+      ],
+      docPath: "docs/lessons/15-session-vs-messages.md",
     },
   ];
 

@@ -21,6 +21,7 @@ import {
   Flame,
   Server,
   Zap,
+  FolderTree,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -91,6 +92,14 @@ export function Header({
       icon: Network,
       color: "text-indigo-400",
       badge: "Pi 观察平面",
+    },
+    {
+      path: "/lessons/v14-session-management",
+      tag: "V14",
+      title: "第 15 课: Session 为什么不是 Messages？",
+      icon: FolderTree,
+      color: "text-emerald-400",
+      badge: "Pi 时空架构",
     },
   ];
 

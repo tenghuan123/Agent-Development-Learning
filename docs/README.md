@@ -19,6 +19,7 @@
 | **V8** | [第 09 课](./lessons/09-mcp-standard-and-plugin-architecture.md) | **MCP (Model Context Protocol) 标准协议** | ✅ 已完成 | MCP Client/Server 解耦、JSON-RPC 2.0 帧级抓包、手写 Mini Code Server |
 | **V9** | [第 10 课](./lessons/10-durable-execution-and-checkpointing.md) | **Durable Execution 与状态恢复** | ✅ 已完成 | 有向状态图 (StateGraph)、原子 WAL Checkpointing、时间旅行调试与分支推演 |
 | **V10** | [第 11 课](./lessons/11-eval-and-tracing.md) | **Agent 评测体系与全链路 Tracing** | ✅ 已完成 | OpenTelemetry 树状调用栈、火焰图瀑布流、三层评测金字塔、Benchmark 基准套件与 A/B 竞技场 |
-| **V11** | [第 12 课](./lessons/12-production-agent.md) | **Production Agent 生产级落地** | 🎓 第一学期结课 | 多租户公平队列、双轨令牌桶限流 (RPM/TPM)、预算硬顶、三态断路器与密码学哈希账本 |
-| **V12** | [第 13 课](./lessons/13-agent-loop-vs-runtime.md) | **Agent Loop vs Coding Agent Runtime (Pi 架构篇)** | ⚡ 第二学期新启 | AgentCore、Runtime、Session 树、ToolExecutor、EventStream 五齿轮解耦，抗击中途插话与 Abort 级联 |
+| **V12** | [第 13 课](./lessons/13-agent-loop-vs-runtime.md) | **Agent Loop vs Coding Agent Runtime (Pi 架构篇)** | ✅ 已完成 | AgentCore、Runtime、Session 树、ToolExecutor、EventStream 五齿轮解耦，抗击中途插话与 Abort 级联 |
+| **V13** | [第 14 课](./lessons/14-event-driven-architecture.md) | **Agent 为什么必须是 Event-Driven？(Pi 观察平面)** | ✅ 已完成 | 单向强类型事件总线、FaultBarrier 故障隔离、Event Sourcing 投影回放与多端无感观察 |
+| **V14** | [第 15 课](./lessons/15-session-vs-messages.md) | **Session 为什么不是 Messages？(Pi 时空架构)** | ⚡ 最新完成 | Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256)、幽灵状态阻断与非线性分支树 |
 

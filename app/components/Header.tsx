@@ -23,6 +23,7 @@ import {
   Zap,
   FolderTree,
   GitFork,
+  Sliders,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -109,6 +110,14 @@ export function Header({
       icon: GitFork,
       color: "text-amber-400",
       badge: "Pi 分支推演",
+    },
+    {
+      path: "/lessons/v16-context-compaction",
+      tag: "V16",
+      title: "第 17 课: Context Compaction 为什么不是“总结聊天记录”？",
+      icon: Sliders,
+      color: "text-teal-400",
+      badge: "Pi 预算治理",
     },
   ];
 

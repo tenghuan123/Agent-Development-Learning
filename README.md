@@ -32,6 +32,7 @@
 [x] V13 Event-Driven     ── 强类型事件总线、FaultBarrier 故障沙箱与 Event Sourcing 投影回放 (Pi 观察平面)
 [x] V14 Session State    ── Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256) 与时空分支树
 [x] V15 Branch & DAG     ── 为什么 Coding Agent 需要 Branch？8 步 Auth 重构走错实测、三大方案定量对比、Cherry-pick 资产拣选与时空穿梭 (Pi 分支推演架构)
+[x] V16 Compaction       ── Context Compaction 为什么不是“总结聊天记录”？6 层预算治理矩阵、负向避坑黑名单、符号位级保真与只追加冷事件归档 (Pi 预算治理篇)
 ```
 
 ---
@@ -55,6 +56,7 @@
 - 🌐 [第 14 课：Agent 为什么必须是 Event-Driven？(Pi 观察平面)](./docs/lessons/14-event-driven-architecture.md)
 - 🪐 [第 15 课：Session 为什么不是 Messages？(Pi 时空架构)](./docs/lessons/15-session-vs-messages.md)
 - 🌿 [第 16 课：为什么 Coding Agent 需要 Branch？(Pi 分支推演架构)](./docs/lessons/16-branching-and-time-travel.md)
+- 📦 [第 17 课：Context Compaction 为什么不是“总结聊天记录”？(Pi 预算治理篇)](./docs/lessons/17-context-compaction.md)
 
 ## 🚀 快速启动
 

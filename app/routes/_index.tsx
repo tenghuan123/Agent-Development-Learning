@@ -22,6 +22,7 @@ import {
   Zap,
   FolderTree,
   GitFork,
+  Sliders,
 } from "lucide-react";
 
 export async function loader() {
@@ -150,8 +151,8 @@ export default function CourseIndex() {
       icon: GitFork,
       color: "from-amber-600 to-emerald-600",
       borderColor: "border-amber-500/50",
-      status: "current",
-      statusText: "⚡ 最新首发",
+      status: "completed",
+      statusText: "已完成",
       badge: "Pi 分支推演",
       highlights: [
         "三大方案竞技场：推倒重来 vs 破坏性快照回滚 vs Session Branching 定量实测",
@@ -159,6 +160,25 @@ export default function CourseIndex() {
         "跨分支资产拣选室 (Cherry-pick Studio)：提取已废弃分支的宝贵模块合入目标主线",
       ],
       docPath: "docs/lessons/16-branching-and-time-travel.md",
+    },
+    {
+      version: "V16",
+      number: "第 17 课",
+      title: "Context Compaction 为什么不是“总结聊天记录”？(Pi 预算治理)",
+      desc: "破除聊天机器人的粗暴总结迷信：解构 6 层分层上下文预算矩阵、负向避坑黑名单 (Negative Constraints)、符号位级保真与只追加冷事件归档，实现 Token 节约 74% 与 100% 任务交付率。",
+      path: "/lessons/v16-context-compaction",
+      icon: Sliders,
+      color: "from-teal-600 to-emerald-600",
+      borderColor: "border-teal-500/50",
+      status: "current",
+      statusText: "⚡ 最新首发",
+      badge: "Pi 预算治理",
+      highlights: [
+        "三大压缩对抗竞技场：无压缩 (爆窗) vs 普通总结 (重踩死锁) vs 结构化预算治理定量实测",
+        "上下文预算治理矩阵：固定基石、活动代码契约、避坑黑名单与高保真执行窗口动态切片",
+        "Pi 只追加 events.jsonl 与瞬态投影架构：冷事件穿透检索与四大领域守恒律严苛验证",
+      ],
+      docPath: "docs/lessons/17-context-compaction.md",
     },
   ];
 

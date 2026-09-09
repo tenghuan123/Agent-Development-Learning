@@ -21,5 +21,6 @@
 | **V10** | [第 11 课](./lessons/11-eval-and-tracing.md) | **Agent 评测体系与全链路 Tracing** | ✅ 已完成 | OpenTelemetry 树状调用栈、火焰图瀑布流、三层评测金字塔、Benchmark 基准套件与 A/B 竞技场 |
 | **V12** | [第 13 课](./lessons/13-agent-loop-vs-runtime.md) | **Agent Loop vs Coding Agent Runtime (Pi 架构篇)** | ✅ 已完成 | AgentCore、Runtime、Session 树、ToolExecutor、EventStream 五齿轮解耦，抗击中途插话与 Abort 级联 |
 | **V13** | [第 14 课](./lessons/14-event-driven-architecture.md) | **Agent 为什么必须是 Event-Driven？(Pi 观察平面)** | ✅ 已完成 | 单向强类型事件总线、FaultBarrier 故障隔离、Event Sourcing 投影回放与多端无感观察 |
-| **V14** | [第 15 课](./lessons/15-session-vs-messages.md) | **Session 为什么不是 Messages？(Pi 时空架构)** | ⚡ 最新完成 | Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256)、幽灵状态阻断与非线性分支树 |
+| **V14** | [第 15 课](./lessons/15-session-vs-messages.md) | **Session 为什么不是 Messages？(Pi 时空架构)** | ✅ 已完成 | Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256)、幽灵状态阻断与非线性分支树 |
+| **V15** | [第 16 课](./lessons/16-branching-and-time-travel.md) | **为什么 Coding Agent 需要 Branch？(Pi 分支推演架构)** | ⚡ 最新完成 | 8 步 Auth 重构走错实测、三大方案定量对比（推倒重来 vs 破坏性回滚 vs DAG 分支）、Cherry-pick 资产拣选与毫秒级时空旅行 |
 

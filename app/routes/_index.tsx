@@ -21,6 +21,7 @@ import {
   Server,
   Zap,
   FolderTree,
+  GitFork,
 } from "lucide-react";
 
 export async function loader() {
@@ -130,8 +131,8 @@ export default function CourseIndex() {
       icon: FolderTree,
       color: "from-emerald-600 to-teal-600",
       borderColor: "border-emerald-500/50",
-      status: "current",
-      statusText: "⚡ 最新首发",
+      status: "completed",
+      statusText: "已完成",
       badge: "Pi 时空架构",
       highlights: [
         "时空倾斜破坏台：幽灵状态崩溃、上下文压缩真相抹杀与非线性分支推演",
@@ -139,6 +140,25 @@ export default function CourseIndex() {
         "对标 Pi (wayfind/pi-mono) 磁盘分层、只追加 events.jsonl 与因果分支规范",
       ],
       docPath: "docs/lessons/15-session-vs-messages.md",
+    },
+    {
+      version: "V15",
+      number: "第 16 课",
+      title: "为什么 Coding Agent 需要 Branch？(Pi 分支推演架构)",
+      desc: "打破单向线性时间轴：当 Agent 做到一半发现方向走错，如何通过 Session Branch DAG 实现无损分叉、任意时空穿梭、资产自由拣选（Cherry-pick）与假说并行推演。",
+      path: "/lessons/v15-branching-and-time-travel",
+      icon: GitFork,
+      color: "from-amber-600 to-emerald-600",
+      borderColor: "border-amber-500/50",
+      status: "current",
+      statusText: "⚡ 最新首发",
+      badge: "Pi 分支推演",
+      highlights: [
+        "三大方案竞技场：推倒重来 vs 破坏性快照回滚 vs Session Branching 定量实测",
+        "DAG 拓扑树与时空旅行：毫秒级在任意节点之间自由穿梭，工作区位级保真",
+        "跨分支资产拣选室 (Cherry-pick Studio)：提取已废弃分支的宝贵模块合入目标主线",
+      ],
+      docPath: "docs/lessons/16-branching-and-time-travel.md",
     },
   ];
 

@@ -22,6 +22,7 @@ import {
   Server,
   Zap,
   FolderTree,
+  GitFork,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -100,6 +101,14 @@ export function Header({
       icon: FolderTree,
       color: "text-emerald-400",
       badge: "Pi 时空架构",
+    },
+    {
+      path: "/lessons/v15-branching-and-time-travel",
+      tag: "V15",
+      title: "第 16 课: 为什么 Coding Agent 需要 Branch？",
+      icon: GitFork,
+      color: "text-amber-400",
+      badge: "Pi 分支推演",
     },
   ];
 

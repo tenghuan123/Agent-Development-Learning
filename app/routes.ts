@@ -22,6 +22,7 @@ export default [
   route("lessons/v14-session-management", "routes/lessons.v14.tsx"),
   route("lessons/v15-branching-and-time-travel", "routes/lessons.v15.tsx"),
   route("lessons/v16-context-compaction", "routes/lessons.v16.tsx"),
+  route("lessons/v17-extensions-and-skills", "routes/lessons.v17.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),
@@ -42,6 +43,7 @@ export default [
   route("api/session", "routes/api.session.ts"),
   route("api/branch", "routes/api.branch.ts"),
   route("api/compaction", "routes/api.compaction.ts"),
+  route("api/extensions", "routes/api.extensions.ts"),
   route("api/experiment", "routes/api.experiment.ts"),
   route("api/sandbox", "routes/api.sandbox.ts"),
   route("api/config", "routes/api.config.ts"),

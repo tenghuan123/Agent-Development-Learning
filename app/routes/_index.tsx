@@ -23,6 +23,7 @@ import {
   FolderTree,
   GitFork,
   Sliders,
+  Award,
 } from "lucide-react";
 
 export async function loader() {
@@ -170,8 +171,8 @@ export default function CourseIndex() {
       icon: Sliders,
       color: "from-teal-600 to-emerald-600",
       borderColor: "border-teal-500/50",
-      status: "current",
-      statusText: "⚡ 最新首发",
+      status: "completed",
+      statusText: "已完成",
       badge: "Pi 预算治理",
       highlights: [
         "三大压缩对抗竞技场：无压缩 (爆窗) vs 普通总结 (重踩死锁) vs 结构化预算治理定量实测",
@@ -179,6 +180,25 @@ export default function CourseIndex() {
         "Pi 只追加 events.jsonl 与瞬态投影架构：冷事件穿透检索与四大领域守恒律严苛验证",
       ],
       docPath: "docs/lessons/17-context-compaction.md",
+    },
+    {
+      version: "V17",
+      number: "第 18 课",
+      title: "为什么成熟 Agent 绝不应该修改 Core？(Pi 扩展架构 & 毕业收官)",
+      desc: "彻底解放 Core：Pi 微内核坚守 4 个最纯粹原语（read/write/edit/bash），通过 TypeScript Extensions & Skills 与 Fault Barrier 沙箱解耦私有业务、安全阻断与企业 PRD/ADR 上下文。",
+      path: "/lessons/v17-extensions-and-skills",
+      icon: Award,
+      color: "from-rose-600 to-indigo-600",
+      borderColor: "border-rose-500/50",
+      status: "current",
+      statusText: "⚡ 毕业收官大典",
+      badge: "Pi 单元毕业",
+      highlights: [
+        "双轨混沌竞技场：直接污染 Core (进程崩溃/工作区损坏) vs 微内核沙箱扩展 100% 隔离对比",
+        "生命周期拦截网：beforeToolCall 物理阻断高危指令、afterToolCall 自动提炼截断 Token 洪水",
+        "Pi 框架全景能力雷达：串联 V12~V17 六大核心支柱，颁发 Coding Agent 架构师全贯通认证",
+      ],
+      docPath: "docs/lessons/18-why-mature-agent-never-modify-core.md",
     },
   ];
 

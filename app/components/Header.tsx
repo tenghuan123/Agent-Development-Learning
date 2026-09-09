@@ -24,6 +24,7 @@ import {
   FolderTree,
   GitFork,
   Sliders,
+  Boxes,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -118,6 +119,14 @@ export function Header({
       icon: Sliders,
       color: "text-teal-400",
       badge: "Pi 预算治理",
+    },
+    {
+      path: "/lessons/v17-extensions-and-skills",
+      tag: "V17",
+      title: "第 18 课: 为什么成熟 Agent 绝不应该修改 Core？(Pi 扩展架构)",
+      icon: Boxes,
+      color: "text-rose-400",
+      badge: "Pi 单元毕业",
     },
   ];
 

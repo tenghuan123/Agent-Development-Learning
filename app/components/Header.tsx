@@ -137,6 +137,14 @@ export function Header({
       color: "text-amber-400",
       badge: "LangGraph 篇开篇",
     },
+    {
+      path: "/lessons/v19-state-graph",
+      tag: "V19",
+      title: "第 20 课: Graph 是什么？—— 从零手写 StateGraph",
+      icon: Network,
+      color: "text-indigo-400",
+      badge: "LangGraph 工业级",
+    },
   ];
 
   const semester1Lessons = [

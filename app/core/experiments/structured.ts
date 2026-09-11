@@ -16,11 +16,27 @@ export interface StructuredExperimentResult {
   runPromptOnly: {
     rawOutput: string;
     parsedDirectly: boolean;
+    parseSuccess: boolean;
     parseError?: string;
     latencyMs: number;
   };
   runStructuredZod: {
     data?: PackageAnalysis;
+    validatedData?: PackageAnalysis;
+    rawOutput: string;
+    isValidated: boolean;
+    latencyMs: number;
+  };
+  promptOnly: {
+    rawOutput: string;
+    parsedDirectly: boolean;
+    parseSuccess: boolean;
+    parseError?: string;
+    latencyMs: number;
+  };
+  zodSchema: {
+    data?: PackageAnalysis;
+    validatedData?: PackageAnalysis;
     rawOutput: string;
     isValidated: boolean;
     latencyMs: number;
@@ -99,20 +115,28 @@ export async function runStructuredExperiment(
     schema: PackageAnalysisSchema,
   });
 
+  const promptOnly = {
+    rawOutput: responseA.content,
+    parsedDirectly,
+    parseSuccess: parsedDirectly,
+    parseError,
+    latencyMs: responseA.latencyMs,
+  };
+
+  const zodSchema = {
+    data: responseB.data,
+    validatedData: responseB.data,
+    rawOutput: responseB.raw,
+    isValidated: true,
+    latencyMs: responseB.latencyMs,
+  };
+
   return {
     samplePackageJson,
-    runPromptOnly: {
-      rawOutput: responseA.content,
-      parsedDirectly,
-      parseError,
-      latencyMs: responseA.latencyMs,
-    },
-    runStructuredZod: {
-      data: responseB.data,
-      rawOutput: responseB.raw,
-      isValidated: true,
-      latencyMs: responseB.latencyMs,
-    },
+    runPromptOnly: promptOnly,
+    runStructuredZod: zodSchema,
+    promptOnly,
+    zodSchema,
     keyTakeaway:
       "【核心认知】Prompt 自然语言指令是‘尽力而为’的软约束，经常夹带 markdown 语法、代码块或前言，无法直接用作可靠的系统接口；而基于 JSON Schema / Zod 的 Structured Output 提供类型契约保证，是 Agent 走向工程化稳定运行的基石。",
   };

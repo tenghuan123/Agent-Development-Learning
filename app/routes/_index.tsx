@@ -210,8 +210,8 @@ export default function CourseIndex() {
       icon: GitBranch,
       color: "from-amber-600 to-rose-600",
       borderColor: "border-amber-500/50",
-      status: "current",
-      statusText: "⚡ 最新开启",
+      status: "completed",
+      statusText: "已完成",
       badge: "LangGraph 篇开篇",
       highlights: [
         "7 步真实工程工作流：分析 → 方案 → 修改 → 测试 → Review → 重试 → 人机审批",
@@ -219,6 +219,25 @@ export default function CourseIndex() {
         "5 重工程混沌事故对照机与 4 大控制流守恒律形式化验证套件",
       ],
       docPath: "docs/lessons/19-when-while-loop-breaks-down.md",
+    },
+    {
+      version: "V19",
+      number: "第 20 课",
+      title: "Graph 是什么？—— 从零手写 StateGraph、Node、Edge 与 ConditionalEdge",
+      desc: "跨越命令式 While Loop 鸿沟：手写纯 TypeScript 的 StateGraph 泛型引擎与编译期拓扑检查器，掌握状态图四大核心原语，打响 Loop vs Graph 架构决策竞技场。",
+      path: "/lessons/v19-state-graph",
+      icon: Network,
+      color: "from-indigo-600 to-purple-600",
+      borderColor: "border-indigo-500/50",
+      status: "current",
+      statusText: "⚡ 最新开启",
+      badge: "LangGraph 工业级",
+      highlights: [
+        "状态图四大原语：State、Node 纯算子、Edge 与 ConditionalEdge 动态路由",
+        "拓扑编译器沙箱：在编译期 100% 静态拦截悬空边、孤立死节点与入口缺失缺陷",
+        "Loop vs Graph 架构决策竞技场：6 大工业级真实场景深度判定与权威准则",
+      ],
+      docPath: "docs/lessons/20-what-is-graph.md",
     },
   ];
 
@@ -481,28 +500,28 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v12-agent-runtime"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-cyan-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v19-state-graph"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-indigo-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Zap className="w-4 h-4 text-amber-300" />
-                <span>进入第 13 课：Agent Loop vs Coding Agent Runtime (Pi 架构)</span>
+                <Network className="w-4 h-4 text-cyan-300" />
+                <span>进入第 20 课：Graph 是什么？—— 从零手写 StateGraph (LangGraph 篇)</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
               <Link
-                to="/lessons/v11-production-agent"
+                to="/lessons/v18-while-loop-collapse"
                 className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
               >
-                <Server className="w-4 h-4 text-emerald-400" />
-                <span>第 12 课：Production Agent 结课压轴</span>
+                <GitBranch className="w-4 h-4 text-amber-400" />
+                <span>第 19 课：While Loop 何时失控</span>
               </Link>
 
               <Link
-                to="/lessons/v10-eval-tracing"
+                to="/lessons/v17-extensions-and-skills"
                 className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
               >
-                <Flame className="w-4 h-4 text-cyan-400" />
-                <span>第 11 课：Eval & Tracing</span>
+                <Award className="w-4 h-4 text-rose-400" />
+                <span>第 18 课：Pi 扩展架构收官</span>
               </Link>
             </div>
           </div>

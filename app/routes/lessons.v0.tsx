@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLoaderData, Link } from "react-router";
 import type { ChatMessage, TokenUsage } from "~/core/llm/types";
+import type { StatelessExperimentResult } from "~/core/experiments/stateless";
+import type { StructuredExperimentResult } from "~/core/experiments/structured";
 import { Header } from "~/components/Header";
 import {
   Terminal,
@@ -87,11 +89,13 @@ export default function Lesson0Page() {
   const [expName, setExpName] = useState("小明");
   const [expLanguage, setExpLanguage] = useState("TypeScript");
   const [statelessLoading, setStatelessLoading] = useState(false);
-  const [statelessResult, setStatelessResult] = useState<any>(null);
+  const [statelessResult, setStatelessResult] =
+    useState<StatelessExperimentResult | null>(null);
 
   // Structured Output Experiment State
   const [structuredLoading, setStructuredLoading] = useState(false);
-  const [structuredResult, setStructuredResult] = useState<any>(null);
+  const [structuredResult, setStructuredResult] =
+    useState<StructuredExperimentResult | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -653,7 +657,9 @@ export default function Lesson0Page() {
                       <div className="p-3 bg-black/40 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300 max-h-32 overflow-y-auto">
                         <pre>
                           {JSON.stringify(
-                            statelessResult.withoutHistory.sentMessages,
+                            statelessResult?.withoutHistory?.sentMessages ??
+                              statelessResult?.runA?.sentMessages ??
+                              [],
                             null,
                             2
                           )}
@@ -666,7 +672,9 @@ export default function Lesson0Page() {
                         大模型返回回答:
                       </div>
                       <div className="p-3 bg-black/40 rounded-lg border border-red-500/20 text-xs text-red-200 leading-relaxed font-sans">
-                        {statelessResult.withoutHistory.response}
+                        {statelessResult?.withoutHistory?.response ??
+                          statelessResult?.runA?.response ??
+                          ""}
                       </div>
                     </div>
 
@@ -696,7 +704,9 @@ export default function Lesson0Page() {
                       <div className="p-3 bg-black/40 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300 max-h-32 overflow-y-auto">
                         <pre>
                           {JSON.stringify(
-                            statelessResult.withHistory.sentMessages,
+                            statelessResult?.withHistory?.sentMessages ??
+                              statelessResult?.runB?.sentMessages ??
+                              [],
                             null,
                             2
                           )}
@@ -709,7 +719,9 @@ export default function Lesson0Page() {
                         大模型返回回答:
                       </div>
                       <div className="p-3 bg-black/40 rounded-lg border border-emerald-500/20 text-xs text-emerald-200 leading-relaxed font-sans">
-                        {statelessResult.withHistory.response}
+                        {statelessResult?.withHistory?.response ??
+                          statelessResult?.runB?.response ??
+                          ""}
                       </div>
                     </div>
 
@@ -786,13 +798,17 @@ export default function Lesson0Page() {
                       </div>
                       <span
                         className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                          structuredResult.promptOnly.parseSuccess
+                          (structuredResult?.promptOnly?.parseSuccess ??
+                            structuredResult?.runPromptOnly?.parseSuccess ??
+                            structuredResult?.runPromptOnly?.parsedDirectly)
                             ? "bg-emerald-500/20 text-emerald-300"
                             : "bg-red-500/20 text-red-300"
                         }`}
                       >
                         JSON.parse:{" "}
-                        {structuredResult.promptOnly.parseSuccess
+                        {(structuredResult?.promptOnly?.parseSuccess ??
+                          structuredResult?.runPromptOnly?.parseSuccess ??
+                          structuredResult?.runPromptOnly?.parsedDirectly)
                           ? "成功"
                           : "失败"}
                       </span>
@@ -803,7 +819,9 @@ export default function Lesson0Page() {
                         大模型返回的原始输出 (Raw Output):
                       </div>
                       <div className="p-3 bg-black/40 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300 max-h-48 overflow-y-auto whitespace-pre-wrap">
-                        {structuredResult.promptOnly.rawOutput}
+                        {structuredResult?.promptOnly?.rawOutput ??
+                          structuredResult?.runPromptOnly?.rawOutput ??
+                          ""}
                       </div>
                     </div>
 
@@ -833,7 +851,11 @@ export default function Lesson0Page() {
                       <div className="p-3 bg-black/40 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-300 max-h-48 overflow-y-auto">
                         <pre>
                           {JSON.stringify(
-                            structuredResult.zodSchema.validatedData,
+                            structuredResult?.zodSchema?.validatedData ??
+                              structuredResult?.zodSchema?.data ??
+                              structuredResult?.runStructuredZod?.validatedData ??
+                              structuredResult?.runStructuredZod?.data ??
+                              null,
                             null,
                             2
                           )}

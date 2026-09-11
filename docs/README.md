@@ -23,5 +23,7 @@
 | **V13** | [第 14 课](./lessons/14-event-driven-architecture.md) | **Agent 为什么必须是 Event-Driven？(Pi 观察平面)** | ✅ 已完成 | 单向强类型事件总线、FaultBarrier 故障隔离、Event Sourcing 投影回放与多端无感观察 |
 | **V14** | [第 15 课](./lessons/15-session-vs-messages.md) | **Session 为什么不是 Messages？(Pi 时空架构)** | ✅ 已完成 | Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256)、幽灵状态阻断与非线性分支树 |
 | **V15** | [第 16 课](./lessons/16-branching-and-time-travel.md) | **为什么 Coding Agent 需要 Branch？(Pi 分支推演架构)** | ✅ 已完成 | 8 步 Auth 重构走错实测、三大方案定量对比（推倒重来 vs 破坏性回滚 vs DAG 分支）、Cherry-pick 资产拣选与毫秒级时空旅行 |
-| **V16** | [第 17 课](./lessons/17-context-compaction.md) | **Context Compaction 为什么不是“总结聊天记录”？** | ⚡ 最新完成 | 6 层预算治理矩阵、负向避坑黑名单、活动代码符号契约保真、Pi 只追加 events.jsonl 冷事件穿透检索 |
+| **V16** | [第 17 课](./lessons/17-context-compaction.md) | **Context Compaction 为什么不是“总结聊天记录”？** | ✅ 已完成 | 6 层预算治理矩阵、负向避坑黑名单、活动代码符号契约保真、Pi 只追加 events.jsonl 冷事件穿透检索 |
+| **V17** | [第 18 课](./lessons/18-why-mature-agent-never-modify-core.md) | **为什么成熟 Agent 绝不应该修改 Core？(Pi 扩展篇)** | ✅ 已毕业 | 4 原语微内核纯洁律、TypeScript Extensions & Skills、Fault Barrier 沙箱隔离与四大守恒律 |
+| **V18** | [第 19 课](./lessons/19-when-while-loop-breaks-down.md) | **什么时候 while loop 开始失控？(LangGraph 显式工作流篇)** | ⚡ 最新开启 | 隐式控制流坍塌、14 个布尔标志位空间爆炸、McCabe 圈复杂度红线、Pre-Graph 状态转移与原子挂起重入 |
 

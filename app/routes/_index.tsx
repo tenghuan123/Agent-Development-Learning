@@ -24,6 +24,7 @@ import {
   GitFork,
   Sliders,
   Award,
+  GitBranch,
 } from "lucide-react";
 
 export async function loader() {
@@ -190,8 +191,8 @@ export default function CourseIndex() {
       icon: Award,
       color: "from-rose-600 to-indigo-600",
       borderColor: "border-rose-500/50",
-      status: "current",
-      statusText: "⚡ 毕业收官大典",
+      status: "completed",
+      statusText: "已毕业",
       badge: "Pi 单元毕业",
       highlights: [
         "双轨混沌竞技场：直接污染 Core (进程崩溃/工作区损坏) vs 微内核沙箱扩展 100% 隔离对比",
@@ -199,6 +200,25 @@ export default function CourseIndex() {
         "Pi 框架全景能力雷达：串联 V12~V17 六大核心支柱，颁发 Coding Agent 架构师全贯通认证",
       ],
       docPath: "docs/lessons/18-why-mature-agent-never-modify-core.md",
+    },
+    {
+      version: "V18",
+      number: "第 19 课",
+      title: "什么时候 while loop 开始失控？(LangGraph 显式工作流开篇)",
+      desc: "探究单体 While-Loop 隐式控制流在复杂工程研发中的必然坍塌：14 个松散状态位空间爆炸、圈复杂度（McCabe）飙升红线、标志位遗漏死锁空转，以及人机审批挂起的持久化绝境。",
+      path: "/lessons/v18-while-loop-collapse",
+      icon: GitBranch,
+      color: "from-amber-600 to-rose-600",
+      borderColor: "border-amber-500/50",
+      status: "current",
+      statusText: "⚡ 最新开启",
+      badge: "LangGraph 篇开篇",
+      highlights: [
+        "7 步真实工程工作流：分析 → 方案 → 修改 → 测试 → Review → 重试 → 人机审批",
+        "双轨推演台：14 个布尔标志位指示器、McCabe 圈复杂度仪表盘与 Pre-Graph 节点拓扑",
+        "5 重工程混沌事故对照机与 4 大控制流守恒律形式化验证套件",
+      ],
+      docPath: "docs/lessons/19-when-while-loop-breaks-down.md",
     },
   ];
 

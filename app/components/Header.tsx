@@ -25,6 +25,7 @@ import {
   GitFork,
   Sliders,
   Boxes,
+  GitBranch,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -127,6 +128,14 @@ export function Header({
       icon: Boxes,
       color: "text-rose-400",
       badge: "Pi 单元毕业",
+    },
+    {
+      path: "/lessons/v18-while-loop-collapse",
+      tag: "V18",
+      title: "第 19 课: 什么时候 while loop 开始失控？(LangGraph 篇)",
+      icon: GitBranch,
+      color: "text-amber-400",
+      badge: "LangGraph 篇开篇",
     },
   ];
 

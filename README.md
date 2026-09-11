@@ -33,6 +33,8 @@
 [x] V14 Session State    ── Message History ≠ Session ≠ Runtime State、物理工作区快照指纹 (SHA-256) 与时空分支树
 [x] V15 Branch & DAG     ── 为什么 Coding Agent 需要 Branch？8 步 Auth 重构走错实测、三大方案定量对比、Cherry-pick 资产拣选与时空穿梭 (Pi 分支推演架构)
 [x] V16 Compaction       ── Context Compaction 为什么不是“总结聊天记录”？6 层预算治理矩阵、负向避坑黑名单、符号位级保真与只追加冷事件归档 (Pi 预算治理篇)
+[x] V17 Extension/Core   ── 为什么成熟 Agent 绝不应该修改 Core？4 原语微内核纯洁律、TypeScript Extensions & Skills 与沙箱隔离 (Pi 架构毕业篇)
+[x] V18 While-Loop Break ── 什么时候 while loop 开始失控？14 个布尔标志位空间爆炸、圈复杂度红线、Pre-Graph 状态转移与原子挂起 (LangGraph 篇开篇)
 ```
 
 ---
@@ -57,6 +59,8 @@
 - 🪐 [第 15 课：Session 为什么不是 Messages？(Pi 时空架构)](./docs/lessons/15-session-vs-messages.md)
 - 🌿 [第 16 课：为什么 Coding Agent 需要 Branch？(Pi 分支推演架构)](./docs/lessons/16-branching-and-time-travel.md)
 - 📦 [第 17 课：Context Compaction 为什么不是“总结聊天记录”？(Pi 预算治理篇)](./docs/lessons/17-context-compaction.md)
+- 🏆 [第 18 课：为什么成熟 Agent 绝不应该修改 Core？(Pi 扩展架构 & 毕业篇)](./docs/lessons/18-why-mature-agent-never-modify-core.md)
+- 🔀 [第 19 课：什么时候 while loop 开始失控？(LangGraph 显式工作流篇)](./docs/lessons/19-when-while-loop-breaks-down.md)
 
 ## 🚀 快速启动
 

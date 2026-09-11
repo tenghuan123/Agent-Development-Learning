@@ -25,6 +25,7 @@ import {
   Sliders,
   Award,
   GitBranch,
+  Database,
 } from "lucide-react";
 
 export async function loader() {
@@ -229,8 +230,8 @@ export default function CourseIndex() {
       icon: Network,
       color: "from-indigo-600 to-purple-600",
       borderColor: "border-indigo-500/50",
-      status: "current",
-      statusText: "⚡ 最新开启",
+      status: "completed",
+      statusText: "已完成",
       badge: "LangGraph 工业级",
       highlights: [
         "状态图四大原语：State、Node 纯算子、Edge 与 ConditionalEdge 动态路由",
@@ -238,6 +239,25 @@ export default function CourseIndex() {
         "Loop vs Graph 架构决策竞技场：6 大工业级真实场景深度判定与权威准则",
       ],
       docPath: "docs/lessons/20-what-is-graph.md",
+    },
+    {
+      version: "V20",
+      number: "第 21 课",
+      title: "Messages 为什么不能当 State？—— 会话状态与工作流状态的分离实践",
+      desc: "破除“状态即聊天记录”的初学者误区：解构 Conversation State (交互感知流) 与 Workflow State (业务事实流) 的正交双轨分离，通过 5 大核心探针与 Prompt 注入攻防验证状态确定性与安全性。",
+      path: "/lessons/v20-messages-vs-state",
+      icon: Database,
+      color: "from-purple-600 to-indigo-600",
+      borderColor: "border-purple-500/50",
+      status: "current",
+      statusText: "⚡ 最新开启",
+      badge: "LangGraph 状态架构",
+      highlights: [
+        "双轨对决竞技场：Message-Only (模糊文本扫描) vs Structured Workflow State (O(1) 确定性) 实测",
+        "状态信息熵与退化显微镜：解构注意力稀释、幽灵状态与长程任务 Token 膨胀 30 倍陷阱",
+        "安全越权攻防沙箱：消息伪造 Prompt Injection 穿透演练与密码学强签名审批凭证防御",
+      ],
+      docPath: "docs/lessons/21-messages-vs-state.md",
     },
   ];
 
@@ -500,20 +520,20 @@ export default function CourseIndex() {
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
-                to="/lessons/v19-state-graph"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-indigo-600/25 transition transform hover:-translate-y-0.5"
+                to="/lessons/v20-messages-vs-state"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-indigo-600/25 transition transform hover:-translate-y-0.5"
               >
-                <Network className="w-4 h-4 text-cyan-300" />
-                <span>进入第 20 课：Graph 是什么？—— 从零手写 StateGraph (LangGraph 篇)</span>
+                <Database className="w-4 h-4 text-cyan-300" />
+                <span>进入第 21 课：Messages 为什么不能当 State？(LangGraph 状态篇)</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
               <Link
-                to="/lessons/v18-while-loop-collapse"
+                to="/lessons/v19-state-graph"
                 className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
               >
-                <GitBranch className="w-4 h-4 text-amber-400" />
-                <span>第 19 课：While Loop 何时失控</span>
+                <Network className="w-4 h-4 text-indigo-400" />
+                <span>第 20 课：从零手写 StateGraph</span>
               </Link>
 
               <Link

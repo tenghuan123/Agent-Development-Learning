@@ -26,5 +26,6 @@
 | **V16** | [第 17 课](./lessons/17-context-compaction.md) | **Context Compaction 为什么不是“总结聊天记录”？** | ✅ 已完成 | 6 层预算治理矩阵、负向避坑黑名单、活动代码符号契约保真、Pi 只追加 events.jsonl 冷事件穿透检索 |
 | **V17** | [第 18 课](./lessons/18-why-mature-agent-never-modify-core.md) | **为什么成熟 Agent 绝不应该修改 Core？(Pi 扩展篇)** | ✅ 已毕业 | 4 原语微内核纯洁律、TypeScript Extensions & Skills、Fault Barrier 沙箱隔离与四大守恒律 |
 | **V18** | [第 19 课](./lessons/19-when-while-loop-breaks-down.md) | **什么时候 while loop 开始失控？(LangGraph 显式工作流篇)** | ✅ 已完成 | 隐式控制流坍塌、14 个布尔标志位空间爆炸、McCabe 圈复杂度红线、Pre-Graph 状态转移与原子挂起重入 |
-| **V19** | [第 20 课](./lessons/20-what-is-graph.md) | **Graph 是什么？—— 从零手写 StateGraph、Node、Edge 与 ConditionalEdge** | ⚡ 最新开启 | 状态图四大原语 (State/Node/Edge/ConditionalEdge)、编译期静态拓扑检查器 (Linter)、有界自愈环路与 Loop vs Graph 架构决策竞技场 |
+| **V19** | [第 20 课](./lessons/20-what-is-graph.md) | **Graph 是什么？—— 从零手写 StateGraph、Node、Edge 与 ConditionalEdge** | ✅ 已完成 | 状态图四大原语 (State/Node/Edge/ConditionalEdge)、编译期静态拓扑检查器 (Linter)、有界自愈环路与 Loop vs Graph 架构决策竞技场 |
+| **V20** | [第 21 课](./lessons/21-messages-vs-state.md) | **Messages 为什么不能当 State？—— 会话状态与工作流状态的分离实践** | ⚡ 最新开启 | 会话状态 vs 工作流状态正交解耦、5 大核心状态探针基准评测、状态信息熵与退化显微镜、Prompt 注入物理防御与复合状态架构 |
 

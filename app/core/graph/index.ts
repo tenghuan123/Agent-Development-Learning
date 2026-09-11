@@ -7,3 +7,4 @@ export * from "./types";
 export * from "./state-graph";
 export * from "./software-dev-graph";
 export * from "./decision-evaluator";
+export * from "./workflow-state";

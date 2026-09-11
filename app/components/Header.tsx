@@ -26,6 +26,7 @@ import {
   Sliders,
   Boxes,
   GitBranch,
+  Database,
 } from "lucide-react";
 
 export interface HeaderProps {
@@ -144,6 +145,14 @@ export function Header({
       icon: Network,
       color: "text-indigo-400",
       badge: "LangGraph 工业级",
+    },
+    {
+      path: "/lessons/v20-messages-vs-state",
+      tag: "V20",
+      title: "第 21 课: Messages 为什么不能当 State？",
+      icon: Database,
+      color: "text-purple-400",
+      badge: "LangGraph 状态架构",
     },
   ];
 

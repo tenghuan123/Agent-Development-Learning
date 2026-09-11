@@ -25,6 +25,7 @@ export default [
   route("lessons/v17-extensions-and-skills", "routes/lessons.v17.tsx"),
   route("lessons/v18-while-loop-collapse", "routes/lessons.v18.tsx"),
   route("lessons/v19-state-graph", "routes/lessons.v19.tsx"),
+  route("lessons/v20-messages-vs-state", "routes/lessons.v20.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

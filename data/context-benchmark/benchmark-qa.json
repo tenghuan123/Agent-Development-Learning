@@ -1,0 +1,54 @@
+[
+  {
+    "id": "qa-01",
+    "question": "Alpha 产品的退款期限是多少天？",
+    "category": "exact_lexical",
+    "expectedFacts": ["Alpha 享有 30 天内无条件全额申请退款"],
+    "expectedSources": ["products/alpha.md"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "qa-02",
+    "question": "我买完东西以后后悔了、不想要了，还能申请退款吗？",
+    "category": "semantic_synonym",
+    "expectedFacts": ["支持 7 天无理由退款"],
+    "expectedSources": ["docs/refund-policy.md"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "qa-03",
+    "question": "遇到错误码 ERR_ALPHA_AUTH_9021 应该如何处理？",
+    "category": "identifier_code",
+    "expectedFacts": ["SSO 令牌过期，需重新颁发授权密钥并重启 AlphaSyncDaemon"],
+    "expectedSources": ["products/alpha.md"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "qa-04",
+    "question": "如果用户已经购买了 Gamma，Alpha 和 Beta 哪个产品更适合它？为什么？",
+    "category": "multi_hop_agentic",
+    "expectedFacts": [
+      "Beta 更适合",
+      "Beta 针对 Gamma 用户提供专属免费插件 BetaGammaConnector",
+      "可实现跨代码库上下文审查"
+    ],
+    "expectedSources": ["products/beta.md", "products/gamma.md"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "qa-05",
+    "question": "根据 2026 年最新政策，常规软件的退款期限是多少天？旧政策是多少天？",
+    "category": "temporal_conflict",
+    "expectedFacts": ["2026 最新政策为 7 天", "2024 旧政策为 30 天已废弃"],
+    "expectedSources": ["docs/2026-policy.md", "docs/2024-policy.md"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "qa-06",
+    "question": "Gamma 向量数据库支持退款吗？为什么？",
+    "category": "exception_rule",
+    "expectedFacts": ["不支持退款", "因为包含实时分配的 GPU 硬件算力与按量计费存储"],
+    "expectedSources": ["products/gamma.md"],
+    "difficulty": "easy"
+  }
+]

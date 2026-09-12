@@ -27,8 +27,15 @@ export default [
   route("lessons/v19-state-graph", "routes/lessons.v19.tsx"),
   route("lessons/v20-messages-vs-state", "routes/lessons.v20.tsx"),
 
+  // Dedicated Context Engineering Workbenches
+  route("lessons/context-c0-setup", "routes/lessons.context-c0.tsx"),
+  route("lessons/context-c1-why-context", "routes/lessons.context-c1.tsx"),
+
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),
+
+  // Context Engineering Benchmark API
+  route("api/context-bench", "routes/api.context-bench.ts"),
 
   // Backend API endpoints
   route("api/chat", "routes/api.chat.ts"),

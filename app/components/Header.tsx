@@ -81,6 +81,25 @@ export function Header({
   const effectiveApiKey = customApiKey || "";
   const isKeyAvailable = hasServerKey || Boolean(effectiveApiKey.trim().length > 0);
 
+  const contextLessons = [
+    {
+      path: "/lessons/context-c0-setup",
+      tag: "C0",
+      title: "第 00 课: 建立实验环境与私有语料库",
+      icon: Database,
+      color: "text-purple-400",
+      badge: "实验底座",
+    },
+    {
+      path: "/lessons/context-c1-why-context",
+      tag: "C1",
+      title: "第 01 课: 模型不知道答案怎么办？(第一性原理)",
+      icon: Brain,
+      color: "text-indigo-400",
+      badge: "上下文起源",
+    },
+  ];
+
   const semester2Lessons = [
     {
       path: "/lessons/v12-agent-runtime",
@@ -330,6 +349,40 @@ export function Header({
                     <Layers className="w-4 h-4 text-amber-400" />
                     <span>🗺️ 课程总览 & 演进全景路线</span>
                   </Link>
+
+                  {/* Context Engineering Track */}
+                  <div className="pt-2 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-purple-400 border-t border-slate-800 uppercase">
+                    <span className="flex items-center gap-1">
+                      <Brain className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Context Engineering 专项</span>
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-normal">新开篇</span>
+                  </div>
+
+                  {contextLessons.map((lesson) => {
+                    const Icon = lesson.icon;
+                    const isActive = location.pathname === lesson.path;
+                    return (
+                      <Link
+                        key={lesson.path}
+                        to={lesson.path}
+                        onClick={() => setShowLessonDropdown(false)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition border ${
+                          isActive
+                            ? "bg-purple-950/40 text-purple-300 border-purple-500/40 font-medium"
+                            : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-purple-200"
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${lesson.color}`} />
+                        <div className="flex-1 flex items-center justify-between">
+                          <div className="font-medium truncate">{lesson.title}</div>
+                          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
+                            {lesson.badge}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
 
                   {/* Semester 2 */}
                   <div className="pt-2 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-cyan-400 border-t border-slate-800 uppercase">

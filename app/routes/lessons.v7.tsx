@@ -1167,7 +1167,7 @@ export default function LessonV7Page() {
         {/* Tab 5: Lecture Notes */}
         {activeTab === "lecture" && (
           <div className="glass-card p-6 md:p-10 rounded-3xl border border-white/10 space-y-6 text-slate-300 leading-relaxed text-sm">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-3">
               <div>
                 <h2 className="text-xl font-bold text-white">
                   第 08 课原理讲义：Harness 与安全沙箱权限隔离
@@ -1176,12 +1176,21 @@ export default function LessonV7Page() {
                   工业级 Coding Agent 的安全底座、多级权限矩阵与人机协同审批设计。
                 </p>
               </div>
-              <Link
-                to="/lessons/v6-memory"
-                className="text-xs text-rose-400 hover:underline flex items-center gap-1"
-              >
-                ← 查看上一课 (V6 Memory)
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/docs/lessons/08-harness-and-sandbox-security.md"
+                  className="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 text-xs font-medium flex items-center gap-1.5 transition"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>阅读完整教案讲义 →</span>
+                </Link>
+                <Link
+                  to="/lessons/v6-memory"
+                  className="text-xs text-rose-400 hover:underline flex items-center gap-1"
+                >
+                  ← 上一课 (V6)
+                </Link>
+              </div>
             </div>
 
             <div className="space-y-4">

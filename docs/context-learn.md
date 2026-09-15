@@ -1,16 +1,16 @@
-明白。你这次要的不是“为了做公司级 Context Agent，该学什么”，而是：
+# Context Engineering：问题驱动全景纲要 🧠
 
-> **假设我完全不知道 Context Engineering 最后会长成什么样，从最基本的问题出发，每解决一个问题，又自然暴露出下一个问题。**
+学习 Context Engineering 最深刻的方式：
 
-这样学到最后，即使没有人提前告诉你“要学 RAG、Memory、Compaction、Hybrid Search”，你也应该能自己推导出它们为什么存在。
+> **假设我们完全不知道 Context Engineering 最终会长成什么样，从最基本的信息瓶颈出发，每解决一个问题，又自然暴露出下一个新问题。**
 
-我会把课程改成一条**问题链**，而不是知识点目录。
+通过这条**问题链**不断递进推导，即使没有任何人提前罗列“要学 RAG、Memory、Compaction、Hybrid Search”，也能够凭借工程实践自己推导出它们为什么存在、分别在解决什么物理边界。
 
 ---
 
-# Context Engineering：问题驱动课程
+## 🎯 核心目标与演进逻辑
 
-整个课程只围绕一个最简单的目标：
+整个专项围绕一个最朴素的工程目标展开：
 
 > **让一个 LLM 在信息不完全的情况下，尽可能可靠地完成任务。**
 
@@ -82,8 +82,6 @@ Evaluation
 
 ---
 
-# 第一阶段：为什么需要 Context？
-
 ## 第 1 课：模型不知道答案怎么办？
 
 ### 问题
@@ -124,7 +122,7 @@ messages = [
 
 模型答对了。
 
-### 你实现
+### 实现方案
 
 ```ts
 buildContext(document, question)
@@ -132,7 +130,7 @@ buildContext(document, question)
 
 ### 验收
 
-你必须能够解释：
+必须能够清晰解释：
 
 > 模型没有“学习”这个文档。
 
@@ -150,7 +148,7 @@ buildContext(document, question)
 
 ---
 
-# 第 2 课：Context 越多越好吗？
+## 第 2 课：Context 越多越好吗？
 
 把：
 
@@ -197,7 +195,7 @@ Latency
 Cost
 ```
 
-### 你实现
+### 实现方案
 
 ```ts
 measureContext()
@@ -227,9 +225,9 @@ Total cost: ?
 
 ---
 
-# 第 3 课：如果数据很多，怎么找到相关信息？
+## 第 3 课：如果数据很多，怎么找到相关信息？
 
-现在你有：
+现在系统拥有：
 
 ```text
 10,000 个文档
@@ -277,7 +275,7 @@ read
 answer
 ```
 
-### 你实现
+### 实现方案
 
 ```ts
 searchText(query)
@@ -317,7 +315,7 @@ ERROR_1003
 
 ---
 
-# 第 4 课：字符串不同，但意思一样怎么办？
+## 第 4 课：字符串不同，但意思一样怎么办？
 
 现在 lexical search 遇到了第一次根本性限制：
 
@@ -367,7 +365,7 @@ grep
 vector search
 ```
 
-### 你实现
+### 实现方案
 
 ```ts
 embed()
@@ -398,7 +396,7 @@ Semantic Search
 
 ---
 
-# 第 5 课：Semantic Search 能替代关键词搜索吗？
+## 第 5 课：Semantic Search 能替代关键词搜索吗？
 
 设计几个问题：
 
@@ -414,7 +412,7 @@ orderId
 VJSHI-2931
 ```
 
-你会发现 Vector Search 对这种东西非常糟糕。
+可以发现 Vector Search 对这种精确标识符的表现非常糟糕。
 
 于是得到重要结论：
 
@@ -446,7 +444,7 @@ Semantic ≠ Better Search
 
 ---
 
-# 第 6 课：Hybrid Retrieval
+## 第 6 课：Hybrid Retrieval（混合检索）
 
 现在实现：
 
@@ -472,7 +470,7 @@ Vector score = 0.82
 
 根本不能直接比。
 
-于是你需要研究：
+于是需要引入融合机制：
 
 ```text
 Rank Fusion
@@ -480,7 +478,7 @@ RRF
 normalization
 ```
 
-### 实现
+### 实现方案
 
 ```ts
 hybridSearch()
@@ -492,7 +490,7 @@ hybridSearch()
 
 > 我知道 Hybrid Search。
 
-而是你能解释：
+而是能够清晰解释：
 
 > **为什么多个 retrieval channel 的 score 不能简单相加。**
 
@@ -510,7 +508,7 @@ hybridSearch()
 
 ---
 
-# 第 7 课：Retrieval 找到了候选，但谁最相关？
+## 第 7 课：Retrieval 找到了候选，但谁最相关？
 
 Retrieval 实际解决的是：
 
@@ -522,7 +520,7 @@ Retrieval 实际解决的是：
 
 因此自然引出：
 
-# Reranking
+> **核心机制：Reranking（从粗排到精排）**
 
 Pipeline 变成：
 
@@ -550,7 +548,7 @@ vs
 Vector Top 50 → Reranker → Top 10
 ```
 
-### 你实现
+### 实现方案
 
 ```ts
 retrieve()
@@ -585,7 +583,7 @@ Reranker 更关心：
 
 ---
 
-# 第 8 课：为什么需要 Chunk？
+## 第 8 课：为什么需要 Chunk？
 
 假设一个文档：
 
@@ -640,7 +638,7 @@ parent-child chunks
 
 > 为什么 chunk 越小不一定越好？
 
-你应该发现：
+实验现象：
 
 ```text
 小 chunk
@@ -666,7 +664,7 @@ parent-child chunks
 
 ---
 
-# 第 9 课：Chunk 自己可能没有意义怎么办？
+## 第 9 课：Chunk 自己可能没有意义怎么办？
 
 Chunking 把信息切碎以后，会制造新的问题：
 
@@ -735,13 +733,13 @@ Chunk:
 
 ---
 
-# 第 10 课：一次 Retrieval 够吗？
+## 第 10 课：一次 Retrieval 够吗？
 
 问题：
 
 > Alpha 和 Beta 哪个更适合已经购买 Gamma 的用户？
 
-你可能需要知道：
+实际任务中可能需要获知：
 
 ```text
 Alpha 是什么
@@ -785,9 +783,9 @@ Answer
 
 这就是：
 
-# Agentic Retrieval
+> **核心机制：Agentic Retrieval（自主多轮检索与路径探索）**
 
-### 你实现
+### 实现方案
 
 给模型：
 
@@ -822,9 +820,9 @@ Agent 会开始疯狂 Search。
 
 ---
 
-# 第 11 课：Agent 为什么会过度检索？
+## 第 11 课：Agent 为什么会过度检索？
 
-你会观察到：
+实验观察：
 
 ```text
 search
@@ -875,13 +873,13 @@ ContextBudget {
 
 ---
 
-# 第 12 课：Retrieval Context 怎么进入模型？
+## 第 12 课：Retrieval Context 怎么进入模型？
 
 现在第一次真正研究：
 
-# Context Assembly
+> **核心机制：Context Assembly（上下文装配与预算分配）**
 
-你可能有：
+待装配的信息包括：
 
 ```text
 System Prompt
@@ -943,7 +941,7 @@ Agent 运行 50 步之后怎么办？
 
 ---
 
-# 第 13 课：长任务中的 Context 会爆炸
+## 第 13 课：长任务中的 Context 会爆炸
 
 Agent：
 
@@ -966,9 +964,9 @@ Tool
 
 于是出现：
 
-# Compaction
+> **核心机制：Compaction（长周期上下文压缩与摘要置换）**
 
-你必须把历史从：
+必须把历史记录从：
 
 ```text
 发生过的一切
@@ -1022,13 +1020,13 @@ compact history
 
 ---
 
-# 第 14 课：什么时候保存，什么时候遗忘？
+## 第 14 课：什么时候保存，什么时候遗忘？
 
 这里自然进入：
 
-# Memory
+> **核心机制：Memory（从短期 Context 到长期记忆）**
 
-你会发现两个东西完全不同：
+深刻区分这两个完全不同的概念：
 
 ```text
 Context
@@ -1073,7 +1071,7 @@ Memory {
 
 ---
 
-# 第 15 课：Memory 为什么比“记住”困难得多？
+## 第 15 课：Memory 为什么比“记住”困难得多？
 
 开始出现：
 
@@ -1101,7 +1099,7 @@ Memory {
 }
 ```
 
-你开始研究：
+开始引入记忆治理机制：
 
 ```text
 Memory write policy
@@ -1121,7 +1119,7 @@ Memory invalidation
 
 ---
 
-# 第 16 课：Context 到底可信不可信？
+## 第 16 课：Context 到底可信不可信？
 
 现在假设有两篇文档：
 
@@ -1183,7 +1181,7 @@ Evidence {
 
 ---
 
-# 第 17 课：Context 本身会攻击 Agent
+## 第 17 课：Context 本身会攻击 Agent
 
 这是很多 RAG 教程会跳过的一层。
 
@@ -1240,11 +1238,11 @@ Agent 必须知道：
 
 ---
 
-# 第 18 课：Context Engineering 怎么评估？
+## 第 18 课：Context Engineering 怎么评估？
 
-最后才进入：
+最后才真正进入：
 
-# Context Evals
+> **核心机制：Context Evals（上下文工程基准评测）**
 
 建立 dataset：
 
@@ -1287,7 +1285,7 @@ Agentic Retrieval
 | Tool Calls          | 搜了多少次     |
 | Cost                | 花了多少钱     |
 
-到这里，你才真正有资格说：
+到这里，才能基于客观数据严谨地证明：
 
 > 这个 Context Engineering 方案更好。
 
@@ -1297,7 +1295,7 @@ Agentic Retrieval
 
 ---
 
-# 最后回头看，你实际上是自己推导出了整个领域
+## 核心演进脉络与总结：从零推导上下文工程全景
 
 最开始只有：
 
@@ -1435,10 +1433,10 @@ Embedding
 → 怎么证明这一切有效
 ```
 
-**这才是我认为比较“客观”的 Context Engineering 学习路线。**
+**这才是真正客观、扎实的 Context Engineering 演化与工程闭环。**
 
-而且这里有一个很重要的学习原则：**前一课不要提前实现后一课的能力。**
+这里贯穿着一条关键的教学与认知原则：**前一课坚决不提前引入后一课的技术方案。**
 
-例如学第 3 课的时候，就真的只准用 grep；第 4 课才准用 vector；第 10 课之前 Retrieval 必须是单次的；第 13 课之前不许做 compaction。这样你会亲自撞到每个技术产生的原因，而不是因为别人告诉你“业界最佳实践是 Hybrid RAG”，所以你就照着做。
+例如学第 3 课时只准用基础 grep 与关键词检索；第 4 课才引入 Vector Embedding；第 10 课之前检索必须是单次静态的；第 13 课之前不许做 compaction。只有当你在实验中亲手撞破旧方案的物理边界，才会深刻理解每一项技术抽象诞生的工程必然性，而不是人云亦云地套用“业界最佳实践”。
 
-如果按你之前 Agent 课程那种学习强度，我会把这 **18 课作为正式版本**，每一课再给你设计成「场景 → 初始代码 → 任务 → 实验变量 → 验收测试 → 思考题」，而且尽量不提前告诉你下一课的答案。
+完整 18 课以「场景 → 初始代码 → 任务 → 实验变量 → 验收测试 → 思考题」步步推演，最终亲手推导并构建出具备精准检索、预算控制、记忆持久化与安全防护的企业级 Context 智能体基础设施。

@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Info,
   ArrowRight,
+  BookOpen,
 } from "lucide-react";
 
 export async function loader() {
@@ -372,13 +373,22 @@ export default function Lesson0Page() {
           </button>
         </div>
 
-        <Link
-          to="/lessons/v1-tool-calling"
-          className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 py-1.5 px-3 rounded-lg bg-cyan-950/30 border border-cyan-500/30 transition"
-        >
-          <span>进入第 02 课: Tool Calling</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/docs/lessons/01-statelessness-and-structured-output.md"
+            className="flex items-center gap-1.5 text-xs text-indigo-300 hover:text-indigo-200 py-1.5 px-3 rounded-lg bg-indigo-950/40 border border-indigo-500/30 transition"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>查看本课讲义</span>
+          </Link>
+          <Link
+            to="/lessons/v1-tool-calling"
+            className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 py-1.5 px-3 rounded-lg bg-cyan-950/30 border border-cyan-500/30 transition"
+          >
+            <span>进入第 02 课: Tool Calling</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
 
       {/* Main Content Area */}

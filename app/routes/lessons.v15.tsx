@@ -463,7 +463,7 @@ export default function LessonV15Page() {
 
           <div className="flex items-center gap-3">
             <Link
-              to="/docs/lessons/16-branching-and-time-travel"
+              to="/docs/lessons/16-branching-and-time-travel.md"
               className="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors shadow-sm"
             >
               <BookOpen className="w-4 h-4 text-emerald-400" />

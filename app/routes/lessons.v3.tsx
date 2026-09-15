@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, Link } from "react-router";
 import { Header } from "~/components/Header";
 import type {
   AgentLoopResult,
@@ -1019,10 +1019,19 @@ export default function LessonV3() {
             {activeTab === "mechanics" && (
               <div className="space-y-6 text-slate-200">
                 <div className="glass-panel p-6 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 to-[#0d1428] space-y-4">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-emerald-400" />
-                    <span>Coding Agent 的三维核心架构体系</span>
-                  </h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-emerald-400" />
+                      <span>Coding Agent 的三维核心架构体系</span>
+                    </h3>
+                    <Link
+                      to="/docs/lessons/04-coding-agent-and-self-healing.md"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-xs text-emerald-300 font-medium flex items-center gap-1.5 transition flex-shrink-0 self-start sm:self-auto"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>查看完整讲义教案 →</span>
+                    </Link>
+                  </div>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     从只读 Agent 跃迁到 Coding Agent，并不是简单增加两个工具，而是构建了一个完整的
                     <strong>“代码补丁 + 终端执行 + 自主自愈”</strong> 的工业级闭环。

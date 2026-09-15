@@ -1,44 +1,44 @@
 import { reactRouter } from "@react-router/dev/vite";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import fs from "node:fs";
-import path from "node:path";
-import { markdownToHtml } from "./app/lib/markdown-renderer";
 
-function markdownCharsetPlugin() {
+function docsRouteBypassPlugin(): Plugin {
+  let reactRouterHandler: any = null;
+
   return {
-    name: "markdown-charset-and-viewer",
-    configureServer(server: any) {
-      server.middlewares.use((req: any, res: any, next: any) => {
-        if (!req.url) return next();
-        const cleanUrl = req.url.split("?")[0];
-        if (cleanUrl.endsWith(".md") || cleanUrl.startsWith("/docs/")) {
-          const relativePath = cleanUrl.startsWith("/")
-            ? cleanUrl.slice(1)
-            : cleanUrl;
-          const filePath = path.join(process.cwd(), relativePath);
-
-          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-            const content = fs.readFileSync(filePath, "utf-8");
-            const accept = req.headers["accept"] || "";
-
-            if (accept.includes("text/html")) {
-              res.setHeader("Content-Type", "text/html; charset=utf-8");
-              res.end(markdownToHtml(content, path.basename(filePath)));
-              return;
-            } else {
-              res.setHeader("Content-Type", "text/plain; charset=utf-8");
-              res.end(content);
-              return;
-            }
+    name: "docs-route-bypass",
+    configureServer(server) {
+      // Pre-middleware: intercepts /docs requests BEFORE Vite's built-in static file middleware (sirv)
+      server.middlewares.use((req, res, next) => {
+        const rawUrl = req.url || "";
+        const cleanPath = rawUrl.split("?")[0];
+        if (cleanPath === "/docs" || cleanPath.startsWith("/docs/")) {
+          if (typeof reactRouterHandler === "function") {
+            return reactRouterHandler(req, res, next);
           }
         }
         next();
       });
+
+      // Post-middleware hook: runs after reactRouter() has registered its SSR handler in server.middlewares
+      return () => {
+        const stack = server.middlewares.stack;
+        // React Router registers its request handler middleware in its configureServer return callback.
+        // We find the last registered middleware on the stack which is React Router's handler.
+        for (let i = stack.length - 1; i >= 0; i--) {
+          const entry = stack[i];
+          if (entry && typeof entry.handle === "function") {
+            reactRouterHandler = entry.handle;
+            break;
+          }
+        }
+      };
     },
   };
 }
 
 export default defineConfig({
-  plugins: [reactRouter(), tsconfigPaths(), markdownCharsetPlugin()],
+  plugins: [reactRouter(), tsconfigPaths(), docsRouteBypassPlugin()],
 });
+
+

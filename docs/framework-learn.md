@@ -1,18 +1,16 @@
-可以。你前 12 课已经从无状态 LLM 一直做到 Production Agent，而且是自己实现 Agent Loop、Context、Memory、Harness、MCP、Durable Execution，而不是依赖某个框架。
+# 第二学期：Agent Runtime & Harness Engineering 机制全景
 
-所以我会把接下来的课程正式定义成：
+在第一学期（前 12 课）中，系统已经从无状态 LLM 一步步演进为生产级 Agent，并亲手实现了 Agent Loop、Context Engine、Memory、Harness 安全沙箱、MCP 与 Durable Execution，而不是机械依赖某个上层框架。
 
-# 第二学期：Agent Runtime & Harness Engineering
-
-总目标不再是：
+本学期的总目标不再是停留在 API 层面：
 
 > “我会使用 Pi / LangGraph。”
 
-而是：
+而是建立真正的架构决断力：
 
-> **给我一个 Agent 工程问题，我能判断应该用 Loop、Graph、Harness、Workflow 还是普通代码，并且知道成熟框架为什么这样设计。**
+> **面对一个真实的 Agent 工程问题，能够准确判断应当使用 Loop、Graph、Harness、Workflow 还是纯原生代码，并深刻理解业界成熟框架为何如此设计。**
 
-主项目继续使用你的 **Mini Claude Code**。
+主工程继续围绕 **Mini Claude Code** 展开演进。
 
 最终让它形成：
 
@@ -79,22 +77,22 @@ new StateGraph(...)
 
 ---
 
-# 第一单元：Pi —— 从 Agent 到 Coding Agent Runtime
+## 第一单元：Pi —— 从 Agent 到 Coding Agent Runtime
 
-Pi 目前仍然把自己定位成一个 **minimal terminal coding harness**，重点包含 session、branching、compaction、extensions、skills、RPC 和 SDK embedding，因此特别适合作为你接下来拆解 Coding Agent Runtime 的第一个对象。([GitHub][1])
+Pi 目前仍然把自己定位成一个 **minimal terminal coding harness**，重点包含 session、branching、compaction、extensions、skills、RPC 和 SDK embedding，因此特别适合作为拆解 Coding Agent Runtime 的第一个对象。([GitHub][1])
 
 ### 第 13 课：为什么 Agent Loop 之外还需要 Runtime？
 
 | 环节     | 内容                                                                              |
 | ------ | ------------------------------------------------------------------------------- |
 | **问题** | 我都已经有 `while → LLM → tool → observation` 了，为什么 Claude Code / Pi 还需要一大坨 Runtime？ |
-| **实验** | 给你现有 Agent 加：用户中途输入、Abort、tool streaming、并发事件、session 恢复，观察 Agent Loop 开始迅速失控   |
+| **实验** | 给现有 Agent 增加：用户中途输入、Abort、tool streaming、并发事件、session 恢复，观察 Agent Loop 开始迅速失控   |
 | **实现** | 把现有代码拆成 `AgentCore / Runtime / Session / ToolExecutor / EventStream`            |
 | **验收** | 能解释 **Agent Loop 与 Agent Runtime 的边界**；能回答“什么应该进入 core，什么不应该”                   |
 
 这一课非常重要。
 
-以前你看到：
+以前看到：
 
 ```ts
 while (true) {
@@ -188,13 +186,13 @@ session A
 
 **验收：**
 
-给任意历史节点，你可以创建另一条 Agent 执行线，同时保留旧执行记录。
+给任意历史节点，可以创建另一条 Agent 执行线，同时保留旧执行记录。
 
 ---
 
-# 第 17 课：Context Compaction 为什么不是“总结聊天记录”？
+### 第 17 课：Context Compaction 为什么不是“总结聊天记录”？
 
-这是我认为你会特别喜欢的一课。
+这是长任务 Agent 最容易踩坑也是最关键的一课。
 
 问题：
 
@@ -242,7 +240,7 @@ Context Budget Manager
 └─ retrievable history
 ```
 
-Pi 自身就把 compaction 作为 session/runtime 能力暴露出来，因此你到这里再去读 Pi 的实现，会非常容易理解它为什么属于 Runtime 而不是简单 Prompt 技巧。([GitHub][1])
+Pi 自身就把 compaction 作为 session/runtime 能力暴露出来，因此到这里再去读 Pi 的实现，会非常容易理解它为什么属于 Runtime 而不是简单 Prompt 技巧。([GitHub][1])
 
 ### 验收
 
@@ -251,14 +249,14 @@ Pi 自身就把 compaction 作为 session/runtime 能力暴露出来，因此你
 ```text
 无压缩
 普通 summary
-你的 structured compaction
+结构化压缩 (structured compaction)
 ```
 
 比较成功率。
 
 ---
 
-# 第 18 课：为什么成熟 Agent 不应该修改 Core？
+### 第 18 课：为什么成熟 Agent 绝不应该修改 Core？
 
 问题：
 
@@ -287,7 +285,7 @@ Figma
 
 观察 core 腐化。
 
-实现你的第一个 Pi Extension：
+实现第一个 Pi Extension：
 
 ```text
 vjshi-context-extension
@@ -308,15 +306,13 @@ Pi 本身就是鼓励通过 TypeScript extensions、skills 等扩展，而不是
 
 > **Pi 单元毕业。**
 
-你不是“会用 Pi”。
+核心收获不是“会用 Pi 的 API”，而是深刻理解：
 
-而是知道：
-
-> Coding Agent Runtime 为什么长成 Pi 这样。
+> **Coding Agent Runtime 为什么长成 Pi 这样。**
 
 ---
 
-# 第二单元：LangGraph —— 从隐式 Loop 到显式 Workflow
+## 第二单元：LangGraph —— 从隐式 Loop 到显式 Workflow
 
 LangGraph 官方现在非常明确地把自己定义成 **low-level orchestration framework and runtime**，重点就是 long-running、stateful agent，以及 durable execution、streaming 和 HITL；官方也明确说不需要 LangChain 才能使用 LangGraph。([LangChain 文档][2])
 
@@ -324,7 +320,7 @@ LangGraph 官方现在非常明确地把自己定义成 **low-level orchestratio
 
 ---
 
-## 第 19 课：什么时候 while loop 开始失控？
+### 第 19 课：什么时候 while loop 开始失控？
 
 | 环节     | 内容                                             |
 | ------ | ---------------------------------------------- |
@@ -357,7 +353,7 @@ resume
 
 ---
 
-# 第 20 课：Graph 是什么？
+### 第 20 课：Graph 是什么？
 
 把上一课改成：
 
@@ -390,13 +386,13 @@ ConditionalEdge
 
 ### 验收
 
-给你一个 Agent 流程，你必须判断：
+给定一个具体的 Agent 业务流程，能够准确判断：
 
 > Loop 更合适还是 Graph 更合适？
 
 ---
 
-# 第 21 课：Messages 为什么不能当 State？
+### 第 21 课：Messages 为什么不能当 State？
 
 实验：
 
@@ -452,7 +448,7 @@ type AgentState = {
 
 ---
 
-# 第 22 课：Reducer 与并发 State
+### 第 22 课：Reducer 与并发 State
 
 问题：
 
@@ -489,9 +485,9 @@ overwrite
 
 ---
 
-# 第 23 课：Checkpoint 真正保存的是什么？
+### 第 23 课：Checkpoint 真正保存的是什么？
 
-你第 10 课已经自己实现过 durable execution，因此这一课会非常顺。
+在第 10 课中已经亲手实现过 durable execution，因此这一课的理论对照会非常顺畅。
 
 问题：
 
@@ -510,7 +506,7 @@ Kill Node 进程。
 
 然后恢复。
 
-LangGraph 当前把 checkpointer 定义成 thread-scoped graph state persistence，而 store 用于跨 thread 的长期数据，这正好可以拿来与你第 7/10 课自己的 Memory / Checkpoint 设计进行对照。([LangChain 文档][3])
+LangGraph 当前把 checkpointer 定义成 thread-scoped graph state persistence，而 store 用于跨 thread 的长期数据，这正好可以拿来与前面第 7/10 课自己的 Memory / Checkpoint 设计进行对照。([LangChain 文档][3])
 
 ### 实现
 
@@ -536,7 +532,7 @@ pnpm dev
 
 ---
 
-# 第 24 课：HITL 为什么本质上是 Durable Suspension？
+### 第 24 课：HITL 为什么本质上是 Durable Suspension？
 
 问题：
 
@@ -563,7 +559,7 @@ kill process
 
 还能审批吗？
 
-LangGraph 的 `interrupt()` 会把状态交给 persistence 层保存，并在使用同一个 thread 恢复时继续执行，因此非常适合把你原来 Harness 里的审批概念重新理解成 **durable suspension + external input**。([LangChain 文档][4])
+LangGraph 的 `interrupt()` 会把状态交给 persistence 层保存，并在使用同一个 thread 恢复时继续执行，因此非常适合把原来 Harness 里的审批概念重新理解成 **durable suspension + external input**。([LangChain 文档][4])
 
 ### 验收
 
@@ -585,7 +581,7 @@ Approve
 
 ---
 
-# 第 25 课：什么时候应该并行？
+### 第 25 课：什么时候应该并行？
 
 问题：
 
@@ -635,9 +631,9 @@ merge conflict
 
 ---
 
-# 第 26 课：什么时候绝对不要用 LangGraph？
+### 第 26 课：什么时候绝对不要用 LangGraph？
 
-给你 10 个案例分类：
+对 10 个典型案例进行架构分类：
 
 ```text
 FAQ Bot
@@ -665,11 +661,11 @@ Workflow Engine
 
 必须给出**为什么不用 LangGraph**的理由。
 
-这一课完成以后，你才算真正学会 LangGraph。
+这一课完成以后，才算真正建立对 LangGraph 的客观技术选型认知。
 
 ---
 
-# 第三单元：DeepSeek Harness —— Agent Runtime 如何成为平台
+## 第三单元：DeepSeek Harness —— Agent Runtime 如何成为平台
 
 这一部分难度会突然提升。
 
@@ -685,7 +681,7 @@ DeepSeek Harness 当前的核心设计仍然是 **Everything is a Plugin**：mod
 
 ---
 
-# 第 27 课：为什么 Dependency Injection 不够？
+### 第 27 课：为什么 Dependency Injection 不够？
 
 问题：
 
@@ -729,7 +725,7 @@ Plugin
 
 ---
 
-# 第 28 课：Everything is a Plugin 到底意味着什么？
+### 第 28 课：Everything is a Plugin 到底意味着什么？
 
 传统架构：
 
@@ -783,9 +779,9 @@ Consumer
 
 ---
 
-# 第 29 课：一个系统里怎么运行 100 个 Agent？
+### 第 29 课：一个系统里怎么运行 100 个 Agent？
 
-这是和你未来公司 Context 中台关系最大的一课。
+这是构建企业级多 Agent 协作系统最核心的一课。
 
 问题：
 
@@ -827,9 +823,9 @@ Global Context
 
 ---
 
-# 第 30 课：真正做你的 Company Context Plugin
+### 第 30 课：真正手写企业级 Company Context Plugin
 
-这一课开始和你未来真正想做的系统汇合。
+这一课开始将前面的机制收敛于真正的业务落地场景。
 
 实现：
 
@@ -878,17 +874,17 @@ Agent 开始设计
 
 **Agent 能自动找到正确上下文，而不是把整个公司知识库塞进 prompt。**
 
-这其实就是你最近思考的 Company Context MVP 的第一个真正工程版本。
+这其实就是一个企业级 Context 中台 MVP 的真正工程落地形态。
 
 ---
 
-# 第四单元：Framework Autopsy —— 不再学框架，开始审框架
+## 第四单元：Framework Autopsy —— 不再学框架，开始审框架
 
 接下来故意快速看其他框架。
 
 ---
 
-# 第 31 课：OpenAI Agents SDK —— 极简 Primitive 路线
+### 第 31 课：OpenAI Agents SDK —— 极简 Primitive 路线
 
 问题：
 
@@ -916,9 +912,9 @@ OpenAI Agents SDK
 
 ---
 
-# 第 32 课：AI SDK —— Agent Runtime 怎么进入 React UI？
+### 第 32 课：AI SDK —— Agent Runtime 怎么进入 React UI？
 
-这个对你这种前端背景尤其重要。
+这个对前端工程化尤为重要。
 
 问题：
 
@@ -964,7 +960,7 @@ Tool Call JSON
 
 ---
 
-# 最终毕业项目：Runtime Benchmark
+## 最终毕业项目：Runtime Benchmark 竞技场
 
 最后不再新增功能。
 
@@ -976,7 +972,7 @@ Tool Call JSON
 
 | Runtime           | 实现             |
 | ----------------- | -------------- |
-| Native            | 你自己的 Agent     |
+| Native            | 手写的原生 Agent     |
 | Pi                | Coding Harness |
 | LangGraph         | Graph Runtime  |
 | OpenAI Agents SDK | Agent SDK      |
@@ -996,7 +992,7 @@ Code Complexity
 Extension Complexity
 ```
 
-最后你必须回答：
+最后必须能够给出严谨回答：
 
 > **如果明天公司让我做一个 Agent 产品，我究竟选择什么 Runtime？**
 
@@ -1006,9 +1002,9 @@ Extension Complexity
 
 ---
 
-# 这 20 课背后的真正知识树
+## 核心架构认知树与体系总结
 
-你第一阶段实际上学的是：
+第一阶段实际上建立的核心模型是：
 
 ```text
                  Agent
@@ -1019,7 +1015,7 @@ Extension Complexity
                  Loop
 ```
 
-第二阶段我们把视角往外拉：
+第二阶段则把架构视角进一步拉升：
 
 ```text
                         Agent System
@@ -1038,35 +1034,33 @@ Extension Complexity
                      Company AI System
 ```
 
-这也是为什么我现在越来越不想把你的路线定义成：
+因此，第二学期的核心目标绝不是：
 
-> **“学习 Agent 框架。”**
+> **“学习具体的某个 Agent 框架 API”**
 
 更准确的是：
 
-> **“学习如何构建 Agent 系统。”**
+> **“掌握如何构建高可靠的 Agent 系统。”**
 
-这两个目标最后培养出来的人完全不同。
+这两种学习目标培养出的工程认知完全不同。
 
-前一个人会问：
+第一种人会问：
 
 > LangGraph 的 API 怎么写？
 
-后一个人会问：
+第二种人会问：
 
 > **这个任务到底需不需要 Graph？State 的生命周期在哪里？谁负责 checkpoint？副作用边界在哪里？Agent Scope 属于 Runtime 还是应用层？Context 谁拥有？**
 
-这才是我希望第二阶段把你训练到的位置。
+这才是第二阶段希望带领开发者达到的深度。
 
-而且我会坚持一个规则：**每一课都先让 Mini Claude Code 真正坏一次，再学习解决方案。** 不允许看到一个新概念就直接引入框架。这样你学完 Pi、LangGraph、DeepSeek Harness 后，记住的不会是 API，而是它们背后的工程问题。
+核心原则依然不变：**每一课都先让 Mini Claude Code 在特定场景下真正失效一次，再推导架构解决方案。** 严禁看到一个新概念就直接套用框架。学完 Pi、LangGraph、DeepSeek Harness 等体系后，内化的不是框架的具体语法糖，而是解决真实系统工程问题的敏锐直觉与架构决断力。
 
-下一课就可以正式从 **第 13 课《为什么 Agent Loop 之外还需要 Runtime？》** 开始，我会像前 12 课一样，先给你制造一个具体问题和实验，不提前讲答案。
-
-[1]: https://github.com/wayfind/pi-mono/blob/main/packages/coding-agent/README.md?utm_source=chatgpt.com "pi-mono/packages/coding-agent/README.md at main · wayfind/pi-mono · GitHub"
+[1]: https://github.com/wayfind/pi-mono/blob/main/packages/coding-agent/README.md "pi-mono/packages/coding-agent/README.md at main · wayfind/pi-mono · GitHub"
 [2]: https://docs.langchain.com/oss/javascript/langgraph/overview "LangGraph overview - Docs by LangChain"
 [3]: https://docs.langchain.com/oss/javascript/langgraph/persistence "Persistence - Docs by LangChain"
 [4]: https://docs.langchain.com/oss/javascript/langgraph/interrupts "Interrupts - Docs by LangChain"
-[5]: https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.md?utm_source=chatgpt.com "deepseek-harness/docs/architecture.md at master · deepseek-ai/deepseek-harness · GitHub"
-[6]: https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/notes/implemented/architecture/2026-07-08-agent-scope-contexts.md?utm_source=chatgpt.com "deepseek-harness/.agents/notes/implemented/architecture/2026-07-08-agent-scope-contexts.md at master · deepseek-ai/deepseek-harness · GitHub"
-[7]: https://openai.github.io/openai-agents-js/?utm_source=chatgpt.com "OpenAI Agents SDK TypeScript | OpenAI Agents SDK"
-[8]: https://chatbot.ai-sdk.dev/docs/customization/tool-approval?utm_source=chatgpt.com "Tool Approval"
+[5]: https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.md "deepseek-harness/docs/architecture.md at master · deepseek-ai/deepseek-harness · GitHub"
+[6]: https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/notes/implemented/architecture/2026-07-08-agent-scope-contexts.md "deepseek-harness/.agents/notes/implemented/architecture/2026-07-08-agent-scope-contexts.md at master · deepseek-ai/deepseek-harness · GitHub"
+[7]: https://openai.github.io/openai-agents-js/ "OpenAI Agents SDK TypeScript | OpenAI Agents SDK"
+[8]: https://chatbot.ai-sdk.dev/docs/customization/tool-approval "Tool Approval"

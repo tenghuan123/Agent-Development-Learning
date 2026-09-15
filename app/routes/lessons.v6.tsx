@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, Link } from "react-router";
 import { Header } from "~/components/Header";
 import type {
   MemoryCategory,
@@ -1451,13 +1451,22 @@ export default function LessonV6Page() {
         {/* TAB 5: LECTURE */}
         {activeTab === "lecture" && (
           <div className="glass-panel p-6 md:p-8 rounded-2xl border border-slate-800 bg-[#0d1322] space-y-6 text-slate-200 text-xs md:text-sm leading-relaxed">
-            <div>
-              <h2 className="text-xl font-bold text-white mb-2">
-                第七课：Memory 与状态机持久化 (Hierarchical Memory Architecture)
-              </h2>
-              <p className="text-slate-400">
-                深入剖析工业级 Coding Agent（Claude Code、Cursor、MemGPT/Letta）的记忆分层哲学。
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-white mb-1">
+                  第七课：Memory 与状态机持久化 (Hierarchical Memory Architecture)
+                </h2>
+                <p className="text-slate-400 text-xs">
+                  深入剖析工业级 Coding Agent（Claude Code、Cursor、MemGPT/Letta）的记忆分层哲学。
+                </p>
+              </div>
+              <Link
+                to="/docs/lessons/07-memory-and-state-persistence.md"
+                className="px-3.5 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-medium flex items-center gap-1.5 transition flex-shrink-0 self-start sm:self-auto"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>阅读完整教案讲义 →</span>
+              </Link>
             </div>
 
             <hr className="border-slate-800" />

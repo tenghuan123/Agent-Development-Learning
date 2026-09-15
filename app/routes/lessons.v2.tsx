@@ -393,14 +393,12 @@ export default function LessonV2() {
               />
             </div>
 
-            <a
-              href="/docs/lessons/03-agent-loop-and-react.md"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1 text-amber-400 hover:text-amber-300 transition"
+            <Link
+              to="/docs/lessons/03-agent-loop-and-react.md"
+              className="flex items-center gap-1 text-amber-400 hover:text-amber-300 transition text-xs"
             >
               <BookOpen className="w-3.5 h-3.5" /> 查看本课讲义
-            </a>
+            </Link>
           </div>
         </div>
       </div>

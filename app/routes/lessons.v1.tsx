@@ -774,9 +774,13 @@ export default function LessonV1() {
                     本课思考过程与完整架构图已归档在项目文档中：
                   </p>
                   <div className="space-y-1 font-mono text-[11px] text-indigo-300">
-                    <div className="p-1.5 bg-[#0a0e18] rounded border border-slate-800">
-                      📄 docs/lessons/02-tool-calling-mechanism.md
-                    </div>
+                    <Link
+                      to="/docs/lessons/02-tool-calling-mechanism.md"
+                      className="p-2 bg-[#0a0e18] hover:bg-indigo-950/40 rounded border border-slate-800 hover:border-indigo-500/40 transition flex items-center justify-between group"
+                    >
+                      <span>📄 docs/lessons/02-tool-calling-mechanism.md</span>
+                      <span className="text-slate-500 group-hover:text-indigo-400 font-sans text-xs">点击阅读 →</span>
+                    </Link>
                   </div>
                 </div>
               </div>

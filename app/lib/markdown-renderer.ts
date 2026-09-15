@@ -1,247 +1,263 @@
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkGfm from "remark-gfm";
+import remarkCjkFriendly from "remark-cjk-friendly";
+import remarkMath from "remark-math";
+import remarkRehype from "remark-rehype";
+import rehypeKatex from "rehype-katex";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeStringify from "rehype-stringify";
+import type { Element, ElementContent, Root, RootContent } from "hast";
+
+export interface MarkdownTocItem {
+  id: string;
+  text: string;
+  level: number;
 }
 
-export function markdownToHtml(md: string, title: string): string {
-  const lines = md.split("\n");
-  const htmlOut: string[] = [];
-  let inCodeBlock = false;
-  let codeLang = "";
-  let codeLines: string[] = [];
-  let inTable = false;
-  let tableRows: string[] = [];
+export interface MarkdownRenderResult {
+  title: string;
+  html: string;
+  toc: MarkdownTocItem[];
+}
 
-  const flushTable = () => {
-    if (!inTable) return;
-    inTable = false;
-    if (tableRows.length === 0) return;
+const TOC_LEVELS = new Set(["h2", "h3"]);
+const LANGUAGE_CLASS_PREFIX = "language-";
 
-    let tableHtml = '<div class="overflow-x-auto my-6"><table class="w-full border-collapse text-sm text-left">';
-    tableRows.forEach((row, idx) => {
-      const isHeader = idx === 0;
-      const isDivider = idx === 1 && row.includes("---");
-      if (isDivider) return;
+/**
+ * 把独占一行的 `$$公式$$` 归一化成 fenced 块级公式。
+ *
+ * remark-math 只在 `$$` 独占一行时才判定为块级公式，写成 `$$x=1$$` 会被当成行内公式
+ * （行内样式、挤在段落里）。讲义通篇用的是后一种写法，但语义上要的是居中的独立公式块，
+ * 所以在解析前做一次文本归一化。带 `> ` 前缀的引用块同样处理，并保留前缀。
+ *
+ * 逐行扫描并跳过围栏代码块，避免把代码里的 `$$` 也改掉。
+ */
+function promoteDisplayMath(md: string): string {
+  let inFence = false;
 
-      const cells = row
-        .split("|")
-        .map((c) => c.trim())
-        .filter((_, i, arr) => i > 0 && i < arr.length - 1);
-
-      if (isHeader) {
-        tableHtml += '<thead class="bg-slate-900/80 text-purple-300 font-semibold border-b border-slate-700"><tr>';
-        cells.forEach((c) => {
-          tableHtml += `<th class="p-3 border border-slate-700/80">${formatInline(c)}</th>`;
-        });
-        tableHtml += "</tr></thead><tbody>";
-      } else {
-        tableHtml += '<tr class="border-b border-slate-800/80 hover:bg-slate-800/30">';
-        cells.forEach((c) => {
-          tableHtml += `<td class="p-3 border border-slate-800 text-slate-300">${formatInline(c)}</td>`;
-        });
-        tableHtml += "</tr>";
+  return md
+    .split("\n")
+    .map((line) => {
+      if (/^\s*(?:```|~~~)/.test(line)) {
+        inFence = !inFence;
+        return line;
       }
-    });
-    tableHtml += "</tbody></table></div>";
-    htmlOut.push(tableHtml);
-    tableRows = [];
-  };
+      if (inFence) return line;
 
-  const formatInline = (text: string): string => {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="text-slate-300 italic">$1</em>')
-      .replace(/`([^`]+)`/g, '<code class="bg-slate-800/90 text-purple-300 px-1.5 py-0.5 rounded text-[13px] font-mono border border-slate-700/60">$1</code>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">$1</a>');
-  };
+      // 正文部分显式排除 `$$`，否则一行里写两段公式会从第一段吃到第二段
+      const match = /^(\s*(?:>\s*)*)\$\$((?:(?!\$\$)[\s\S])+)\$\$\s*$/.exec(line);
+      if (!match) return line;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+      const [, prefix, body] = match;
+      return `${prefix}$$\n${prefix}${body}\n${prefix}$$`;
+    })
+    .join("\n");
+}
 
-    // Code block toggle
-    if (line.trim().startsWith("```")) {
-      flushTable();
-      if (inCodeBlock) {
-        inCodeBlock = false;
-        const codeContent = escapeHtml(codeLines.join("\n"));
-        htmlOut.push(
-          `<div class="my-5 rounded-xl overflow-hidden border border-slate-800 bg-[#090d1a] shadow-xl">
-            <div class="bg-slate-900/90 px-4 py-2 text-xs font-mono text-slate-400 border-b border-slate-800 flex items-center justify-between">
-              <span>${escapeHtml(codeLang || "text")}</span>
-              <span class="text-[10px] text-slate-500">ASCII / Code</span>
-            </div>
-            <pre class="p-4 overflow-x-auto text-[13px] font-mono text-slate-200 leading-relaxed whitespace-pre"><code>${codeContent}</code></pre>
-          </div>`
-        );
-        codeLines = [];
-        codeLang = "";
-      } else {
-        inCodeBlock = true;
-        codeLang = line.trim().slice(3).trim();
-        codeLines = [];
-      }
-      continue;
-    }
+/** 拼接 hast 子树里的纯文本，忽略标签本身。 */
+function collectText(node: RootContent | Element): string {
+  if (node.type === "text") {
+    return node.value;
+  }
+  if ("children" in node && Array.isArray(node.children)) {
+    return node.children.map((child) => collectText(child)).join("");
+  }
+  return "";
+}
 
-    if (inCodeBlock) {
-      codeLines.push(line);
-      continue;
-    }
+function classList(node: Element): string[] {
+  const raw = node.properties?.className;
+  return Array.isArray(raw) ? raw.map(String) : [];
+}
 
-    // Tables
-    if (line.trim().startsWith("|") && line.trim().endsWith("|")) {
-      inTable = true;
-      tableRows.push(line.trim());
-      continue;
-    } else if (inTable) {
-      flushTable();
-    }
+/** remark-math 产出的块级公式也是 `<pre><code class="language-math math-display">`，
+ *  必须与真正的代码块区分开，否则公式会被套上代码卡片外壳。 */
+function isMathBlock(node: Element): boolean {
+  return node.children.some(
+    (child) =>
+      child.type === "element" &&
+      child.tagName === "code" &&
+      classList(child).some((c) => c.startsWith("math-"))
+  );
+}
 
-    // Empty lines
-    if (!line.trim()) {
-      continue;
-    }
+/** 把代码块包成带语言标签的卡片，还原原有的代码块外观。 */
+function wrapCodeCard(node: Element): Element {
+  const code = node.children.find(
+    (child): child is Element =>
+      child.type === "element" && child.tagName === "code"
+  );
 
-    // Horizontal rules
-    if (line.trim() === "---" || line.trim() === "***") {
-      htmlOut.push('<hr class="my-8 border-slate-800" />');
-      continue;
-    }
+  const langClass = code
+    ? classList(code).find((c) => c.startsWith(LANGUAGE_CLASS_PREFIX))
+    : undefined;
+  const lang = langClass ? langClass.slice(LANGUAGE_CLASS_PREFIX.length) : "";
 
-    // Headings
-    if (line.startsWith("# ")) {
-      htmlOut.push(
-        `<h1 class="text-2xl md:text-3xl font-extrabold text-white mt-8 mb-4 tracking-tight flex items-center gap-3 border-b border-slate-800 pb-3">${formatInline(
-          line.slice(2)
-        )}</h1>`
-      );
-      continue;
-    }
-    if (line.startsWith("## ")) {
-      htmlOut.push(
-        `<h2 class="text-xl md:text-2xl font-bold text-slate-100 mt-8 mb-3 tracking-tight flex items-center gap-2">${formatInline(
-          line.slice(3)
-        )}</h2>`
-      );
-      continue;
-    }
-    if (line.startsWith("### ")) {
-      htmlOut.push(
-        `<h3 class="text-lg font-semibold text-purple-300 mt-6 mb-2 tracking-tight">${formatInline(
-          line.slice(4)
-        )}</h3>`
-      );
-      continue;
-    }
-
-    // Blockquotes
-    if (line.startsWith("> ")) {
-      const bqContent = line.slice(2);
-      htmlOut.push(
-        `<blockquote class="border-l-4 border-purple-500 bg-purple-950/20 px-4 py-3 my-4 rounded-r-lg text-slate-300 text-sm leading-relaxed">${formatInline(
-          bqContent
-        )}</blockquote>`
-      );
-      continue;
-    }
-
-    // Unordered List
-    if (line.trim().startsWith("- ")) {
-      htmlOut.push(
-        `<li class="ml-5 list-disc text-sm text-slate-300 my-1 leading-relaxed">${formatInline(
-          line.trim().slice(2)
-        )}</li>`
-      );
-      continue;
-    }
-
-    // Ordered List
-    const numMatch = line.trim().match(/^(\d+)\.\s+(.*)$/);
-    if (numMatch) {
-      htmlOut.push(
-        `<li class="ml-5 list-decimal text-sm text-slate-300 my-1 leading-relaxed"><span class="font-semibold text-white">${numMatch[1]}.</span> ${formatInline(
-          numMatch[2]
-        )}</li>`
-      );
-      continue;
-    }
-
-    // Regular paragraphs
-    htmlOut.push(
-      `<p class="text-sm md:text-base text-slate-300 leading-relaxed my-3">${formatInline(
-        line
-      )}</p>`
+  // 语言已经提到卡片标题栏上了，代码元素上不必再留一次
+  if (code && langClass) {
+    const remaining = classList(code).filter(
+      (c) => !c.startsWith(LANGUAGE_CLASS_PREFIX)
     );
+    const { className: _dropped, ...rest } = code.properties ?? {};
+    code.properties = remaining.length > 0 ? { ...rest, className: remaining } : rest;
   }
 
-  flushTable();
-
-  return `<!DOCTYPE html>
-<html lang="zh-CN" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(title)} - Mini Claude Code 讲义</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: '#070a12'
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body {
-      background-color: #070a12;
-      color: #e2e8f0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    pre code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-  </style>
-</head>
-<body class="min-h-screen bg-[#070a12] text-slate-200">
-  <!-- Top Nav -->
-  <header class="sticky top-0 z-50 bg-[#070a12]/90 backdrop-blur border-b border-slate-800 px-6 py-3.5">
-    <div class="max-w-5xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="/" class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 transition">
-          ← 返回课程首页
-        </a>
-        <span class="text-slate-500 text-xs font-mono">/</span>
-        <span class="text-xs font-medium text-slate-300 truncate max-w-xs md:max-w-md">
-          ${escapeHtml(title)}
-        </span>
-      </div>
-      <div class="flex items-center gap-3">
-        <button onclick="window.history.back()" class="text-xs px-3 py-1 rounded border border-slate-700 hover:bg-slate-800 text-slate-300 transition">
-          返回工作台
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Document Container -->
-  <main class="max-w-4xl mx-auto px-6 py-10">
-    <div class="glass-container bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 md:p-10 shadow-2xl">
-      ${htmlOut.join("\n")}
-    </div>
-
-    <footer class="mt-12 text-center text-xs text-slate-500 py-6 border-t border-slate-800/80">
-      Mini Claude Code · 从零手写 Agent 体系化课程 · UTF-8 标准渲染
-    </footer>
-  </main>
-</body>
-</html>`;
+  return {
+    type: "element",
+    tagName: "div",
+    properties: { className: ["code-card"] },
+    children: [
+      {
+        type: "element",
+        tagName: "div",
+        properties: { className: ["code-card__bar"] },
+        children: [
+          {
+            type: "element",
+            tagName: "span",
+            properties: { className: ["code-card__dot"] },
+            children: [],
+          },
+          {
+            type: "element",
+            tagName: "span",
+            properties: { className: ["code-card__lang"] },
+            children: [{ type: "text", value: lang || "text" }],
+          },
+        ],
+      },
+      {
+        type: "element",
+        tagName: "div",
+        properties: { className: ["code-card__body"] },
+        children: [node],
+      },
+    ],
+  };
 }
 
+/**
+ * 递归重写子节点：代码块套卡片容器，表格套横向滚动容器。
+ *
+ * 必须递归——引用块内部的代码块同样是 pre，只在顶层扫一遍会漏掉
+ * 「> ```ts ... > ```」这种嵌套写法。
+ */
+function transformChildren(children: ElementContent[]): ElementContent[] {
+  return children.map((node) => {
+    if (node.type !== "element") return node;
+
+    const element: Element =
+      node.children.length > 0
+        ? { ...node, children: transformChildren(node.children) }
+        : node;
+
+    if (element.tagName === "pre" && !isMathBlock(element)) {
+      return wrapCodeCard(element);
+    }
+
+    if (element.tagName === "table") {
+      // 宽表在窄屏会撑破页面，交给容器横向滚动
+      return {
+        type: "element",
+        tagName: "div",
+        properties: { className: ["table-scroll"] },
+        children: [element],
+      };
+    }
+
+    return element;
+  });
+}
+
+interface CollectorStats {
+  title: string;
+  toc: MarkdownTocItem[];
+}
+
+/**
+ * 在 rehype-slug 之后、rehype-katex 之前运行，收集文档标题与侧边栏大纲。
+ *
+ * 放在 KaTeX 之前是有意的：此时标题文本仍是原始 markdown 文本。若等 KaTeX 展开后再取，
+ * 同一段公式的 HTML 与 MathML 两套渲染会被各读一遍，大纲里就会出现重复文字。
+ */
+function rehypeDocOutline(stats: CollectorStats) {
+  // unified 的插件是两层：attacher 接收配置并返回 transformer，transformer 才拿到语法树。
+  // 少一层的话，tree 收到的会是 processor 自身。
+  return function attacher() {
+    return function transformer(tree: Root) {
+      for (const node of tree.children) {
+        if (node.type !== "element" || !node.properties?.id) continue;
+        if (node.tagName !== "h1" && !TOC_LEVELS.has(node.tagName)) continue;
+
+        const text = collectText(node).trim();
+        if (!text) continue;
+
+        if (node.tagName === "h1") {
+          if (!stats.title) stats.title = text;
+          continue;
+        }
+
+        stats.toc.push({
+          id: String(node.properties.id),
+          text,
+          level: node.tagName === "h2" ? 2 : 3,
+        });
+      }
+    };
+  };
+}
+
+/** 结构重写插件：只负责代码卡片 / 表格容器，与大纲收集分开，顺序无耦合。 */
+function rehypeDocContainers() {
+  return function transformer(tree: Root) {
+    // remark-rehype 不会产出 doctype 节点，这里的收窄是安全的
+    tree.children = transformChildren(tree.children as ElementContent[]);
+  };
+}
+
+/**
+ * 渲染 Markdown 正文。
+ *
+ * 走 unified / remark / rehype 标准管线：GFM（表格、任务列表、删除线、自动链接）、
+ * 数学公式（KaTeX）、标题锚点（rehype-slug）。块级容器的嵌套关系——引用里放代码块、
+ * 引用里放有序列表——由 remark 的 block 解析器统一处理，不再逐行判断。
+ */
+export async function renderMarkdownBody(
+  md: string,
+  defaultTitle = "讲义文档"
+): Promise<MarkdownRenderResult> {
+  const stats: CollectorStats = { title: "", toc: [] };
+
+  const file = await unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    // 中文标点紧贴 `**` 时（如 `**快照（Snapshot）**以及`），CommonMark 的
+    // flanking 规则不认为右界符成立，加粗会退化成字面量。讲义通篇中文，必须开。
+    .use(remarkCjkFriendly)
+    .use(remarkMath)
+    // 刻意不开 allowDangerousHtml：文档里的裸 HTML 会被丢弃，不构成注入面
+    .use(remarkRehype)
+    .use(rehypeSlug)
+    .use(rehypeAutolinkHeadings, {
+      behavior: "wrap",
+      properties: { className: ["heading-anchor"] },
+    })
+    .use(rehypeDocOutline(stats))
+    .use(rehypeDocContainers)
+    .use(rehypeKatex, {
+      // 单条公式写错不该让整页 500，降级成红色原文更利于定位
+      throwOnError: false,
+      errorColor: "#f43f5e",
+      strict: false,
+    })
+    .use(rehypeStringify)
+    .process(promoteDisplayMath(md));
+
+  return {
+    title: stats.title || defaultTitle,
+    html: String(file),
+    toc: stats.toc,
+  };
+}

@@ -27,7 +27,9 @@ import {
   Boxes,
   GitBranch,
   Database,
+  BookOpen,
 } from "lucide-react";
+import { getLessonDocPath } from "~/lib/docs-catalog";
 
 export interface HeaderProps {
   hasServerKey: boolean;
@@ -80,6 +82,7 @@ export function Header({
 
   const effectiveApiKey = customApiKey || "";
   const isKeyAvailable = hasServerKey || Boolean(effectiveApiKey.trim().length > 0);
+  const currentDocPath = getLessonDocPath(currentLesson?.id || location.pathname);
 
   const contextLessons = [
     {
@@ -336,7 +339,7 @@ export function Header({
                   className="fixed inset-0 z-40"
                   onClick={() => setShowLessonDropdown(false)}
                 />
-                <div className="absolute left-0 mt-2 w-80 max-h-[82vh] overflow-y-auto rounded-xl bg-[#0f1526] border border-slate-700 shadow-2xl p-2 z-50 space-y-1">
+                <div className="absolute left-0 mt-2 w-[380px] sm:w-[420px] max-w-[calc(100vw-2rem)] max-h-[82vh] overflow-y-auto rounded-xl bg-[#0f1526] border border-slate-700 shadow-2xl p-2 z-50 space-y-1">
                   <Link
                     to="/"
                     onClick={() => setShowLessonDropdown(false)}
@@ -346,8 +349,21 @@ export function Header({
                         : "text-slate-300 hover:bg-slate-800/60"
                     }`}
                   >
-                    <Layers className="w-4 h-4 text-amber-400" />
-                    <span>🗺️ 课程总览 & 演进全景路线</span>
+                    <Layers className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                    <span className="truncate">🗺️ 课程总览 & 演进全景路线</span>
+                  </Link>
+
+                  <Link
+                    to="/docs/README.md"
+                    onClick={() => setShowLessonDropdown(false)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition ${
+                      location.pathname.startsWith("/docs")
+                        ? "bg-indigo-600/20 text-indigo-300 font-medium"
+                        : "text-indigo-300 hover:bg-slate-800/60"
+                    }`}
+                  >
+                    <BookOpen className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+                    <span className="truncate">📚 讲义中心 & 技术文档库</span>
                   </Link>
 
                   {/* Context Engineering Track */}
@@ -366,57 +382,33 @@ export function Header({
                       <Link
                         key={lesson.path}
                         to={lesson.path}
+                        title={lesson.title}
                         onClick={() => setShowLessonDropdown(false)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition border ${
+                        className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs transition border ${
                           isActive
                             ? "bg-purple-950/40 text-purple-300 border-purple-500/40 font-medium"
                             : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-purple-200"
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${lesson.color}`} />
-                        <div className="flex-1 flex items-center justify-between">
-                          <div className="font-medium truncate">{lesson.title}</div>
-                          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
-                            {lesson.badge}
-                          </span>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <Icon className={`w-4 h-4 flex-shrink-0 ${lesson.color}`} />
+                          <span className="font-medium truncate">{lesson.title}</span>
                         </div>
-                      </Link>
-                    );
-                  })}
-
-                  {/* Semester 2 */}
-                  <div className="pt-2 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-cyan-400 border-t border-slate-800 uppercase">
-                    <span>第二学期 · Runtime 工程</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-normal">进行中</span>
-                  </div>
-
-                  {semester2Lessons.map((lesson) => {
-                    const Icon = lesson.icon;
-                    const isActive = location.pathname === lesson.path;
-                    return (
-                      <Link
-                        key={lesson.path}
-                        to={lesson.path}
-                        onClick={() => setShowLessonDropdown(false)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition border ${
-                          isActive
-                            ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 font-medium"
-                            : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-cyan-200"
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 ${lesson.color}`} />
-                        <div className="flex-1 flex items-center justify-between">
-                          <div className="font-medium truncate">{lesson.title}</div>
-                          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">
-                            {lesson.badge}
-                          </span>
-                        </div>
+                        <span
+                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded border flex-shrink-0 whitespace-nowrap ${
+                            isActive
+                              ? "bg-purple-500/30 text-purple-200 border-purple-500/50 font-bold"
+                              : "bg-purple-500/15 text-purple-300 border-purple-500/30"
+                          }`}
+                        >
+                          {lesson.tag}
+                        </span>
                       </Link>
                     );
                   })}
 
                   {/* Semester 1 */}
-                  <div className="pt-3 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-slate-400 border-t border-slate-800 uppercase">
+                  <div className="pt-2 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-slate-400 border-t border-slate-800 uppercase">
                     <span>第一学期 · 手写 Agent 引擎</span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-normal">已结课</span>
                   </div>
@@ -428,19 +420,65 @@ export function Header({
                       <Link
                         key={lesson.path}
                         to={lesson.path}
+                        title={lesson.title}
                         onClick={() => setShowLessonDropdown(false)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition ${
+                        className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs transition border ${
                           isActive
-                            ? "bg-purple-600/20 text-purple-300 font-medium"
-                            : "text-slate-300 hover:bg-slate-800/60"
+                            ? "bg-indigo-600/20 text-indigo-300 border-indigo-500/40 font-medium"
+                            : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-slate-200"
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${lesson.color}`} />
-                        <div className="flex-1">
-                          <div className="text-slate-200 font-medium">
-                            {lesson.title}
-                          </div>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <Icon className={`w-4 h-4 flex-shrink-0 ${lesson.color}`} />
+                          <span className="font-medium truncate">{lesson.title}</span>
                         </div>
+                        <span
+                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded border flex-shrink-0 whitespace-nowrap ${
+                            isActive
+                              ? "bg-indigo-500/30 text-indigo-200 border-indigo-500/50 font-bold"
+                              : "bg-slate-800/80 text-slate-400 border-slate-700/50"
+                          }`}
+                        >
+                          {lesson.tag}
+                        </span>
+                      </Link>
+                    );
+                  })}
+
+                  {/* Semester 2 */}
+                  <div className="pt-3 pb-1 px-3 flex items-center justify-between text-[11px] font-semibold tracking-wider text-cyan-400 border-t border-slate-800 uppercase">
+                    <span>第二学期 · Runtime 工程</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-normal">进行中</span>
+                  </div>
+
+                  {semester2Lessons.map((lesson) => {
+                    const Icon = lesson.icon;
+                    const isActive = location.pathname === lesson.path;
+                    return (
+                      <Link
+                        key={lesson.path}
+                        to={lesson.path}
+                        title={lesson.title}
+                        onClick={() => setShowLessonDropdown(false)}
+                        className={`flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs transition border ${
+                          isActive
+                            ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 font-medium"
+                            : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-cyan-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <Icon className={`w-4 h-4 flex-shrink-0 ${lesson.color}`} />
+                          <span className="font-medium truncate">{lesson.title}</span>
+                        </div>
+                        <span
+                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded border flex-shrink-0 whitespace-nowrap ${
+                            isActive
+                              ? "bg-cyan-500/30 text-cyan-200 border-cyan-500/50 font-bold"
+                              : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+                          }`}
+                        >
+                          {lesson.tag}
+                        </span>
                       </Link>
                     );
                   })}
@@ -448,6 +486,17 @@ export function Header({
               </>
             )}
           </div>
+
+          {currentDocPath && (
+            <Link
+              to={currentDocPath}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/30 text-xs text-indigo-300 hover:text-indigo-200 transition font-medium"
+              title="查阅本课详细原理讲义"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+              <span>本课讲义</span>
+            </Link>
+          )}
         </div>
 
         {/* Right: Active Model Badge & Connection Config */}

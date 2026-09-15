@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
 } from "react-router";
 import type { Route } from "./+types/root";
+import "katex/dist/katex.min.css";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [

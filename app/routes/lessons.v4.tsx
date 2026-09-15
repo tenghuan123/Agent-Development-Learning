@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   ChevronRight,
   Terminal,
+  BookOpen,
   Flame,
   Sliders,
   GitBranch,
@@ -264,14 +265,13 @@ export default function Lesson05PlanningWorkbench() {
             <span>上一课 (V3 Coding Agent)</span>
           </Link>
           <div className="h-3 w-px bg-slate-800" />
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noreferrer"
-            className="text-slate-400 hover:text-slate-200 transition"
+          <Link
+            to="/docs/lessons/05-planning-and-workflow-routing.md"
+            className="text-purple-400 hover:text-purple-300 transition flex items-center gap-1 text-xs"
           >
-            讲义文档 ↗
-          </a>
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>讲义文档</span>
+          </Link>
         </div>
       </div>
 

@@ -948,8 +948,7 @@ export default function CourseIndex() {
                 </Link>
 
                 <Link
-                  to="/docs/lessons/context/00-setup-and-baseline.md"
-                  target="_blank"
+                  to="/docs/context-learn.md"
                   className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
                 >
                   <BookOpen className="w-4 h-4 text-cyan-400" />
@@ -1132,19 +1131,28 @@ export default function CourseIndex() {
                         </div>
                       </div>
 
-                      <div className="pt-6">
+                      <div className="pt-6 flex items-center gap-2">
                         {isAvailable ? (
                           <Link
                             to={lesson.path}
-                            className="w-full py-2.5 px-4 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
                           >
                             <span>进入实验台 (Workbench)</span>
                             <ChevronRight className="w-3.5 h-3.5" />
                           </Link>
                         ) : (
-                          <div className="w-full py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
+                          <div className="flex-1 py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
                             {lesson.statusText}
                           </div>
+                        )}
+                        {lesson.docPath && (
+                          <Link
+                            to={`/${lesson.docPath}`}
+                            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-purple-300 border border-slate-700/80 transition flex items-center justify-center shrink-0"
+                            title="查阅本课原理讲义"
+                          >
+                            <BookOpen className="w-4 h-4" />
+                          </Link>
                         )}
                       </div>
                     </div>
@@ -1313,19 +1321,28 @@ export default function CourseIndex() {
                     </div>
 
                     {/* Action Link */}
-                    <div className="pt-6">
+                    <div className="pt-6 flex items-center gap-2">
                       {isAvailable ? (
                         <Link
                           to={lesson.path}
-                          className="w-full py-2.5 px-4 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                          className="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
                         >
                           <span>进入实验台 (Workbench)</span>
                           <ChevronRight className="w-3.5 h-3.5" />
                         </Link>
                       ) : (
-                        <div className="w-full py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
+                        <div className="flex-1 py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
                           {lesson.statusText}
                         </div>
+                      )}
+                      {lesson.docPath && (
+                        <Link
+                          to={`/${lesson.docPath}`}
+                          className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-indigo-300 border border-slate-700/80 transition flex items-center justify-center shrink-0"
+                          title="查阅本课原理讲义"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                        </Link>
                       )}
                     </div>
                   </div>

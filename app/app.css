@@ -60,3 +60,191 @@
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(31, 42, 64, 0.8);
 }
+
+/* ------------------------------------------------------------------ *
+ * 讲义正文（Markdown 渲染结果）
+ *
+ * 渲染出的 class 不在 tailwind.config.ts 的 content 扫描范围内，所以这里
+ * 只能用 @apply / 手写 CSS，不能指望源码里出现对应的原子类。
+ * 选择器统一写成 `.doc-body.prose`，靠多一个 class 压过 typography 插件的
+ * `.prose xxx` 默认样式（两者同为 components 层，同特异性时拼的是生成顺序）。
+ * ------------------------------------------------------------------ */
+@layer components {
+  /* ---------- 标题 ---------- */
+  .doc-body.prose :is(h1, h2, h3, h4) {
+    scroll-margin-top: 5.5rem;
+  }
+
+  .doc-body.prose h1 {
+    @apply text-2xl md:text-3xl font-extrabold text-white tracking-tight
+           border-b border-slate-800 pb-3 mt-2 mb-5;
+  }
+
+  .doc-body.prose h2 {
+    @apply text-xl md:text-2xl font-bold text-slate-100 tracking-tight
+           border-b border-slate-800/60 pb-2 mt-10 mb-4;
+  }
+
+  .doc-body.prose h3 {
+    @apply text-base md:text-lg font-semibold text-purple-300 tracking-tight mt-8 mb-3;
+  }
+
+  .doc-body.prose .heading-anchor {
+    @apply flex items-baseline gap-2 no-underline text-inherit;
+    font: inherit;
+  }
+
+  .doc-body.prose :is(h2, h3) .heading-anchor::before {
+    @apply font-mono transition-opacity;
+    opacity: 0.45;
+  }
+
+  .doc-body.prose h2 .heading-anchor::before {
+    content: "#";
+    @apply text-indigo-400 text-base;
+  }
+
+  .doc-body.prose h3 .heading-anchor::before {
+    content: "##";
+    @apply text-purple-400 text-sm;
+  }
+
+  .doc-body.prose :is(h2, h3) .heading-anchor:hover::before {
+    opacity: 1;
+  }
+
+  /* ---------- 段落与链接 ---------- */
+  .doc-body.prose a {
+    @apply text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition;
+  }
+
+  .doc-body.prose strong {
+    @apply text-white font-semibold;
+  }
+
+  /* ---------- 引用块 ---------- */
+  /* 连续引用行已由 remark 合成单个 blockquote，这里只做外观；
+     不再由渲染器逐行吐独立卡片。 */
+  .doc-body.prose blockquote {
+    @apply not-italic font-normal text-slate-300
+           border-l-4 border-indigo-500 bg-indigo-950/20
+           px-5 py-4 my-5 rounded-r-xl;
+  }
+
+  /* typography 插件默认给引用首尾段加引号，讲义场景不需要 */
+  .doc-body.prose blockquote p:first-of-type::before,
+  .doc-body.prose blockquote p:last-of-type::after {
+    content: none;
+  }
+
+  /* 引用块内部的代码卡片收敛一点，避免"框套框" */
+  .doc-body.prose blockquote .code-card {
+    @apply my-4 border-slate-700/60;
+  }
+
+  .doc-body.prose :is(blockquote, li) > :first-child {
+    margin-top: 0;
+  }
+
+  .doc-body.prose :is(blockquote, li) > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* ---------- 代码 ---------- */
+  .doc-body.prose .code-card {
+    @apply my-6 rounded-xl overflow-hidden border border-slate-800 bg-[#090d1a] shadow-xl;
+  }
+
+  .doc-body.prose .code-card__bar {
+    @apply flex items-center gap-2 px-4 py-2
+           bg-slate-900/90 text-xs font-mono text-slate-400 border-b border-slate-800;
+  }
+
+  .doc-body.prose .code-card__dot {
+    @apply inline-block w-2.5 h-2.5 rounded-full bg-slate-700;
+  }
+
+  .doc-body.prose .code-card__lang {
+    @apply text-slate-300 font-semibold;
+  }
+
+  /* 卡片已经提供了背景/圆角/内边距，清掉 typography 给 pre 的默认外观 */
+  .doc-body.prose .code-card__body pre {
+    @apply bg-transparent border-0 rounded-none shadow-none
+           p-4 m-0 overflow-x-auto text-[13px] leading-relaxed;
+  }
+
+  .doc-body.prose .code-card__body pre code {
+    @apply bg-transparent border-0 p-0 text-[13px] text-slate-200 font-mono;
+  }
+
+  .doc-body.prose :not(pre) > code {
+    @apply bg-slate-800/90 text-indigo-300 font-normal px-1.5 py-0.5 rounded
+           text-[13px] font-mono border border-slate-700/60;
+  }
+
+  /* 行内代码两端的反引号也是 typography 插件的默认行为 */
+  .doc-body.prose :not(pre) > code::before,
+  .doc-body.prose :not(pre) > code::after {
+    content: none;
+  }
+
+  /* ---------- 表格 ---------- */
+  .doc-body.prose .table-scroll {
+    @apply my-6 overflow-x-auto rounded-xl border border-slate-800 shadow-lg;
+  }
+
+  .doc-body.prose table {
+    @apply w-full border-collapse text-sm text-left my-0;
+  }
+
+  .doc-body.prose thead {
+    @apply bg-slate-900/90 text-indigo-300;
+  }
+
+  .doc-body.prose th {
+    @apply p-3 border border-slate-700/80 font-semibold;
+  }
+
+  .doc-body.prose td {
+    @apply p-3 border border-slate-800 text-slate-300;
+  }
+
+  .doc-body.prose tbody tr {
+    @apply border-b border-slate-800/80 transition;
+  }
+
+  .doc-body.prose tbody tr:hover {
+    @apply bg-slate-800/30;
+  }
+
+  /* ---------- 分隔线 ---------- */
+  .doc-body.prose hr {
+    @apply my-8 border-slate-800/80;
+  }
+
+  /* ---------- 数学公式 ---------- */
+  .doc-body.prose .katex {
+    /* KaTeX_Main 没有中文字形，\text{中文} 会掉到 serif 兜底；
+       在字体栈里补上中文字体，和正文保持一致。 */
+    font-family: KaTeX_Main, "Inter", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      sans-serif;
+  }
+
+  /* 长公式在窄屏下横向滚动，不要撑破卡片 */
+  .doc-body.prose .katex-display {
+    @apply my-5 py-1 overflow-x-auto overflow-y-hidden;
+  }
+
+  /* 引用块内的公式再宽也只剩引用自己的内边距可让，把这段还给它，
+     否则稍长一点的公式右边会被直接裁掉 */
+  .doc-body.prose blockquote .katex-display {
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+  }
+
+  .doc-body.prose .katex-display > .katex {
+    @apply text-slate-100;
+  }
+}

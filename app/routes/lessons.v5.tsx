@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, Link } from "react-router";
 import { Header } from "~/components/Header";
 import type {
   CompactionRecord,
@@ -1395,12 +1395,18 @@ TypeError: Cannot read properties of undefined (reading 'verifyJwtSignature')
               </div>
 
               {/* Link to full doc */}
-              <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/30 flex items-center justify-between">
+              <Link
+                to="/docs/lessons/06-context-engineering-and-compression.md"
+                className="p-4 rounded-xl bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/30 hover:border-purple-500/60 flex items-center justify-between transition group"
+              >
                 <div className="flex items-center gap-2 text-xs text-purple-200">
                   <BookOpen className="w-4 h-4 text-purple-400" />
                   <span>查看本课完整技术讲义文档：`docs/lessons/06-context-engineering-and-compression.md`</span>
                 </div>
-              </div>
+                <span className="text-xs text-purple-400 font-semibold group-hover:translate-x-1 transition-transform">
+                  立即阅读 →
+                </span>
+              </Link>
             </div>
           </div>
         )}

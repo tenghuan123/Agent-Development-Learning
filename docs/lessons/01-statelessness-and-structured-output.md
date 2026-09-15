@@ -42,12 +42,10 @@ $$\text{Memory} = \text{Runtime 每次将历史消息数组重新喂给 Context 
 大模型可能返回：
 ```text
 好的！分析结果如下：
-```json
 {
   "framework": "React",
   "version": "19.0.0"
 }
-```
 希望对你有帮助！
 ```
 

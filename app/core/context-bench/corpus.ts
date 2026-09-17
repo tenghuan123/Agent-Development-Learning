@@ -24,6 +24,14 @@ export interface BenchmarkQuestion {
 
 export type { ContextMetrics, TierContextResult, LexicalSearchResult } from "./metrics";
 export { measureContext, assembleTierFromDocs, extractKeywords, searchInDocs } from "./metrics";
+export type { SemanticSearchResult } from "./semantic";
+export {
+  cosineSimilarity,
+  vectorDotProduct,
+  vectorNorm,
+  computeDenseSemanticVector,
+  searchSemanticInDocs,
+} from "./semantic";
 import {
   measureContext,
   assembleTierFromDocs,
@@ -31,6 +39,11 @@ import {
   searchInDocs,
   type TierContextResult,
 } from "./metrics";
+import {
+  searchSemanticInDocs,
+  computeDenseSemanticVector,
+  type SemanticSearchResult,
+} from "./semantic";
 
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
@@ -121,6 +134,58 @@ export class BenchmarkCorpusManager {
     return searchInDocs(this.getAllDocuments(), queryOrKeywords);
   }
 
+  private static cachedDocEmbeddings: Map<string, number[]> | null = null;
+
+  /**
+   * Load real pre-computed 512-dim document embeddings from data/context-benchmark/document-embeddings.json
+   */
+  static getDocumentEmbeddings(): Map<string, number[]> {
+    if (this.cachedDocEmbeddings) return this.cachedDocEmbeddings;
+    const embPath = path.join(this.basePath, "document-embeddings.json");
+    this.cachedDocEmbeddings = new Map<string, number[]>();
+    if (fs.existsSync(embPath)) {
+      try {
+        const raw = fs.readFileSync(embPath, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (parsed.documents) {
+          for (const [id, vec] of Object.entries(parsed.documents)) {
+            this.cachedDocEmbeddings.set(id, vec as number[]);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load document-embeddings.json:", err);
+      }
+    }
+    return this.cachedDocEmbeddings;
+  }
+
+  static computeSemanticVector = computeDenseSemanticVector;
+
+  /**
+   * Semantic Vector Search over the corpus.
+   * Calculates real Cosine Similarity between the query embedding and each document embedding.
+   */
+  static searchSemantic(
+    query: string,
+    options?: {
+      topK?: number;
+      queryVector?: number[];
+      minThreshold?: number;
+      docVectors?: Map<string, number[]>;
+    }
+  ): SemanticSearchResult[] {
+    const realDocVectors = this.getDocumentEmbeddings();
+    const effectiveDocVectors =
+      options?.docVectors ||
+      (options?.queryVector && options.queryVector.length > 32 && realDocVectors.size > 0
+        ? realDocVectors
+        : undefined);
+
+    return searchSemanticInDocs(this.getAllDocuments(), query, {
+      ...options,
+      docVectors: effectiveDocVectors,
+    });
+  }
 
   static measureContext = measureContext;
 

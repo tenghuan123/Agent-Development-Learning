@@ -118,6 +118,14 @@ export function Header({
       color: "text-amber-400",
       badge: "词法检索",
     },
+    {
+      path: "/lessons/context-c4-semantic-search",
+      tag: "C4",
+      title: "第 04 课: 字符串不同但意思一样怎么办？(Semantic Search)",
+      icon: Sparkles,
+      color: "text-purple-400",
+      badge: "语义检索",
+    },
   ];
 
   const semester2Lessons = [

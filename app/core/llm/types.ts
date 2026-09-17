@@ -59,3 +59,12 @@ export interface ChatCompletionOptions {
   responseFormat?: { type: "json_object" | "text" };
   signal?: AbortSignal;
 }
+
+export interface EmbeddingResponse {
+  embeddings: number[][];
+  model: string;
+  usage?: {
+    promptTokens: number;
+    totalTokens: number;
+  };
+}

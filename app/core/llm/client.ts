@@ -7,6 +7,7 @@ import type {
   LLMClientConfig,
   LLMResponse,
   LLMStreamChunk,
+  EmbeddingResponse,
 } from "./types";
 import type { ToolRegistry } from "../tools/registry";
 import { ToolExecutor } from "../tools/executor";
@@ -92,6 +93,44 @@ export class LLMClient {
         "未配置 LLM API Key，请在页面右上角设置，或在根目录 .env 文件中配置 LLM_API_KEY"
       );
     }
+  }
+
+  /**
+   * Create vector embeddings for one or more text strings.
+   * Uses standard OpenAI-compatible embeddings endpoint with automatic retry.
+   */
+  public async createEmbedding(
+    input: string | string[],
+    model?: string,
+    dimensions = 512
+  ): Promise<EmbeddingResponse> {
+    this.ensureApiKeyConfigured();
+    const isZhipu = this.openai.baseURL.includes("bigmodel.cn");
+    const effectiveModel =
+      model ||
+      process.env.EMBEDDING_MODEL ||
+      (isZhipu ? "embedding-3" : "text-embedding-3-small");
+
+    return withRetry(async () => {
+      const resp = await this.openai.embeddings.create({
+        model: effectiveModel,
+        input,
+        encoding_format: "float",
+        ...(isZhipu || effectiveModel.includes("embedding-3") ? { dimensions } : {}),
+      });
+
+      const embeddings = resp.data.map((item) => item.embedding);
+      return {
+        embeddings,
+        model: resp.model || effectiveModel,
+        usage: resp.usage
+          ? {
+              promptTokens: resp.usage.prompt_tokens,
+              totalTokens: resp.usage.total_tokens,
+            }
+          : undefined,
+      };
+    });
   }
 
   private prepareMessages(

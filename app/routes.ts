@@ -32,6 +32,7 @@ export default [
   route("lessons/context-c1-why-context", "routes/lessons.context-c1.tsx"),
   route("lessons/context-c2-sufficient-context", "routes/lessons.context-c2.tsx"),
   route("lessons/context-c3-lexical-search", "routes/lessons.context-c3.tsx"),
+  route("lessons/context-c4-semantic-search", "routes/lessons.context-c4.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

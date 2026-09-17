@@ -45,6 +45,21 @@ import {
   computeDenseSemanticVector,
   type SemanticSearchResult,
 } from "./semantic";
+export type {
+  HybridSearchResult,
+  HybridFusionOptions,
+  FusionAlgorithm,
+} from "./hybrid";
+export {
+  reciprocalRankFusion,
+  minMaxScoreFusion,
+  rawScoreSumFusion,
+  searchHybridInDocs,
+} from "./hybrid";
+import {
+  searchHybridInDocs,
+  type HybridFusionOptions,
+} from "./hybrid";
 
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
@@ -183,6 +198,26 @@ export class BenchmarkCorpusManager {
         : undefined);
 
     return searchSemanticInDocs(this.getAllDocuments(), query, {
+      ...options,
+      docVectors: effectiveDocVectors,
+    });
+  }
+
+  /**
+   * Hybrid Retrieval (Lexical + Semantic + Fusion: RRF / MinMax / Raw)
+   */
+  static searchHybrid(
+    query: string,
+    options?: HybridFusionOptions
+  ): ReturnType<typeof searchHybridInDocs> {
+    const realDocVectors = this.getDocumentEmbeddings();
+    const effectiveDocVectors =
+      options?.docVectors ||
+      (options?.queryVector && options.queryVector.length > 32 && realDocVectors.size > 0
+        ? realDocVectors
+        : undefined);
+
+    return searchHybridInDocs(this.getAllDocuments(), query, {
       ...options,
       docVectors: effectiveDocVectors,
     });

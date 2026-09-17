@@ -46,12 +46,14 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c3": "/docs/lessons/context/03-lexical-search-and-grep.md",
   "context-c4": "/docs/lessons/context/04-semantic-search-and-embedding.md",
   "context-c5": "/docs/lessons/context/05-can-semantic-search-replace-lexical.md",
+  "context-c6": "/docs/lessons/context/06-hybrid-retrieval-and-rrf.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
   c3: "/docs/lessons/context/03-lexical-search-and-grep.md",
   c4: "/docs/lessons/context/04-semantic-search-and-embedding.md",
   c5: "/docs/lessons/context/05-can-semantic-search-replace-lexical.md",
+  c6: "/docs/lessons/context/06-hybrid-retrieval-and-rrf.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -95,6 +97,7 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "context-03": "/lessons/context-c3-lexical-search",
   "context-04": "/lessons/context-c4-semantic-search",
   "context-05": "/lessons/context-c5-semantic-vs-lexical",
+  "context-06": "/lessons/context-c6-hybrid-retrieval",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

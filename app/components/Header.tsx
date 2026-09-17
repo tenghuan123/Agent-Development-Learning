@@ -135,6 +135,14 @@ export function Header({
       color: "text-rose-400",
       badge: "边界认知",
     },
+    {
+      path: "/lessons/context-c6-hybrid-retrieval",
+      tag: "C6",
+      title: "第 06 课: 为什么不能一起用？(Hybrid Retrieval 与 RRF)",
+      icon: Network,
+      color: "text-cyan-400",
+      badge: "混合检索",
+    },
   ];
 
   const semester2Lessons = [

@@ -940,6 +940,330 @@ ${contextContent}
       });
     }
 
+    // 14. Action: Search Hybrid (Lesson 6)
+    if (requestedAction === "search_hybrid") {
+      const q = (query || question || "").trim();
+      const customKeywords: string[] | undefined = body.keywords;
+      const effectiveKeywords = Array.isArray(customKeywords) && customKeywords.length > 0
+        ? customKeywords
+        : BenchmarkCorpusManager.extractKeywords(q);
+
+      const algorithm = body.algorithm || "rrf";
+      const k = typeof body.k === "number" ? body.k : 60;
+      const weightLexical = typeof body.weightLexical === "number" ? body.weightLexical : 0.5;
+      const weightSemantic = typeof body.weightSemantic === "number" ? body.weightSemantic : 0.5;
+      const topK = typeof body.topK === "number" ? body.topK : 8;
+
+      let queryVector: number[] | undefined;
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = baseURL || process.env.LLM_BASE_URL;
+
+      if (effectiveApiKey && effectiveApiKey.trim().length > 0) {
+        try {
+          const embClient = new LLMClient({ apiKey: effectiveApiKey, baseURL: effectiveBaseURL, defaultModel: model });
+          const embResp = await embClient.createEmbedding(q);
+          if (embResp.embeddings && embResp.embeddings[0]) {
+            queryVector = embResp.embeddings[0];
+          }
+        } catch {
+          // fallback
+        }
+      }
+
+      const t0 = Date.now();
+      const hybridOut = BenchmarkCorpusManager.searchHybrid(q, {
+        algorithm,
+        k,
+        weightLexical,
+        weightSemantic,
+        topK,
+        customKeywords: effectiveKeywords,
+        queryVector,
+      });
+      const latencyMs = Date.now() - t0;
+
+      return Response.json({
+        success: true,
+        query: q,
+        keywords: effectiveKeywords,
+        algorithm,
+        parameters: hybridOut.parameters,
+        latencyMs,
+        hybridResults: hybridOut.hybridResults.map((r) => ({
+          doc: r.doc,
+          id: r.doc.id,
+          title: r.doc.title,
+          category: r.doc.category,
+          tokenCount: r.doc.tokenCount,
+          finalRank: r.finalRank,
+          finalScore: r.finalScore,
+          algorithm: r.algorithm,
+          lexicalRank: r.lexicalRank,
+          lexicalScore: r.lexicalScore,
+          semanticRank: r.semanticRank,
+          semanticScore: r.semanticScore,
+          normLexicalScore: r.normLexicalScore,
+          normSemanticScore: r.normSemanticScore,
+          matchReason: r.matchReason,
+          contribution: r.contribution,
+          previewSnippet: r.previewSnippet,
+          matchedKeywords: r.matchedKeywords,
+        })),
+        lexicalResults: hybridOut.lexicalResults.slice(0, 5).map((r) => ({
+          id: r.doc.id,
+          title: r.doc.title,
+          score: r.score,
+          matchSnippet: r.matchSnippet,
+          matchedKeywords: r.matchedKeywords,
+        })),
+        semanticResults: hybridOut.semanticResults.slice(0, 5).map((r) => ({
+          id: r.doc.id,
+          title: r.doc.title,
+          similarity: r.similarity,
+          rank: r.rank,
+          previewSnippet: r.previewSnippet,
+        })),
+      });
+    }
+
+    // 15. Action: Run Hybrid RAG Pipeline (Lesson 6)
+    if (requestedAction === "run_hybrid_pipeline") {
+      const q = (question || query || "").trim();
+      const customKeywords: string[] | undefined = body.keywords;
+      const effectiveKeywords = Array.isArray(customKeywords) && customKeywords.length > 0
+        ? customKeywords
+        : BenchmarkCorpusManager.extractKeywords(q);
+
+      const algorithm = body.algorithm || "rrf";
+      const k = typeof body.k === "number" ? body.k : 60;
+      const weightLexical = typeof body.weightLexical === "number" ? body.weightLexical : 0.5;
+      const weightSemantic = typeof body.weightSemantic === "number" ? body.weightSemantic : 0.5;
+
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = baseURL || process.env.LLM_BASE_URL;
+
+      let queryVector: number[] | undefined;
+      if (effectiveApiKey && effectiveApiKey.trim().length > 0) {
+        try {
+          const embClient = new LLMClient({ apiKey: effectiveApiKey, baseURL: effectiveBaseURL, defaultModel: model });
+          const embResp = await embClient.createEmbedding(q);
+          if (embResp.embeddings && embResp.embeddings[0]) {
+            queryVector = embResp.embeddings[0];
+          }
+        } catch {
+          // fallback
+        }
+      }
+
+      const tStartSearch = Date.now();
+      const hybridOut = BenchmarkCorpusManager.searchHybrid(q, {
+        algorithm,
+        k,
+        weightLexical,
+        weightSemantic,
+        topK: 5,
+        customKeywords: effectiveKeywords,
+        queryVector,
+      });
+      const searchLatencyMs = Date.now() - tStartSearch;
+
+      const topHit = hybridOut.hybridResults[0] || null;
+      const allDocs = BenchmarkCorpusManager.getAllDocuments();
+      const allDocsTokens = allDocs.reduce((acc, d) => acc + d.tokenCount, 0);
+
+      let answer = "";
+      let llmLatencyMs = 0;
+      let promptTokens = 0;
+      let outputTokens = 0;
+
+      const shouldRunLLM = Boolean(effectiveApiKey);
+      if (shouldRunLLM && topHit) {
+        const client = new LLMClient({
+          apiKey: effectiveApiKey,
+          baseURL: effectiveBaseURL,
+          defaultModel: model,
+        });
+
+        const channelMeta =
+          topHit.matchReason === "both"
+            ? `双轨共识召回 (词法排位 #${topHit.lexicalRank}, 语义相似度 ${topHit.semanticScore.toFixed(3)})`
+            : topHit.matchReason === "lexical_only"
+            ? `词法单轨兜底召回 (词法分: ${topHit.lexicalScore})`
+            : `语义单轨泛化召回 (语义相似度: ${topHit.semanticScore.toFixed(3)})`;
+
+        const prompt = `以下是通过双轨混合检索与 RRF 算法（Hybrid Retrieval & Rank Fusion，${channelMeta}，融合得分: ${topHit.finalScore}）为你精准提取的参考文档《${topHit.doc.title}》：
+
+<<<DOCUMENT_START>>>
+${topHit.doc.content}
+<<<DOCUMENT_END>>>
+
+请严格基于上述参考文档回答用户问题。若文档中提及相关条款，请清晰准确地做出解答。若文档中明确不包含相关信息，请如实说明未知。
+
+用户问题：${q}`;
+
+        promptTokens = SmartTruncator.estimateTokens(prompt);
+        const t0 = Date.now();
+        const res = await client.chatCompletion({
+          messages: [{ role: "user", content: prompt }],
+          systemPrompt: "你是一个专业的知识问答助手。回答必须严谨，以提供的参考文档为唯一依据。",
+        });
+        llmLatencyMs = Date.now() - t0;
+        answer = res.content;
+        outputTokens = SmartTruncator.estimateTokens(res.content);
+      } else if (shouldRunLLM && !topHit) {
+        const fallbackPrompt = `用户提问：${q}\n\n注意：混合检索在知识库中未找到任何匹配参考文档。请诚实告知用户缺少相关资料。`;
+        promptTokens = SmartTruncator.estimateTokens(fallbackPrompt);
+        const t0 = Date.now();
+        const client = new LLMClient({ apiKey: effectiveApiKey, baseURL: effectiveBaseURL, defaultModel: model });
+        const res = await client.chatCompletion({
+          messages: [{ role: "user", content: fallbackPrompt }],
+          systemPrompt: "你是一个专业的知识问答助手。若缺乏参考文档依据，请明确告知未知。",
+        });
+        llmLatencyMs = Date.now() - t0;
+        answer = res.content;
+        outputTokens = SmartTruncator.estimateTokens(res.content);
+      }
+
+      const totalTokens = promptTokens + outputTokens;
+      const tokenSavingsPct = allDocsTokens > 0
+        ? Number((((allDocsTokens - promptTokens) / allDocsTokens) * 100).toFixed(1))
+        : 0;
+
+      return Response.json({
+        success: true,
+        query: q,
+        algorithm,
+        searchLatencyMs,
+        llmLatencyMs,
+        totalLatencyMs: searchLatencyMs + llmLatencyMs,
+        topHit: topHit
+          ? {
+              id: topHit.doc.id,
+              title: topHit.doc.title,
+              category: topHit.doc.category,
+              finalRank: topHit.finalRank,
+              finalScore: topHit.finalScore,
+              matchReason: topHit.matchReason,
+              lexicalRank: topHit.lexicalRank,
+              semanticRank: topHit.semanticRank,
+              semanticScore: topHit.semanticScore,
+              lexicalScore: topHit.lexicalScore,
+              previewSnippet: topHit.previewSnippet,
+              tokenCount: topHit.doc.tokenCount,
+            }
+          : null,
+        topResults: hybridOut.hybridResults.slice(0, 4).map((r) => ({
+          id: r.doc.id,
+          title: r.doc.title,
+          finalRank: r.finalRank,
+          finalScore: r.finalScore,
+          matchReason: r.matchReason,
+          lexicalRank: r.lexicalRank,
+          semanticRank: r.semanticRank,
+        })),
+        answer,
+        tokens: {
+          promptTokens,
+          outputTokens,
+          totalTokens,
+          allDocsTokens,
+          tokenSavingsPct,
+        },
+      });
+    }
+
+    // 16. Action: Run C6 Triple Showdown (Lexical vs Semantic vs Hybrid RRF)
+    if (requestedAction === "run_c6_triple_showdown") {
+      const k = typeof body.k === "number" ? body.k : 60;
+      const weightLexical = typeof body.weightLexical === "number" ? body.weightLexical : 0.5;
+      const weightSemantic = typeof body.weightSemantic === "number" ? body.weightSemantic : 0.5;
+
+      const casesToRun = C5_MATRIX_CASES;
+
+      const showdownResults = casesToRun.map((mc) => {
+        // 1. Lexical
+        const tLex0 = Date.now();
+        const lexResults = BenchmarkCorpusManager.searchText(mc.lexicalKeywords);
+        const lexLatencyMs = Date.now() - tLex0;
+        const lexHitRank = lexResults.findIndex((r) => r.doc.id === mc.targetDocId);
+        const lexTopHit = lexResults[0] || null;
+
+        // 2. Semantic
+        const tSem0 = Date.now();
+        const semResults = BenchmarkCorpusManager.searchSemantic(mc.query, { topK: 5 });
+        const semLatencyMs = Date.now() - tSem0;
+        const semHitRank = semResults.findIndex((r) => r.doc.id === mc.targetDocId);
+        const semTopHit = semResults[0] || null;
+
+        // 3. Hybrid RRF
+        const tHyb0 = Date.now();
+        const hybOut = BenchmarkCorpusManager.searchHybrid(mc.query, {
+          algorithm: "rrf",
+          k,
+          weightLexical,
+          weightSemantic,
+          topK: 5,
+          customKeywords: mc.lexicalKeywords,
+        });
+        const hybLatencyMs = Date.now() - tHyb0;
+        const hybHitRank = hybOut.hybridResults.findIndex((r) => r.doc.id === mc.targetDocId);
+        const hybTopHit = hybOut.hybridResults[0] || null;
+
+        return {
+          id: mc.id,
+          category: mc.category,
+          title: mc.title,
+          query: mc.query,
+          targetDocId: mc.targetDocId,
+          targetDocTitle: mc.targetDocTitle,
+          lexicalKeywords: mc.lexicalKeywords,
+          expectedWinner: mc.expectedWinner,
+          keyTakeaway: mc.keyTakeaway,
+          lexical: {
+            latencyMs: lexLatencyMs,
+            targetRank: lexHitRank !== -1 ? lexHitRank + 1 : null,
+            totalHits: lexResults.length,
+            topMatchDoc: lexTopHit ? lexTopHit.doc.title : null,
+            score: lexTopHit ? lexTopHit.score : 0,
+            isTopHit: lexHitRank === 0,
+          },
+          semantic: {
+            latencyMs: semLatencyMs,
+            targetRank: semHitRank !== -1 ? semHitRank + 1 : null,
+            totalHits: semResults.length,
+            topMatchDoc: semTopHit ? semTopHit.doc.title : null,
+            similarity: semTopHit ? semTopHit.similarity : 0,
+            isTopHit: semHitRank === 0,
+          },
+          hybrid: {
+            latencyMs: hybLatencyMs,
+            targetRank: hybHitRank !== -1 ? hybHitRank + 1 : null,
+            totalHits: hybOut.hybridResults.length,
+            topMatchDoc: hybTopHit ? hybTopHit.doc.title : null,
+            rrfScore: hybTopHit ? hybTopHit.finalScore : 0,
+            matchReason: hybTopHit ? hybTopHit.matchReason : "none",
+            isTopHit: hybHitRank === 0,
+          },
+        };
+      });
+
+      const summary = {
+        totalCases: showdownResults.length,
+        lexicalTopHits: showdownResults.filter((c) => c.lexical.isTopHit).length,
+        semanticTopHits: showdownResults.filter((c) => c.semantic.isTopHit).length,
+        hybridTopHits: showdownResults.filter((c) => c.hybrid.isTopHit).length,
+        hybridRecallPct: Number(
+          ((showdownResults.filter((c) => c.hybrid.targetRank !== null).length / showdownResults.length) * 100).toFixed(1)
+        ),
+      };
+
+      return Response.json({
+        success: true,
+        summary,
+        cases: showdownResults,
+      });
+    }
+
     return Response.json({ error: "Unknown action" }, { status: 400 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

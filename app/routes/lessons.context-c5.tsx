@@ -416,6 +416,13 @@ export default function ContextLesson5Page() {
             </Link>
             <span className="text-zinc-700">|</span>
             <Link
+              to="/lessons/context-c6-hybrid-retrieval"
+              className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+            >
+              下一课 (C6 混合检索) →
+            </Link>
+            <span className="text-zinc-700">|</span>
+            <Link
               to="/docs/lessons/context/05-can-semantic-search-replace-lexical.md"
               className="text-rose-400 hover:text-rose-300 flex items-center gap-1 font-medium transition-colors"
             >
@@ -1290,6 +1297,15 @@ export default function ContextLesson5Page() {
                 两种完全不同量纲和概率分布的得分，<strong>绝对不能粗暴相加！</strong>
                 下一课我们将手写 <strong>RRF（Reciprocal Rank Fusion 倒数排名融合算法）</strong>，完成检索体系的双轨并合！
               </p>
+              <div className="pt-2">
+                <Link
+                  to="/lessons/context-c6-hybrid-retrieval"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-zinc-950 font-bold text-xs transition-colors shadow-md shadow-cyan-950/50"
+                >
+                  <span>立即开启第 06 课：双轨融合实战</span>
+                  <span className="font-mono">→</span>
+                </Link>
+              </div>
             </div>
           </div>
         )}

@@ -101,6 +101,14 @@ export function Header({
       color: "text-indigo-400",
       badge: "上下文起源",
     },
+    {
+      path: "/lessons/context-c2-sufficient-context",
+      tag: "C2",
+      title: "第 02 课: Context 越多越好吗？(Sufficient Context)",
+      icon: Scissors,
+      color: "text-cyan-400",
+      badge: "信息密度",
+    },
   ];
 
   const semester2Lessons = [

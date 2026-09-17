@@ -42,8 +42,10 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   v20: "/docs/lessons/21-messages-vs-state.md",
   "context-c0": "/docs/lessons/context/00-setup-and-baseline.md",
   "context-c1": "/docs/lessons/context/01-why-need-context.md",
+  "context-c2": "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
+  c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -83,6 +85,7 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "21": "/lessons/v20-messages-vs-state",
   "context-00": "/lessons/context-c0-setup",
   "context-01": "/lessons/context-c1-why-context",
+  "context-02": "/lessons/context-c2-sufficient-context",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

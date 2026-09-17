@@ -119,8 +119,8 @@ export default function CourseIndex() {
       icon: Brain,
       color: "from-indigo-600 to-cyan-600",
       borderColor: "border-indigo-500/50",
-      status: "current",
-      statusText: "⚡ 最新开启",
+      status: "completed",
+      statusText: "已就绪",
       badge: "第一性原理",
       highlights: [
         "双轨对抗实验室：Zero Context 裸问 vs 注入文档对比",
@@ -134,19 +134,19 @@ export default function CourseIndex() {
       number: "第 02 课",
       title: "Context 越多越好吗？(Sufficient vs Maximum)",
       desc: "把所有文档全部塞进 Prompt 会怎样？Token 飙升、成本失控，回答质量反而因为注意力稀释而恶化。手写 measureContext() 量化信噪比。",
-      path: "#",
+      path: "/lessons/context-c2-sufficient-context",
       icon: Scissors,
       color: "from-cyan-600 to-blue-600",
       borderColor: "border-cyan-500/50",
-      status: "next",
-      statusText: "下一课",
+      status: "current",
+      statusText: "⚡ 最新开启",
       badge: "信息密度",
       highlights: [
         "三组对照实验：只有正确文档 vs +10无关文档 vs +100无关片段",
         "核心思想跃迁：不是 Maximum Context，而是 Sufficient Context",
         "Token 消耗、延迟、成本与准确率四维量化观测",
       ],
-      docPath: "docs/context-learn.md",
+      docPath: "docs/lessons/context/02-sufficient-vs-maximum-context.md",
     },
     {
       version: "C3",
@@ -157,9 +157,9 @@ export default function CourseIndex() {
       icon: Terminal,
       color: "from-amber-600 to-orange-600",
       borderColor: "border-amber-500/50",
-      status: "todo",
-      statusText: "规划中",
-      badge: "字面检索",
+      status: "next",
+      statusText: "下一课",
+      badge: "搜索起点",
       highlights: [
         "字符串匹配与倒排索引原语：searchText(query)",
         "用户问题 ➔ 提取关键词 ➔ searchText ➔ read ➔ answer 链路",
@@ -945,6 +945,14 @@ export default function CourseIndex() {
                 >
                   <Brain className="w-4 h-4 text-indigo-400" />
                   <span>第 1 课：模型不知道答案怎么办？(第一性原理)</span>
+                </Link>
+
+                <Link
+                  to="/lessons/context-c2-sufficient-context"
+                  className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+                >
+                  <Scissors className="w-4 h-4 text-cyan-400" />
+                  <span>第 2 课：Context 越多越好吗？(Sufficient Context)</span>
                 </Link>
 
                 <Link

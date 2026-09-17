@@ -423,10 +423,10 @@ export default function ContextLesson1Page() {
 
               <div className="pt-2">
                 <Link
-                  to="/lessons/context-c0-setup"
+                  to="/lessons/context-c2-sufficient-context"
                   className="text-cyan-400 hover:text-cyan-300 text-xs font-semibold inline-flex items-center gap-1"
                 >
-                  <span>下一步思考：如果我有 10,000 个文档，把它们全部拼进去会发生什么？</span>
+                  <span>前往第 2 课：Context 越多越好吗？(Sufficient Context 实验)</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

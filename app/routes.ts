@@ -30,6 +30,7 @@ export default [
   // Dedicated Context Engineering Workbenches
   route("lessons/context-c0-setup", "routes/lessons.context-c0.tsx"),
   route("lessons/context-c1-why-context", "routes/lessons.context-c1.tsx"),
+  route("lessons/context-c2-sufficient-context", "routes/lessons.context-c2.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

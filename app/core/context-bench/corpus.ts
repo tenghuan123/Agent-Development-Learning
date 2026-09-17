@@ -22,6 +22,10 @@ export interface BenchmarkQuestion {
   difficulty: "easy" | "medium" | "hard";
 }
 
+export type { ContextMetrics, TierContextResult } from "./metrics";
+export { measureContext, assembleTierFromDocs } from "./metrics";
+import { measureContext, assembleTierFromDocs, type TierContextResult } from "./metrics";
+
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
 
@@ -126,5 +130,21 @@ export class BenchmarkCorpusManager {
     }
 
     return results;
+  }
+
+  static measureContext = measureContext;
+
+  /**
+   * Assemble context for 3 tiers:
+   * Tier A: Sufficient (only target doc)
+   * Tier B: Diluted (target doc + 4~6 other docs)
+   * Tier C: Saturated (all docs + distractor/expanded noise with position control)
+   */
+  static assembleTierContext(options: {
+    targetDocId: string;
+    tier: "A" | "B" | "C";
+    position?: "top" | "middle" | "bottom";
+  }): TierContextResult {
+    return assembleTierFromDocs(this.getAllDocuments(), options);
   }
 }

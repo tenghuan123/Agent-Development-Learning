@@ -28,6 +28,7 @@ import {
   Database,
   AlertTriangle,
   RefreshCw,
+  Search,
 } from "lucide-react";
 
 export async function loader() {
@@ -138,8 +139,8 @@ export default function CourseIndex() {
       icon: Scissors,
       color: "from-cyan-600 to-blue-600",
       borderColor: "border-cyan-500/50",
-      status: "current",
-      statusText: "⚡ 最新开启",
+      status: "completed",
+      statusText: "已就绪",
       badge: "信息密度",
       highlights: [
         "三组对照实验：只有正确文档 vs +10无关文档 vs +100无关片段",
@@ -153,19 +154,19 @@ export default function CourseIndex() {
       number: "第 03 课",
       title: "数据很多怎么找到相关信息？(Grep / Lexical Search)",
       desc: "面对 10,000 个文档不可能全塞。先不要学 Vector DB，从最朴素的关键词 grep 开始。手写 searchText() 与 readDocument() 检索闭环。",
-      path: "#",
-      icon: Terminal,
+      path: "/lessons/context-c3-lexical-search",
+      icon: Search,
       color: "from-amber-600 to-orange-600",
       borderColor: "border-amber-500/50",
-      status: "next",
-      statusText: "下一课",
+      status: "current",
+      statusText: "⚡ 最新开启",
       badge: "搜索起点",
       highlights: [
         "字符串匹配与倒排索引原语：searchText(query)",
         "用户问题 ➔ 提取关键词 ➔ searchText ➔ read ➔ answer 链路",
         "致命痛点浮现：用户问'买了反悔'，文档写'无理由退款'，搜不到",
       ],
-      docPath: "docs/context-learn.md",
+      docPath: "docs/lessons/context/03-lexical-search-and-grep.md",
     },
     {
       version: "C4",
@@ -176,8 +177,8 @@ export default function CourseIndex() {
       icon: Sparkles,
       color: "from-purple-600 to-pink-600",
       borderColor: "border-purple-500/50",
-      status: "todo",
-      statusText: "规划中",
+      status: "next",
+      statusText: "下一课",
       badge: "语义检索",
       highlights: [
         "Embedding 几何空间映射：找'字' vs 找'意思'",

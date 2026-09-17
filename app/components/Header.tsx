@@ -28,6 +28,7 @@ import {
   GitBranch,
   Database,
   BookOpen,
+  Search,
 } from "lucide-react";
 import { getLessonDocPath } from "~/lib/docs-catalog";
 
@@ -108,6 +109,14 @@ export function Header({
       icon: Scissors,
       color: "text-cyan-400",
       badge: "信息密度",
+    },
+    {
+      path: "/lessons/context-c3-lexical-search",
+      tag: "C3",
+      title: "第 03 课: 数据很多怎么找到相关信息？(Lexical Search)",
+      icon: Search,
+      color: "text-amber-400",
+      badge: "词法检索",
     },
   ];
 

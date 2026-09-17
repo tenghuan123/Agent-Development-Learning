@@ -22,9 +22,15 @@ export interface BenchmarkQuestion {
   difficulty: "easy" | "medium" | "hard";
 }
 
-export type { ContextMetrics, TierContextResult } from "./metrics";
-export { measureContext, assembleTierFromDocs } from "./metrics";
-import { measureContext, assembleTierFromDocs, type TierContextResult } from "./metrics";
+export type { ContextMetrics, TierContextResult, LexicalSearchResult } from "./metrics";
+export { measureContext, assembleTierFromDocs, extractKeywords, searchInDocs } from "./metrics";
+import {
+  measureContext,
+  assembleTierFromDocs,
+  extractKeywords,
+  searchInDocs,
+  type TierContextResult,
+} from "./metrics";
 
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
@@ -104,33 +110,17 @@ export class BenchmarkCorpusManager {
     }
   }
 
+  static extractKeywords = extractKeywords;
+  static searchInDocs = searchInDocs;
+
   /**
-   * Lexical Search (Grep) over the corpus
+   * Lexical Search (Grep) over the corpus.
+   * Supports a single query string or an array of keywords.
    */
-  static searchText(query: string): Array<{ doc: CorpusDocument; matchSnippet: string; score: number }> {
-    if (!query.trim()) return [];
-    const docs = this.getAllDocuments();
-    const results: Array<{ doc: CorpusDocument; matchSnippet: string; score: number }> = [];
-    const lowerQuery = query.toLowerCase();
-
-    for (const doc of docs) {
-      const lowerContent = doc.content.toLowerCase();
-      const idx = lowerContent.indexOf(lowerQuery);
-      if (idx !== -1) {
-        // Find line or window
-        const start = Math.max(0, idx - 40);
-        const end = Math.min(doc.content.length, idx + query.length + 60);
-        const snippet = (start > 0 ? "..." : "") + doc.content.substring(start, end).replace(/\n/g, " ") + (end < doc.content.length ? "..." : "");
-        results.push({
-          doc,
-          matchSnippet: snippet,
-          score: 1.0,
-        });
-      }
-    }
-
-    return results;
+  static searchText(queryOrKeywords: string | string[]) {
+    return searchInDocs(this.getAllDocuments(), queryOrKeywords);
   }
+
 
   static measureContext = measureContext;
 

@@ -29,6 +29,7 @@ import {
   Database,
   BookOpen,
   Search,
+  AlertTriangle,
 } from "lucide-react";
 import { getLessonDocPath } from "~/lib/docs-catalog";
 
@@ -125,6 +126,14 @@ export function Header({
       icon: Sparkles,
       color: "text-purple-400",
       badge: "语义检索",
+    },
+    {
+      path: "/lessons/context-c5-semantic-vs-lexical",
+      tag: "C5",
+      title: "第 05 课: Semantic 能替代关键词搜索吗？(失真边界)",
+      icon: AlertTriangle,
+      color: "text-rose-400",
+      badge: "边界认知",
     },
   ];
 

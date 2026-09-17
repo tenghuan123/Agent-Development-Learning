@@ -24,13 +24,14 @@ export interface BenchmarkQuestion {
 
 export type { ContextMetrics, TierContextResult, LexicalSearchResult } from "./metrics";
 export { measureContext, assembleTierFromDocs, extractKeywords, searchInDocs } from "./metrics";
-export type { SemanticSearchResult } from "./semantic";
+export type { SemanticSearchResult, TokenFragment, FragmentationReport } from "./semantic";
 export {
   cosineSimilarity,
   vectorDotProduct,
   vectorNorm,
   computeDenseSemanticVector,
   searchSemanticInDocs,
+  simulateTokenFragmentation,
 } from "./semantic";
 import {
   measureContext,

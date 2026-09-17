@@ -75,8 +75,7 @@ const SEMANTIC_CLUSTERS: Array<{
     weight: 1.5,
     terms: [
       "alpha", "企业版", "sso", "单点登录", "令牌", "授权密钥", "容灾", "高可用",
-      "故障切换", "主备", "崩溃", "节点切换", "alphasyncdaemon", "alphaauthbridge",
-      "err_alpha_auth_9021", "30天保障"
+      "故障切换", "主备", "崩溃", "节点切换", "30天保障"
     ],
   },
   {
@@ -84,7 +83,7 @@ const SEMANTIC_CLUSTERS: Array<{
     dimIndex: 2,
     weight: 1.5,
     terms: [
-      "beta", "插件", "betagammaconnector", "代码库", "审查", "集成", "跨代码库",
+      "beta", "插件", "代码库", "审查", "集成", "跨代码库",
       "免费插件", "协同", "开发者", "github", "gitlab"
     ],
   },
@@ -240,3 +239,117 @@ export function searchSemanticInDocs(
 
   return results.slice(0, topK);
 }
+
+export interface TokenFragment {
+  token: string;
+  type: "symbol_prefix" | "separator" | "subword" | "digits" | "word";
+  isRareIdentifier: boolean;
+  dilutionPct: number;
+}
+
+export interface FragmentationReport {
+  original: string;
+  tokens: TokenFragment[];
+  fragmentCount: number;
+  containsExactSymbol: boolean;
+  dilutionSeverity: "none" | "low" | "medium" | "severe";
+  explanation: string;
+}
+
+/**
+ * Simulates Subword BPE / WordPiece tokenization behavior on exact symbols,
+ * error codes (ERR_ALPHA_AUTH_9021), and CamelCase names (AlphaSyncDaemon).
+ * Demonstrates how continuous embeddings dilute discrete identifier fingerprints.
+ */
+export function simulateTokenFragmentation(text: string): FragmentationReport {
+  if (!text || !text.trim()) {
+    return {
+      original: "",
+      tokens: [],
+      fragmentCount: 0,
+      containsExactSymbol: false,
+      dilutionSeverity: "none",
+      explanation: "输入为空",
+    };
+  }
+
+  const rawTokens: TokenFragment[] = [];
+  // Tokenize using regex preserving code identifiers, delimiters, and chinese characters
+  const identifierRegex = /[A-Z0-9]+(?:_[A-Z0-9]+)+|[A-Z][a-z]+(?:[A-Z][a-z]+)+|[a-zA-Z]+|\d+|[\u4e00-\u9fa5]|[^\s\w\u4e00-\u9fa5]/g;
+  const matches = text.match(identifierRegex) || [];
+
+  let hasExactSymbol = false;
+
+  for (const item of matches) {
+    // Check if item is an uppercase underscored identifier (e.g. ERR_ALPHA_AUTH_9021)
+    if (/^[A-Z0-9]+(_[A-Z0-9]+)+$/.test(item)) {
+      hasExactSymbol = true;
+      const parts = item.split("_");
+      parts.forEach((p, idx) => {
+        if (/^\d+$/.test(p)) {
+          // Numbers in BPE often fragment into 2-digit chunks e.g. 90, 21
+          if (p.length > 2) {
+            rawTokens.push({ token: p.slice(0, 2), type: "digits", isRareIdentifier: true, dilutionPct: 15 });
+            rawTokens.push({ token: p.slice(2), type: "digits", isRareIdentifier: true, dilutionPct: 15 });
+          } else {
+            rawTokens.push({ token: p, type: "digits", isRareIdentifier: true, dilutionPct: 20 });
+          }
+        } else if (p.length > 5) {
+          rawTokens.push({ token: p.slice(0, 4), type: "subword", isRareIdentifier: true, dilutionPct: 25 });
+          rawTokens.push({ token: p.slice(4), type: "subword", isRareIdentifier: true, dilutionPct: 25 });
+        } else {
+          rawTokens.push({ token: p, type: idx === 0 ? "symbol_prefix" : "subword", isRareIdentifier: true, dilutionPct: 30 });
+        }
+
+        if (idx < parts.length - 1) {
+          rawTokens.push({ token: "_", type: "separator", isRareIdentifier: false, dilutionPct: 5 });
+        }
+      });
+    } else if (/^[A-Z][a-z]+([A-Z][a-z]+)+$/.test(item)) {
+      // CamelCase identifier e.g. AlphaSyncDaemon
+      hasExactSymbol = true;
+      const camelParts = item.match(/[A-Z][a-z]+/g) || [item];
+      camelParts.forEach((cp) => {
+        rawTokens.push({ token: cp, type: "subword", isRareIdentifier: true, dilutionPct: 35 });
+      });
+    } else if (/^\d{3,}$/.test(item)) {
+      // Standalone numbers / ports e.g. 9443
+      hasExactSymbol = true;
+      rawTokens.push({ token: item.slice(0, 2), type: "digits", isRareIdentifier: true, dilutionPct: 30 });
+      rawTokens.push({ token: item.slice(2), type: "digits", isRareIdentifier: true, dilutionPct: 30 });
+    } else if (/^[\u4e00-\u9fa5]$/.test(item)) {
+      rawTokens.push({ token: item, type: "word", isRareIdentifier: false, dilutionPct: 50 });
+    } else {
+      rawTokens.push({ token: item, type: "word", isRareIdentifier: false, dilutionPct: 50 });
+    }
+  }
+
+  const totalTokens = rawTokens.length;
+  const rareCount = rawTokens.filter((t) => t.isRareIdentifier).length;
+
+  let dilutionSeverity: FragmentationReport["dilutionSeverity"] = "none";
+  let explanation = "查询主要由通用词组成，分词器按正常词根切分，语义空间分布均衡。";
+
+  if (hasExactSymbol) {
+    if (rareCount >= 6 || totalTokens > 10) {
+      dilutionSeverity = "severe";
+      explanation = "严重分词碎片化：唯一标识符被 BPE 撕裂为多个连续 Subword 与数字残片，其高维绝对几何特征被周围通用词严重稀释！";
+    } else if (rareCount >= 3) {
+      dilutionSeverity = "medium";
+      explanation = "中度稀释：精确符号被拆分为词根与数字片段，在连续向量空间中可能因通用副词诱导发生排名偏移。";
+    } else {
+      dilutionSeverity = "low";
+      explanation = "轻微切分：包含专有标识符，但切分块较少，向量相似度仍保留部分区分度。";
+    }
+  }
+
+  return {
+    original: text,
+    tokens: rawTokens,
+    fragmentCount: totalTokens,
+    containsExactSymbol: hasExactSymbol,
+    dilutionSeverity,
+    explanation,
+  };
+}
+

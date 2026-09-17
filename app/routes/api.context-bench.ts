@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { BenchmarkCorpusManager } from "~/core/context-bench/corpus";
+import { BenchmarkCorpusManager, C7_BENCHMARK_CASES, runTwoStageFunnel } from "~/core/context-bench/corpus";
 import { LLMClient } from "~/core/llm/client";
 import { SmartTruncator } from "~/core/context/truncator";
 
@@ -1261,6 +1261,248 @@ ${topHit.doc.content}
         success: true,
         summary,
         cases: showdownResults,
+      });
+    }
+
+    // 10. C7: Get Benchmark Cases
+    if (requestedAction === "get_c7_benchmark_cases") {
+      return Response.json({
+        success: true,
+        cases: C7_BENCHMARK_CASES,
+      });
+    }
+
+    // 11. C7: Search Two-Stage (Coarse Retrieval + Cross-Encoder Rerank)
+    if (requestedAction === "search_two_stage") {
+      const q = (query || question || "").trim();
+      const stage1TopK = typeof body.stage1TopK === "number" ? body.stage1TopK : 8;
+      const stage2TopN = typeof body.stage2TopN === "number" ? body.stage2TopN : 3;
+      const strictAuthorityCheck = body.strictAuthorityCheck !== false;
+
+      const funnel = BenchmarkCorpusManager.searchTwoStage(q, {
+        stage1TopK,
+        stage2TopN,
+        rerankOptions: {
+          topN: stage2TopN,
+          strictAuthorityCheck,
+        },
+      });
+
+      return Response.json({
+        success: true,
+        funnel,
+      });
+    }
+
+    // 12. C7: Rerank Candidates
+    if (requestedAction === "rerank_candidates") {
+      const q = (query || question || "").trim();
+      const candidates = Array.isArray(body.candidates) ? body.candidates : [];
+      const topN = typeof body.topN === "number" ? body.topN : 3;
+      const strictAuthorityCheck = body.strictAuthorityCheck !== false;
+
+      const reranked = BenchmarkCorpusManager.rerank(q, candidates, {
+        topN,
+        strictAuthorityCheck,
+      });
+
+      return Response.json({
+        success: true,
+        reranked,
+        truncated: reranked.slice(0, topN),
+      });
+    }
+
+    // 13. C7: Run Two-Stage Pipeline with LLM Answer Contrast
+    if (requestedAction === "run_reranking_pipeline") {
+      const q = (question || query || "").trim();
+      const stage1TopK = typeof body.stage1TopK === "number" ? body.stage1TopK : 8;
+      const stage2TopN = typeof body.stage2TopN === "number" ? body.stage2TopN : 3;
+      const strictAuthorityCheck = body.strictAuthorityCheck !== false;
+
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = baseURL || process.env.LLM_BASE_URL;
+
+      const funnel = BenchmarkCorpusManager.searchTwoStage(q, {
+        stage1TopK,
+        stage2TopN,
+        rerankOptions: {
+          topN: stage2TopN,
+          strictAuthorityCheck,
+        },
+      });
+
+      const coarseTopHit = funnel.stage1Candidates[0]?.doc || null;
+      const rerankTopHit = funnel.truncatedTopN[0] ? funnel.truncatedTopN[0].doc : null;
+
+      let coarseAnswer: string | null = null;
+      let rerankAnswer: string | null = null;
+      let coarsePromptTokens = 0;
+      let rerankPromptTokens = 0;
+      let coarseLatencyMs = 0;
+      let rerankLatencyMs = 0;
+
+      const shouldRunLLM = Boolean(effectiveApiKey);
+      if (shouldRunLLM && coarseTopHit && rerankTopHit) {
+        const client = new LLMClient({
+          apiKey: effectiveApiKey,
+          baseURL: effectiveBaseURL,
+          defaultModel: model,
+        });
+
+        // Prompt A: Coarse Top 1 (Without Reranker)
+        const promptCoarse = `以下是通过 Stage 1 粗排召回直接选取的参考文档《${coarseTopHit.title}》：
+
+<<<DOCUMENT_START>>>
+${coarseTopHit.content}
+<<<DOCUMENT_END>>>
+
+请严格基于上述参考文档，回答用户的问题。如果文档中未提及或明确否定，请如实说明。
+
+问题：${q}`;
+
+        // Prompt B: Reranked Golden Context (Top 1 or Top N)
+        const topDocsContent = funnel.truncatedTopN
+          .map((r, i) => `【参考资料 ${i + 1}: ${r.doc.title} (相关度得分: ${(r.rerankScore * 100).toFixed(1)}%)】\n${r.doc.content}`)
+          .join("\n\n---\n\n");
+
+        const promptRerank = `以下是通过 Cross-Encoder 深度交互重排器（Stage 2 精排）为你精挑细选的黄金上下文：
+
+<<<DOCUMENT_START>>>
+${topDocsContent}
+<<<DOCUMENT_END>>>
+
+请严格基于上述高置信度参考资料，回答用户的问题。若资料中有最新政策、特例约定或除外条款，请准确指明。
+
+问题：${q}`;
+
+        const t0 = Date.now();
+        const resA = await client.chatCompletion({
+          messages: [{ role: "user", content: promptCoarse }],
+          systemPrompt: "你是一个专业的企业级问答助理。请严格根据提供的参考资料回答。",
+        });
+        coarseLatencyMs = Date.now() - t0;
+        coarseAnswer = resA.content;
+        coarsePromptTokens = SmartTruncator.estimateTokens(promptCoarse);
+
+        const t1 = Date.now();
+        const resB = await client.chatCompletion({
+          messages: [{ role: "user", content: promptRerank }],
+          systemPrompt: "你是一个专业的企业级问答助理。请严格根据提供的参考资料回答。",
+        });
+        rerankLatencyMs = Date.now() - t1;
+        rerankAnswer = resB.content;
+        rerankPromptTokens = SmartTruncator.estimateTokens(promptRerank);
+      } else {
+        // Deterministic simulated contrast for demonstration without API key
+        if (coarseTopHit?.id.includes("2024")) {
+          coarseAnswer = "【未经精排模型回答（采纳了粗排排第 1 的 2024 废弃政策）】根据参考总则，所有全线产品（含软件及基础服务）一律支持 30 天宽松退款周期。（注：此回答基于已废弃的历史政策，回答严重失真！）";
+        } else if (coarseTopHit?.id.includes("refund-policy") && q.includes("Alpha")) {
+          coarseAnswer = "【未经精排模型回答（采纳了粗排排第 1 的通用退款政策）】除特定产品另有专属说明外，所有标准数字软件均支持 7 天无理由退款。（注：模型未能优先参考 Alpha 专属文档中的 30 天特例，造成回答不准！）";
+        } else {
+          coarseAnswer = `【未经精排】基于粗排文档《${coarseTopHit?.title}》提取的解答。`;
+        }
+
+        if (rerankTopHit?.id.includes("2026")) {
+          rerankAnswer = "【精排重排后模型回答（采纳了 Cross-Encoder 升至首位的 2026 现行有效政策）】根据 2026 年度现行有效客户服务总则（v2026.1.0），除专属大客户定制产品 (Alpha) 仍享有 30 天特殊约定外，常规数字软件无理由退款期限已统一规范缩短为 7 天。2024 年度的 30 天政策已完全废弃。";
+        } else if (rerankTopHit?.id.includes("alpha.md") && q.includes("Alpha")) {
+          rerankAnswer = "【精排重排后模型回答（采纳了 Cross-Encoder 识别特例覆写后的 Alpha 规约）】Alpha 专属企业级产品享有独立服务保障，支持自购买之日起 30 天内无条件全额申请退款，覆写了通用 7 天规则。";
+        } else {
+          rerankAnswer = `【精排重排后】基于精排优选文档《${rerankTopHit?.title}》生成的精准权威解答。`;
+        }
+      }
+
+      return Response.json({
+        success: true,
+        funnel,
+        llmContrast: {
+          coarseTopDoc: coarseTopHit ? { id: coarseTopHit.id, title: coarseTopHit.title } : null,
+          rerankTopDoc: rerankTopHit ? { id: rerankTopHit.id, title: rerankTopHit.title } : null,
+          coarseAnswer,
+          rerankAnswer,
+          coarsePromptTokens,
+          rerankPromptTokens,
+          coarseLatencyMs,
+          rerankLatencyMs,
+        },
+      });
+    }
+
+    // 14. C7: Run Benchmark Showdown Matrix
+    if (requestedAction === "run_c7_benchmark_matrix") {
+      const cases = C7_BENCHMARK_CASES;
+      const allDocs = BenchmarkCorpusManager.getAllDocuments();
+
+      const evaluatedCases = cases.map((benchCase) => {
+        const funnel = runTwoStageFunnel(allDocs, benchCase.query, {
+          stage1TopK: 8,
+          stage2TopN: 3,
+          rerankOptions: {
+            strictAuthorityCheck: true,
+          },
+        });
+
+        const stage1TopHit = funnel.stage1Candidates[0];
+        const stage1TopDocId = stage1TopHit ? stage1TopHit.doc.id : null;
+        const stage1HitTargetRank = funnel.stage1Candidates.findIndex(
+          (c) => c.doc.id === benchCase.targetDocId
+        );
+
+        const stage2TopHit = funnel.truncatedTopN[0];
+        const stage2TopDocId = stage2TopHit ? stage2TopHit.doc.id : null;
+        const stage2HitTargetRank = funnel.stage2Reranked.findIndex(
+          (c) => c.doc.id === benchCase.targetDocId
+        );
+
+        const stage1Success = stage1TopDocId === benchCase.targetDocId;
+        const stage2Success = stage2TopDocId === benchCase.targetDocId;
+
+        const targetRerankResult = funnel.stage2Reranked.find(
+          (c) => c.doc.id === benchCase.targetDocId
+        );
+
+        return {
+          id: benchCase.id,
+          category: benchCase.category,
+          title: benchCase.title,
+          query: benchCase.query,
+          targetDocId: benchCase.targetDocId,
+          targetDocTitle: benchCase.targetDocTitle,
+          phenomenon: benchCase.phenomenon,
+          stage1: {
+            topDocId: stage1TopDocId,
+            topDocTitle: stage1TopHit ? stage1TopHit.doc.title : "None",
+            targetRank: stage1HitTargetRank !== -1 ? stage1HitTargetRank + 1 : null,
+            isTopHit: stage1Success,
+          },
+          stage2: {
+            topDocId: stage2TopDocId,
+            topDocTitle: stage2TopHit ? stage2TopHit.doc.title : "None",
+            targetRank: stage2HitTargetRank !== -1 ? stage2HitTargetRank + 1 : null,
+            isTopHit: stage2Success,
+            rerankScore: targetRerankResult?.rerankScore ?? 0,
+            rankDelta: targetRerankResult?.rankDelta ?? 0,
+            decisionReason: targetRerankResult?.decisionReason ?? "",
+          },
+        };
+      });
+
+      const summary = {
+        totalCases: evaluatedCases.length,
+        stage1TopHits: evaluatedCases.filter((c) => c.stage1.isTopHit).length,
+        stage2TopHits: evaluatedCases.filter((c) => c.stage2.isTopHit).length,
+        stage1AccuracyPct: Number(
+          ((evaluatedCases.filter((c) => c.stage1.isTopHit).length / evaluatedCases.length) * 100).toFixed(1)
+        ),
+        stage2AccuracyPct: Number(
+          ((evaluatedCases.filter((c) => c.stage2.isTopHit).length / evaluatedCases.length) * 100).toFixed(1)
+        ),
+      };
+
+      return Response.json({
+        success: true,
+        summary,
+        cases: evaluatedCases,
       });
     }
 

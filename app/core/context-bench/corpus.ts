@@ -60,6 +60,26 @@ import {
   searchHybridInDocs,
   type HybridFusionOptions,
 } from "./hybrid";
+export type {
+  RerankResult,
+  RerankOptions,
+  TwoStageFunnelResult,
+  CrossAttentionTokenPair,
+  C7BenchmarkCase,
+} from "./reranker";
+export {
+  computeCrossAttentionMatrix,
+  scoreCrossEncoder,
+  rerankDocuments,
+  runTwoStageFunnel,
+  C7_BENCHMARK_CASES,
+} from "./reranker";
+import {
+  rerankDocuments,
+  runTwoStageFunnel,
+  C7_BENCHMARK_CASES,
+  type RerankOptions,
+} from "./reranker";
 
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
@@ -221,6 +241,34 @@ export class BenchmarkCorpusManager {
       ...options,
       docVectors: effectiveDocVectors,
     });
+  }
+
+  /**
+   * Cross-Encoder Reranker over candidates
+   */
+  static rerank(
+    query: string,
+    candidates: Parameters<typeof rerankDocuments>[1],
+    options?: RerankOptions
+  ) {
+    return rerankDocuments(query, candidates, options);
+  }
+
+  /**
+   * Two-Stage Funnel: Stage 1 Coarse Retrieval (Hybrid) + Stage 2 Fine Reranking (Cross-Encoder)
+   */
+  static searchTwoStage(
+    query: string,
+    options?: Parameters<typeof runTwoStageFunnel>[2]
+  ) {
+    return runTwoStageFunnel(this.getAllDocuments(), query, options);
+  }
+
+  /**
+   * Get C7 Reranker benchmark evaluation cases
+   */
+  static getBenchmarkC7Cases() {
+    return C7_BENCHMARK_CASES;
   }
 
   static measureContext = measureContext;

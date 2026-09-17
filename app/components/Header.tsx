@@ -143,6 +143,14 @@ export function Header({
       color: "text-cyan-400",
       badge: "混合检索",
     },
+    {
+      path: "/lessons/context-c7-reranking",
+      tag: "C7",
+      title: "第 07 课: 粗排捞出了候选，但谁最相关？(Cross-Encoder Reranking)",
+      icon: Sliders,
+      color: "text-teal-400",
+      badge: "精排重排",
+    },
   ];
 
   const semester2Lessons = [

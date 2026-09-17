@@ -485,6 +485,13 @@ export default function ContextLessonC6() {
             </Link>
             <span className="text-zinc-700">|</span>
             <Link
+              to="/lessons/context-c7-reranking"
+              className="text-teal-400 hover:text-teal-300 flex items-center gap-1 font-medium transition-colors"
+            >
+              下一课 (C7 精排重排) →
+            </Link>
+            <span className="text-zinc-700">|</span>
+            <Link
               to="/docs/lessons/context/06-hybrid-retrieval-and-rrf.md"
               className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium transition-colors"
             >
@@ -1367,6 +1374,15 @@ export default function ContextLessonC6() {
               <p className="text-xs text-zinc-400 leading-relaxed">
                 下一课我们将手写 <strong>Cross-Encoder 重排器</strong>，让相关性判定从粗粒度的“点积夹角”升维到“交叉注意力交互”，完成检索工程的终极精排进化！
               </p>
+              <div className="pt-2">
+                <Link
+                  to="/lessons/context-c7-reranking"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-colors shadow-sm"
+                >
+                  <span>立即开启第 07 课实战工坊</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
         )}

@@ -36,6 +36,7 @@ export default [
   route("lessons/context-c5-semantic-vs-lexical", "routes/lessons.context-c5.tsx"),
   route("lessons/context-c6-hybrid-retrieval", "routes/lessons.context-c6.tsx"),
   route("lessons/context-c7-reranking", "routes/lessons.context-c7.tsx"),
+  route("lessons/context-c8-chunking", "routes/lessons.context-c8.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

@@ -46,12 +46,28 @@ function promoteDisplayMath(md: string): string {
       }
       if (inFence) return line;
 
-      // 正文部分显式排除 `$$`，否则一行里写两段公式会从第一段吃到第二段
-      const match = /^(\s*(?:>\s*)*)\$\$((?:(?!\$\$)[\s\S])+)\$\$\s*$/.exec(line);
-      if (!match) return line;
+      // 1. 完全在同一行闭合的 $$formula$$
+      const singleMatch = /^(\s*(?:>\s*)*)\$\$((?:(?!\$\$)[\s\S])+)\$\$\s*$/.exec(line);
+      if (singleMatch) {
+        const [, prefix, body] = singleMatch;
+        return `${prefix}$$\n${prefix}${body}\n${prefix}$$`;
+      }
 
-      const [, prefix, body] = match;
-      return `${prefix}$$\n${prefix}${body}\n${prefix}$$`;
+      // 2. 以 $$ 起始但未闭合的公式起始行（如 `$$\begin{aligned}`）
+      const openMatch = /^(\s*(?:>\s*)*)\$\$([^$].*)$/.exec(line);
+      if (openMatch) {
+        const [, prefix, body] = openMatch;
+        return `${prefix}$$\n${prefix}${body}`;
+      }
+
+      // 3. 以 $$ 结尾的公式闭合行（如 `\end{aligned}$$`）
+      const closeMatch = /^(\s*(?:>\s*)*)(.*?[^$])\$\$\s*$/.exec(line);
+      if (closeMatch) {
+        const [, prefix, body] = closeMatch;
+        return `${prefix}${body}\n${prefix}$$`;
+      }
+
+      return line;
     })
     .join("\n");
 }

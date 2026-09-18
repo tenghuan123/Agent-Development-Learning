@@ -1411,10 +1411,13 @@ export default function ContextLessonC7() {
                 3. <strong>LLM 成本爆炸</strong>：即使重排精准，整篇长文注入 Prompt 依然会导致 Context 臃肿崩溃。
               </p>
 
-              <div className="pt-2">
-                <div className="text-xs font-mono text-teal-400 font-semibold flex items-center gap-2">
-                  <span>👉 第 08 课：为什么需要 Chunk？—— 文档切分粒度、语义边界与重叠窗口 (Overlap) 工程</span>
-                </div>
+              <div className="pt-2 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/lessons/context-c8-chunking"
+                  className="text-xs font-mono text-teal-300 hover:text-teal-200 font-semibold flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-950/40 border border-teal-800/60 hover:border-teal-600 transition-all"
+                >
+                  👉 进入第 08 课：为什么需要 Chunk？—— 切分粒度、重叠窗口与语义边界工程
+                </Link>
               </div>
             </div>
           </div>

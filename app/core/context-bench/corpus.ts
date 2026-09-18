@@ -80,6 +80,71 @@ import {
   C7_BENCHMARK_CASES,
   type RerankOptions,
 } from "./reranker";
+export type {
+  Chunk,
+  ChunkStrategy,
+  BoundaryType,
+  ChunkingResult,
+  ChunkingStats,
+  ChunkingOptions,
+  ChunkSearchOutcome,
+  ChunkHit,
+  ChunkTrapType,
+  ChunkingBenchmarkCase,
+  ChunkingEvalStrategy,
+  ChunkingEvalConfig,
+  ChunkingEvalOutcome,
+  ChunkingEvalSummary,
+  ChunkingCaseResult,
+} from "./chunker";
+export {
+  chunkDocument,
+  chunkCorpus,
+  chunkWholeDocument,
+  chunkByFixedSize,
+  chunkRecursive,
+  chunkSemantic,
+  toChunkDocument,
+  chunksToDocuments,
+  chunkDocIdOf,
+  searchChunks,
+  expandToParent,
+  evaluateChunkingStrategy,
+  CHUNKING_BENCHMARK_CASES,
+  HIGH_DENSITY_THRESHOLD,
+} from "./chunker";
+import {
+  chunkCorpus,
+  chunkDocument,
+  evaluateChunkingStrategy,
+  searchChunks,
+  CHUNKING_BENCHMARK_CASES,
+  type Chunk,
+  type ChunkingEvalConfig,
+  type ChunkingOptions,
+  type ChunkSearchOptions,
+  type ChunkingBenchmarkCase,
+} from "./chunker";
+export type { EmbeddingStage, EmbeddingKind, EmbeddingSet, VectorSelection } from "./embedding-store";
+export {
+  loadEmbeddingSet,
+  listEmbeddingSets,
+  listChunkEmbeddingSets,
+  findChunkEmbeddingSet,
+  resolveEmbeddingPath,
+  selectCompatibleVectors,
+  validateCoverage,
+  FROZEN_STAGES,
+} from "./embedding-store";
+import {
+  findChunkEmbeddingSet,
+  listChunkEmbeddingSets,
+  loadEmbeddingSet,
+  selectCompatibleVectors,
+  type EmbeddingKind,
+  type EmbeddingStage,
+} from "./embedding-store";
+import type { ChunkStrategy } from "./chunker";
 
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
@@ -173,26 +238,93 @@ export class BenchmarkCorpusManager {
   private static cachedDocEmbeddings: Map<string, number[]> | null = null;
 
   /**
-   * Load real pre-computed 512-dim document embeddings from data/context-benchmark/document-embeddings.json
+   * Load pre-computed 512-dim document embeddings for the **C4~C7** stage.
+   *
+   * 历史资产：C4/C5/C6/C7 的全部向量检索都经由本方法取向量。
+   * 向量集已按课程阶段迁移到 data/context-benchmark/c4-c7/document-embeddings.json，
+   * 内容与迁移前逐字节一致。
+   *
+   * 注意：C8 引入的两篇长文档**不在**本集合内，`searchSemanticInDocs` 的向量来源
+   * 一致性守卫会把它们从语义通道排除，而不是回退到异维向量。
    */
   static getDocumentEmbeddings(): Map<string, number[]> {
     if (this.cachedDocEmbeddings) return this.cachedDocEmbeddings;
-    const embPath = path.join(this.basePath, "document-embeddings.json");
-    this.cachedDocEmbeddings = new Map<string, number[]>();
-    if (fs.existsSync(embPath)) {
-      try {
-        const raw = fs.readFileSync(embPath, "utf-8");
-        const parsed = JSON.parse(raw);
-        if (parsed.documents) {
-          for (const [id, vec] of Object.entries(parsed.documents)) {
-            this.cachedDocEmbeddings.set(id, vec as number[]);
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to load document-embeddings.json:", err);
-      }
-    }
+    this.cachedDocEmbeddings = loadEmbeddingSet("c4-c7", "document").vectors;
     return this.cachedDocEmbeddings;
+  }
+
+  /** 按课程阶段 / 类型装载向量集 */
+  static getStageEmbeddings(stage: EmbeddingStage, kind: EmbeddingKind) {
+    return loadEmbeddingSet(stage, kind);
+  }
+
+  /** C8 chunk 级向量集：按切分配置精确匹配（文件名已编码配置） */
+  static findChunkEmbeddings(config: { strategy: ChunkStrategy; chunkSize: number; overlap: number }) {
+    return findChunkEmbeddingSet("c8", config);
+  }
+
+  /** 列出 C8 下全部可用的 chunk 向量集 */
+  static listChunkEmbeddingSets() {
+    return listChunkEmbeddingSets("c8");
+  }
+
+  /** C8 文档级向量集（c8/document-embeddings.json，覆盖含长文档的全量语料） */
+  static getC8DocumentEmbeddings() {
+    return loadEmbeddingSet("c8", "document");
+  }
+
+  /**
+   * 维度安全的文档级向量选路（C8 文档级基线使用）。
+   * 查询向量与向量集维度不一致时整体放弃远端向量，由调用方回退本地确定性向量。
+   */
+  static selectDocumentVectors(docIds: string[], queryDimensions: number) {
+    return selectCompatibleVectors(docIds, this.getC8DocumentEmbeddings(), queryDimensions);
+  }
+
+  /** 维度安全的 chunk 级向量选路 */
+  static selectChunkVectors(chunkIds: string[], queryDimensions: number) {
+    const sets = listChunkEmbeddingSets("c8");
+    const first = sets[0];
+    if (!first) {
+      return selectCompatibleVectors(chunkIds, loadEmbeddingSet("c8", "document"), queryDimensions);
+    }
+    return selectCompatibleVectors(chunkIds, first, queryDimensions);
+  }
+
+  // =========================================================================
+  // C8: Chunking
+  // =========================================================================
+
+  /** 对全量语料（短文 + 长文）执行切分 */
+  static chunkCorpus(options?: ChunkingOptions): ReturnType<typeof chunkCorpus> {
+    return chunkCorpus(this.getAllDocuments(), options);
+  }
+
+  static chunkOne(docId: string, options?: ChunkingOptions) {
+    const doc = this.readDocument(docId);
+    if (!doc) return null;
+    return chunkDocument(doc, options);
+  }
+
+  /** 扁平化全部切片，供 chunk 级检索使用 */
+  static getAllChunks(options?: ChunkingOptions): Chunk[] {
+    return this.chunkCorpus(options).flatMap((r) => r.chunks);
+  }
+
+  static searchChunkIndex(
+    allChunks: Chunk[],
+    query: string,
+    options?: ChunkSearchOptions
+  ) {
+    return searchChunks(allChunks, query, options);
+  }
+
+  static getBenchmarkChunkingCases(): ChunkingBenchmarkCase[] {
+    return CHUNKING_BENCHMARK_CASES;
+  }
+
+  static evaluateChunking(config: ChunkingEvalConfig) {
+    return evaluateChunkingStrategy(this.getAllDocuments(), CHUNKING_BENCHMARK_CASES, config);
   }
 
   static computeSemanticVector = computeDenseSemanticVector;

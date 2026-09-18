@@ -1,7 +1,32 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { BenchmarkCorpusManager, C7_BENCHMARK_CASES, runTwoStageFunnel } from "~/core/context-bench/corpus";
+import { searchHybridInDocs } from "~/core/context-bench/hybrid";
+import type { ChunkingEvalStrategy } from "~/core/context-bench/chunker";
 import { LLMClient } from "~/core/llm/client";
 import { SmartTruncator } from "~/core/context/truncator";
+
+/** C8 基准矩阵的一行配置 */
+interface ChunkingMatrixRow {
+  label: string;
+  strategy: ChunkingEvalStrategy;
+  chunkSize: number;
+  overlap: number;
+  semanticThreshold?: number;
+  parentSize?: number;
+}
+
+/** C8 默认对决矩阵：覆盖 粒度 / 边界策略 / 重叠 / 父子块 四类变量 */
+const DEFAULT_CHUNKING_MATRIX: ChunkingMatrixRow[] = [
+  { label: "文档级（基线）", strategy: "document", chunkSize: 0, overlap: 0 },
+  { label: "定长 256", strategy: "fixed", chunkSize: 256, overlap: 0 },
+  { label: "定长 512", strategy: "fixed", chunkSize: 512, overlap: 0 },
+  { label: "定长 512 + 重叠128", strategy: "fixed", chunkSize: 512, overlap: 128 },
+  { label: "定长 2048", strategy: "fixed", chunkSize: 2048, overlap: 0 },
+  { label: "结构感知 512", strategy: "recursive", chunkSize: 512, overlap: 0 },
+  { label: "结构感知 512 + 重叠64", strategy: "recursive", chunkSize: 512, overlap: 64 },
+  { label: "语义边界 512 + 重叠64", strategy: "semantic", chunkSize: 512, overlap: 64 },
+  { label: "Small-to-Big 256→1400", strategy: "small-to-big", chunkSize: 256, overlap: 32, parentSize: 1400 },
+];
 
 export async function loader(_args: LoaderFunctionArgs) {
   const docs = BenchmarkCorpusManager.getAllDocuments();
@@ -1503,6 +1528,289 @@ ${topDocsContent}
         success: true,
         summary,
         cases: evaluatedCases,
+      });
+    }
+
+    // =====================================================================
+    // C8: Chunking
+    // =====================================================================
+
+    // 15. C8: 对指定文档执行切分
+    if (requestedAction === "chunk_document") {
+      const strategy = body.strategy || "recursive";
+      const chunkSize = typeof body.chunkSize === "number" ? body.chunkSize : 512;
+      const overlap = typeof body.overlap === "number" ? body.overlap : 64;
+      const semanticThreshold =
+        typeof body.semanticThreshold === "number" ? body.semanticThreshold : undefined;
+
+      const docIds: string[] = Array.isArray(body.docIds) && body.docIds.length > 0
+        ? body.docIds
+        : BenchmarkCorpusManager.getAllDocuments().map((d) => d.id);
+
+      const results = docIds
+        .map((id) =>
+          BenchmarkCorpusManager.chunkOne(id, { strategy, chunkSize, overlap, semanticThreshold })
+        )
+        .filter((r): r is NonNullable<typeof r> => r !== null);
+
+      return Response.json({
+        success: true,
+        strategy,
+        chunkSize,
+        overlap,
+        semanticThreshold: semanticThreshold ?? 0.62,
+        results,
+      });
+    }
+
+    // 16. C8: chunk 级检索（含 Small-to-Big 展开）
+    if (requestedAction === "search_chunks") {
+      const q = (query || question || "").trim();
+      const strategy = body.strategy || "recursive";
+      const chunkSize = typeof body.chunkSize === "number" ? body.chunkSize : 512;
+      const overlap = typeof body.overlap === "number" ? body.overlap : 64;
+      const parentSize = typeof body.parentSize === "number" ? body.parentSize : 0;
+      const rerankTopN = typeof body.rerankTopN === "number" ? body.rerankTopN : 3;
+
+      const chunks = BenchmarkCorpusManager.getAllChunks({ strategy, chunkSize, overlap });
+      const chunkSet = BenchmarkCorpusManager.findChunkEmbeddings({ strategy, chunkSize, overlap });
+
+      // 真实查询向量（拿不到就退回本地确定性向量，searchChunks 内部会保证两侧同维）
+      let queryVector: number[] | undefined;
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+      if (effectiveApiKey) {
+        try {
+          const client = new LLMClient({
+            apiKey: effectiveApiKey,
+            baseURL: baseURL || process.env.LLM_BASE_URL,
+            defaultModel: model,
+          });
+          const embResp = await client.createEmbedding(q, undefined, 512);
+          queryVector = embResp.embeddings[0];
+        } catch {
+          queryVector = undefined;
+        }
+      }
+
+      const outcome = BenchmarkCorpusManager.searchChunkIndex(chunks, q, {
+        topK: 12,
+        rerankTopN,
+        parentSize,
+        chunkVectors: chunkSet?.vectors,
+        queryVector,
+      });
+
+      return Response.json({
+        success: true,
+        outcome,
+        chunkCount: chunks.length,
+        vectorSet: chunkSet
+          ? { id: chunkSet.id, path: chunkSet.relativePath, dimensions: chunkSet.dimensions, config: chunkSet.chunkConfig }
+          : null,
+      });
+    }
+
+    // 17. C8: 切分策略基准矩阵
+    if (requestedAction === "run_chunking_matrix") {
+      const docs = BenchmarkCorpusManager.getAllDocuments();
+      const cases = BenchmarkCorpusManager.getBenchmarkChunkingCases();
+
+      const matrix: ChunkingMatrixRow[] = Array.isArray(body.matrix) && body.matrix.length > 0
+        ? body.matrix
+        : DEFAULT_CHUNKING_MATRIX;
+
+      // 基准用例的真实查询向量（失败则整体退回本地向量通道）
+      const queryVectors = new Map<string, number[]>();
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+      if (effectiveApiKey) {
+        try {
+          const client = new LLMClient({
+            apiKey: effectiveApiKey,
+            baseURL: baseURL || process.env.LLM_BASE_URL,
+            defaultModel: model,
+          });
+          const resp = await client.createEmbedding(cases.map((c) => c.query), undefined, 512);
+          cases.forEach((c, i) => {
+            if (resp.embeddings[i]) queryVectors.set(c.query, resp.embeddings[i]);
+          });
+        } catch {
+          queryVectors.clear();
+        }
+      }
+
+      const rows = matrix.map((cfg) => {
+        const baseStrategy = cfg.strategy === "small-to-big" ? "recursive" : cfg.strategy;
+        const matched =
+          baseStrategy === "document"
+            ? undefined
+            : BenchmarkCorpusManager.findChunkEmbeddings({
+                strategy: baseStrategy,
+                chunkSize: cfg.chunkSize,
+                overlap: cfg.overlap,
+              });
+
+        const outcome = BenchmarkCorpusManager.evaluateChunking({
+          strategy: cfg.strategy,
+          chunkSize: cfg.chunkSize,
+          overlap: cfg.overlap,
+          semanticThreshold: cfg.semanticThreshold,
+          parentSize: cfg.parentSize,
+          chunkVectors: matched?.vectors,
+          chunkVectorConfig: matched?.chunkConfig,
+          queryVectorOf: (q) => queryVectors.get(q),
+        });
+
+        return { config: cfg, summary: outcome.summary, cases: outcome.cases };
+      });
+
+      const docRow = rows.find((r) => r.config.strategy === "document");
+      const bestRow = [...rows].sort((a, b) => b.summary.effectiveRate - a.summary.effectiveRate)[0];
+
+      return Response.json({
+        success: true,
+        rows,
+        baseline: docRow?.summary ?? null,
+        best: bestRow
+          ? {
+              label: bestRow.config.label,
+              tokenSavingsVsDocumentPct:
+                docRow && docRow.summary.avgRetrievedTokens > 0
+                  ? Number(
+                      (
+                        ((docRow.summary.avgRetrievedTokens - bestRow.summary.avgRetrievedTokens) /
+                          docRow.summary.avgRetrievedTokens) *
+                        100
+                      ).toFixed(1)
+                    )
+                  : 0,
+              densityGainVsDocument:
+                docRow && docRow.summary.avgSignalDensity > 0
+                  ? Number(
+                      (bestRow.summary.avgSignalDensity / docRow.summary.avgSignalDensity).toFixed(1)
+                    )
+                  : 0,
+            }
+          : null,
+        corpus: {
+          docCount: docs.length,
+          totalTokens: docs.reduce((a, d) => a + d.tokenCount, 0),
+          longDocs: docs
+            .filter((d) => d.tokenCount > 1500)
+            .map((d) => ({ id: d.id, title: d.title, tokens: d.tokenCount })),
+        },
+        caseCount: cases.length,
+        queryVectorCount: queryVectors.size,
+      });
+    }
+
+    // 18. C8: 端到端三路对比（文档级 / 切片精排 / Small-to-Big）
+    if (requestedAction === "run_chunking_pipeline") {
+      const q = (question || query || "").trim();
+      const strategy = body.strategy || "recursive";
+      const chunkSize = typeof body.chunkSize === "number" ? body.chunkSize : 256;
+      const overlap = typeof body.overlap === "number" ? body.overlap : 32;
+      const parentSize = typeof body.parentSize === "number" ? body.parentSize : 1400;
+
+      const docs = BenchmarkCorpusManager.getAllDocuments();
+      const chunks = BenchmarkCorpusManager.getAllChunks({ strategy, chunkSize, overlap });
+      const chunkSet = BenchmarkCorpusManager.findChunkEmbeddings({ strategy, chunkSize, overlap });
+
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+
+      // A 路：文档级 —— 取混合检索的首位文档全文
+      const docLevel = searchHybridInDocs(docs, q, { algorithm: "rrf", k: 60, topK: 3 });
+      const docTop = docLevel.hybridResults[0]?.doc ?? null;
+
+      // B 路：切片精排（不展开）
+      const chunkOnly = BenchmarkCorpusManager.searchChunkIndex(chunks, q, {
+        topK: 12,
+        rerankTopN: 3,
+        parentSize: 0,
+        chunkVectors: chunkSet?.vectors,
+      });
+
+      // C 路：Small-to-Big（展开父窗口）
+      const smallToBig = BenchmarkCorpusManager.searchChunkIndex(chunks, q, {
+        topK: 12,
+        rerankTopN: 3,
+        parentSize,
+        chunkVectors: chunkSet?.vectors,
+      });
+
+      const buildPath = (label: string, content: string, tokens: number) => ({ label, content, tokens });
+
+      const pathA = docTop ? buildPath("文档级注入", docTop.content, docTop.tokenCount) : null;
+      const pathB = buildPath(
+        "切片精排注入",
+        chunkOnly.hits.map((h) => h.injectedContent).join("\n\n---\n\n"),
+        chunkOnly.totalInjectedTokens
+      );
+      const pathC = buildPath(
+        "Small-to-Big 注入",
+        smallToBig.hits.map((h) => h.injectedContent).join("\n\n---\n\n"),
+        smallToBig.totalInjectedTokens
+      );
+
+      let answerA: string | null = null;
+      let answerB: string | null = null;
+      let answerC: string | null = null;
+      let latencyA = 0;
+      let latencyB = 0;
+      let latencyC = 0;
+
+      if (effectiveApiKey) {
+        const client = new LLMClient({
+          apiKey: effectiveApiKey,
+          baseURL: baseURL || process.env.LLM_BASE_URL,
+          defaultModel: model,
+        });
+        const systemPrompt = "你是一个专业的企业级运维问答助理。请严格根据提供的参考资料回答，并指明出处章节。";
+
+        const run = async (content: string) => {
+          const t0 = Date.now();
+          const res = await client.chatCompletion({
+            messages: [
+              {
+                role: "user",
+                content: `以下是通过检索为你准备的参考资料：\n\n<<<CONTEXT_START>>>\n${content}\n<<<CONTEXT_END>>>\n\n请严格基于上述资料回答问题。若资料中未提及，请说明未知。\n\n问题：${q}`,
+              },
+            ],
+            systemPrompt,
+          });
+          return { answer: res.content, latency: Date.now() - t0 };
+        };
+
+        if (pathA) {
+          const r = await run(pathA.content);
+          answerA = r.answer;
+          latencyA = r.latency;
+        }
+        const rB = await run(pathB.content);
+        answerB = rB.answer;
+        latencyB = rB.latency;
+        const rC = await run(pathC.content);
+        answerC = rC.answer;
+        latencyC = rC.latency;
+      } else {
+        // 无 API Key 时的确定性说明（不伪造模型输出）
+        const note = "（未配置 API Key，未调用模型；此处展示的是将要注入的上下文与成本对比）";
+        answerA = `${note}\n\n注入 ${pathA?.tokens ?? 0} token 的整篇文档。答案只占其中极小比例，需靠模型自己在长上下文中定位。`;
+        answerB = `${note}\n\n注入 ${pathB.tokens} token 的 Top-3 精排切片。信噪比显著提升，但单个切片可能不自足。`;
+        answerC = `${note}\n\n注入 ${pathC.tokens} token 的 Top-3 切片父窗口。信噪比与完整性兼顾。`;
+      }
+
+      return Response.json({
+        success: true,
+        query: q,
+        config: { strategy, chunkSize, overlap, parentSize },
+        paths: {
+          document: pathA
+            ? { ...pathA, answer: answerA, latencyMs: latencyA }
+            : null,
+          chunk: { ...pathB, answer: answerB, latencyMs: latencyB },
+          smallToBig: { ...pathC, answer: answerC, latencyMs: latencyC },
+        },
+        ranWithLLM: Boolean(effectiveApiKey),
       });
     }
 

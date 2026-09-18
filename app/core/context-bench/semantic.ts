@@ -188,6 +188,14 @@ export function computeDenseSemanticVector(text: string, dimensions = 16): numbe
 /**
  * Pure in-memory Semantic Search over any array of CorpusDocument.
  * Supports passing custom pre-calculated query/doc vectors (e.g. from OpenAI embeddings).
+ *
+ * 向量来源一致性守卫：当调用方【显式提供】docVectors 时，不在该 Map 中的文档会
+ * 被跳过而非回退到本地确定性向量。原因是两者的维度可能不同，而
+ * `cosineSimilarity` 用 `min(len)` 算点积、却各自用自身长度算范数，混用会导致
+ * 范数错配、余弦被系统性压低（静默降级）。
+ *
+ * 对既有课程零影响：C4~C7 的语料全部存在于 c4-c7/document-embeddings.json，
+ * 该分支对它们永不触发；未提供 docVectors 时行为完全不变。
  */
 export function searchSemanticInDocs(
   docs: CorpusDocument[],
@@ -208,7 +216,12 @@ export function searchSemanticInDocs(
   const results: SemanticSearchResult[] = [];
 
   for (const doc of docs) {
-    const docVec = options?.docVectors?.get(doc.id) || computeDenseSemanticVector(`${doc.title} \n ${doc.content}`);
+    const providedDocVec = options?.docVectors?.get(doc.id);
+    // 显式提供了向量表、但本篇不在其中 ⇒ 维度不可比，跳过而非异维回退
+    if (options?.docVectors && !providedDocVec) continue;
+
+    const docVec =
+      providedDocVec || computeDenseSemanticVector(`${doc.title} \n ${doc.content}`);
     const sim = cosineSimilarity(qVec, docVec);
 
     if (sim >= minThreshold) {

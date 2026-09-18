@@ -151,6 +151,14 @@ export function Header({
       color: "text-teal-400",
       badge: "精排重排",
     },
+    {
+      path: "/lessons/context-c8-chunking",
+      tag: "C8",
+      title: "第 08 课: 整篇文档太大，切碎了又讲不完整 (Chunking)",
+      icon: Layers,
+      color: "text-blue-400",
+      badge: "切片治理",
+    },
   ];
 
   const semester2Lessons = [

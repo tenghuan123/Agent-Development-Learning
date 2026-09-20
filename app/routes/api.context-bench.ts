@@ -1543,8 +1543,14 @@ ${topDocsContent}
       const semanticThreshold =
         typeof body.semanticThreshold === "number" ? body.semanticThreshold : undefined;
 
+      const targetDocId = typeof body.docId === "string" && body.docId.trim().length > 0
+        ? body.docId.trim()
+        : null;
+
       const docIds: string[] = Array.isArray(body.docIds) && body.docIds.length > 0
         ? body.docIds
+        : targetDocId
+        ? [targetDocId]
         : BenchmarkCorpusManager.getAllDocuments().map((d) => d.id);
 
       const results = docIds
@@ -1553,12 +1559,17 @@ ${topDocsContent}
         )
         .filter((r): r is NonNullable<typeof r> => r !== null);
 
+      const chunking = targetDocId
+        ? results.find((r) => r.docId === targetDocId) ?? results[0] ?? null
+        : results[0] ?? null;
+
       return Response.json({
         success: true,
         strategy,
         chunkSize,
         overlap,
         semanticThreshold: semanticThreshold ?? 0.62,
+        chunking,
         results,
       });
     }
@@ -1811,6 +1822,39 @@ ${topDocsContent}
           smallToBig: { ...pathC, answer: answerC, latencyMs: latencyC },
         },
         ranWithLLM: Boolean(effectiveApiKey),
+      });
+    }
+
+    // 19. C8: 粒度权衡扫描（固定重叠量下，扫描 8 组 chunkSize 对自足率 / 信噪比 / 冗余率的对抗曲线）
+    if (requestedAction === "run_chunking_sweep") {
+      const sweepOverlap = typeof body.overlap === "number" ? body.overlap : 64;
+      const sweepStrategy = (body.strategy || "fixed") as ChunkingEvalStrategy;
+      const sweepSizes = [128, 256, 384, 512, 768, 1024, 1536, 2048];
+
+      const rows = sweepSizes.map((size) => {
+        const cfg: ChunkingMatrixRow = {
+          label: `${size} tok`,
+          strategy: sweepStrategy,
+          chunkSize: size,
+          overlap: sweepOverlap,
+        };
+        const outcome = BenchmarkCorpusManager.evaluateChunking({
+          strategy: cfg.strategy,
+          chunkSize: cfg.chunkSize,
+          overlap: cfg.overlap,
+        });
+        return {
+          config: cfg,
+          summary: outcome.summary,
+          cases: outcome.cases,
+        };
+      });
+
+      return Response.json({
+        success: true,
+        overlap: sweepOverlap,
+        strategy: sweepStrategy,
+        rows,
       });
     }
 

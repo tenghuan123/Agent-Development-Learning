@@ -154,10 +154,18 @@ export function Header({
     {
       path: "/lessons/context-c8-chunking",
       tag: "C8",
-      title: "第 08 课: 整篇文档太大，切碎了又讲不完整 (Chunking)",
-      icon: Layers,
+      title: "第 08 课: 为什么需要 Chunk？(切分粒度与语义边界)",
+      icon: Scissors,
       color: "text-blue-400",
-      badge: "切片治理",
+      badge: "切分几何",
+    },
+    {
+      path: "/lessons/context-c9-small-to-big",
+      tag: "C9",
+      title: "第 09 课: 检索粒度与注入粒度解耦 (Small-to-Big 架构)",
+      icon: Boxes,
+      color: "text-indigo-400",
+      badge: "两级架构",
     },
   ];
 

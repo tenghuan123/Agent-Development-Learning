@@ -49,6 +49,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c6": "/docs/lessons/context/06-hybrid-retrieval-and-rrf.md",
   "context-c7": "/docs/lessons/context/07-reranking-and-cross-encoder.md",
   "context-c8": "/docs/lessons/context/08-chunking-granularity-and-boundaries.md",
+  "context-c9": "/docs/lessons/context/09-chunk-retrieval-and-small-to-big.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
@@ -58,6 +59,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   c6: "/docs/lessons/context/06-hybrid-retrieval-and-rrf.md",
   c7: "/docs/lessons/context/07-reranking-and-cross-encoder.md",
   c8: "/docs/lessons/context/08-chunking-granularity-and-boundaries.md",
+  c9: "/docs/lessons/context/09-chunk-retrieval-and-small-to-big.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -104,6 +106,7 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "context-06": "/lessons/context-c6-hybrid-retrieval",
   "context-07": "/lessons/context-c7-reranking",
   "context-08": "/lessons/context-c8-chunking",
+  "context-09": "/lessons/context-c9-small-to-big",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

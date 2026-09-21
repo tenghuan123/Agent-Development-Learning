@@ -63,19 +63,21 @@ export class LLMClient {
   public defaultModel: string;
 
   constructor(config?: LLMClientConfig) {
-    const apiKey = config?.apiKey || process.env.LLM_API_KEY || "";
+    const env = typeof process !== "undefined" && process?.env ? process.env : {};
+    const apiKey = config?.apiKey || env.LLM_API_KEY || "";
     const baseURL =
       config?.baseURL ||
-      process.env.LLM_BASE_URL ||
+      env.LLM_BASE_URL ||
       "https://open.bigmodel.cn/api/paas/v4";
 
     this.defaultModel =
-      config?.defaultModel || process.env.LLM_MODEL || "glm-4-flash";
+      config?.defaultModel || env.LLM_MODEL || "glm-4-flash";
 
     this.openai = new OpenAI({
       apiKey,
       baseURL,
       maxRetries: 3,
+      dangerouslyAllowBrowser: true,
       defaultHeaders: {
         "HTTP-Referer": "https://github.com/mini-claude-code",
         "X-Title": "Mini Claude Code",
@@ -662,5 +664,18 @@ Rules:
   }
 }
 
-// Global default singleton instance
-export const defaultLLMClient = new LLMClient();
+// Global default singleton instance (lazy evaluated to prevent top-level execution in browser bundles)
+let _defaultLLMClientInstance: LLMClient | null = null;
+export function getDefaultLLMClient(): LLMClient {
+  if (!_defaultLLMClientInstance) {
+    _defaultLLMClientInstance = new LLMClient();
+  }
+  return _defaultLLMClientInstance;
+}
+export const defaultLLMClient = new Proxy({} as LLMClient, {
+  get(_target, prop, receiver) {
+    const client = getDefaultLLMClient();
+    const value = Reflect.get(client, prop, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});

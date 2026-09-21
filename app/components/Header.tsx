@@ -167,6 +167,14 @@ export function Header({
       color: "text-indigo-400",
       badge: "两级架构",
     },
+    {
+      path: "/lessons/context-c10-contextual-retrieval",
+      tag: "C10",
+      title: "第 10 课: Chunk 自己脱离语境无意义？(Contextual Retrieval)",
+      icon: FolderTree,
+      color: "text-emerald-400",
+      badge: "语境保真",
+    },
   ];
 
   const semester2Lessons = [

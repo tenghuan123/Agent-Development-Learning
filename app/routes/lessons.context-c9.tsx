@@ -1056,10 +1056,10 @@ Golden Context 注入 Prompt`}</pre>
                 </p>
               </div>
               <Link
-                to="/lessons/context-c8-chunking"
-                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 shrink-0 transition-all border border-zinc-700"
+                to="/lessons/context-c10-contextual-retrieval"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shrink-0 transition-all border border-emerald-500 shadow-md shadow-emerald-950/40"
               >
-                重温 C8 切分基础
+                进入第 10 课实验台
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

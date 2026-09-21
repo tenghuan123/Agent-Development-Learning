@@ -39,9 +39,12 @@ function docsRouteBypassPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [reactRouter(), tsconfigPaths(), docsRouteBypassPlugin()],
+  define: {
+    "process.env": {},
+  },
   server: {
-    port: 5175
-  }
+    port: 5175,
+  },
 });
 
 

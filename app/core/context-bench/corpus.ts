@@ -145,6 +145,34 @@ import {
   type EmbeddingStage,
 } from "./embedding-store";
 import type { ChunkStrategy } from "./chunker";
+export type {
+  ContextualStrategy,
+  ContextualChunk,
+  ContextualHit,
+  ContextualOutcome,
+  ContextualBenchmarkConfig,
+  ContextualCaseResult,
+  ContextualEvalSummary,
+  ContextualEvalRow,
+} from "./contextual";
+export {
+  extractBreadcrumbs,
+  CURATED_SITUATIONAL_CONTEXTS,
+  generateHeuristicSituationalContext,
+  generateLLMSituationalContext,
+  expandNeighborChunks,
+  transformToContextualChunks,
+  toContextualDocument,
+  searchContextualChunks,
+  getC10BenchmarkCases,
+  evaluateContextualConfig,
+  DEFAULT_CONTEXTUAL_MATRIX,
+} from "./contextual";
+import {
+  searchContextualChunks,
+  getC10BenchmarkCases,
+  evaluateContextualConfig,
+} from "./contextual";
 
 export class BenchmarkCorpusManager {
   private static basePath = path.join(process.cwd(), "data", "context-benchmark");
@@ -417,5 +445,25 @@ export class BenchmarkCorpusManager {
     position?: "top" | "middle" | "bottom";
   }): TierContextResult {
     return assembleTierFromDocs(this.getAllDocuments(), options);
+  }
+
+  // =========================================================================
+  // C10: Contextual Retrieval & Metadata Enrichment
+  // =========================================================================
+
+  static getC10BenchmarkCases() {
+    return getC10BenchmarkCases(CHUNKING_BENCHMARK_CASES);
+  }
+
+  static searchContextual(
+    allChunks: Chunk[],
+    query: string,
+    options?: Parameters<typeof searchContextualChunks>[2]
+  ) {
+    return searchContextualChunks(allChunks, query, options);
+  }
+
+  static evaluateContextual(config: Parameters<typeof evaluateContextualConfig>[2]) {
+    return evaluateContextualConfig(this.getAllDocuments(), CHUNKING_BENCHMARK_CASES, config);
   }
 }

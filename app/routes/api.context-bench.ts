@@ -4,6 +4,13 @@ import { searchHybridInDocs } from "~/core/context-bench/hybrid";
 import type { ChunkingEvalStrategy } from "~/core/context-bench/chunker";
 import { LLMClient } from "~/core/llm/client";
 import { SmartTruncator } from "~/core/context/truncator";
+import {
+  type ContextualStrategy,
+  type ContextualBenchmarkConfig,
+  DEFAULT_CONTEXTUAL_MATRIX,
+  generateLLMSituationalContext,
+  evaluateContextualConfig,
+} from "~/core/context-bench/contextual";
 
 /** C8 基准矩阵的一行配置 */
 interface ChunkingMatrixRow {
@@ -1855,6 +1862,222 @@ ${topDocsContent}
         overlap: sweepOverlap,
         strategy: sweepStrategy,
         rows,
+      });
+    }
+
+    // =========================================================================
+    // C10: Contextual Retrieval Actions
+    // =========================================================================
+
+    // 20. C10: 语境增强切片检索
+    if (requestedAction === "search_contextual") {
+      const q = (query || "").trim();
+      const strategy = (body.strategy || "situational") as ContextualStrategy;
+      const chunkStrategy = body.chunkStrategy || "recursive";
+      const chunkSize = typeof body.chunkSize === "number" ? body.chunkSize : 256;
+      const overlap = typeof body.overlap === "number" ? body.overlap : 32;
+      const parentSize = typeof body.parentSize === "number" ? body.parentSize : 0;
+      const neighborWindow = typeof body.neighborWindow === "number" ? body.neighborWindow : 0;
+
+      const rawChunks = BenchmarkCorpusManager.getAllChunks({
+        strategy: chunkStrategy,
+        chunkSize,
+        overlap,
+      });
+
+      const outcome = BenchmarkCorpusManager.searchContextual(rawChunks, q, {
+        contextualStrategy: strategy,
+        parentSize,
+        neighborWindow,
+        topK: 12,
+        rerankTopN: 3,
+      });
+
+      return Response.json({ success: true, outcome });
+    }
+
+    // 21. C10: 语境增强全景对决矩阵
+    if (requestedAction === "run_contextual_matrix") {
+      const matrixConfigs = body.matrix || DEFAULT_CONTEXTUAL_MATRIX;
+      const docs = BenchmarkCorpusManager.getAllDocuments();
+      const cases = BenchmarkCorpusManager.getC10BenchmarkCases();
+
+      const rows = matrixConfigs.map((cfg: ContextualBenchmarkConfig) => {
+        const outcome = evaluateContextualConfig(docs, cases, cfg);
+        return {
+          config: cfg,
+          summary: outcome.summary,
+          cases: outcome.cases,
+        };
+      });
+
+      return Response.json({
+        success: true,
+        rows,
+        caseCount: cases.length,
+        corpusDocCount: docs.length,
+      });
+    }
+
+    // 22. C10: 单切片情境注标生成（LLM 在线生成或确定性回退）
+    if (requestedAction === "generate_situational_context") {
+      const chunkId = body.chunkId;
+      const docId = body.docId || (chunkId ? chunkId.split("#")[0] : "");
+      const doc = BenchmarkCorpusManager.readDocument(docId);
+      if (!doc) {
+        return Response.json({ error: "Document not found" }, { status: 404 });
+      }
+
+      const chunksResult = BenchmarkCorpusManager.chunkOne(docId, {
+        strategy: body.chunkStrategy || "recursive",
+        chunkSize: body.chunkSize || 256,
+        overlap: body.overlap || 32,
+      });
+      const targetChunk = chunksResult?.chunks.find((c) => c.id === chunkId) || chunksResult?.chunks[0];
+      if (!targetChunk) {
+        return Response.json({ error: "Chunk not found" }, { status: 404 });
+      }
+
+      const situationalContext = await generateLLMSituationalContext(doc, targetChunk, {
+        apiKey: apiKey || process.env.LLM_API_KEY,
+        baseURL: baseURL || process.env.LLM_BASE_URL,
+        model,
+      });
+
+      return Response.json({
+        success: true,
+        chunkId: targetChunk.id,
+        situationalContext,
+      });
+    }
+
+    // 23. C10: 四路语境端到端问答流水线对比
+    if (requestedAction === "run_contextual_pipeline") {
+      const q = (question || query || "").trim();
+      const chunkStrategy = body.chunkStrategy || "recursive";
+      const chunkSize = typeof body.chunkSize === "number" ? body.chunkSize : 256;
+      const overlap = typeof body.overlap === "number" ? body.overlap : 32;
+
+      const rawChunks = BenchmarkCorpusManager.getAllChunks({
+        strategy: chunkStrategy,
+        chunkSize,
+        overlap,
+      });
+
+      // A 路：无语境原始切片
+      const pathRaw = BenchmarkCorpusManager.searchContextual(rawChunks, q, {
+        contextualStrategy: "raw",
+        topK: 12,
+        rerankTopN: 2,
+      });
+
+      // B 路：结构面包屑
+      const pathBreadcrumbs = BenchmarkCorpusManager.searchContextual(rawChunks, q, {
+        contextualStrategy: "breadcrumbs",
+        topK: 12,
+        rerankTopN: 2,
+      });
+
+      // C 路：Anthropic 生成式情境注标
+      const pathSituational = BenchmarkCorpusManager.searchContextual(rawChunks, q, {
+        contextualStrategy: "situational",
+        topK: 12,
+        rerankTopN: 2,
+      });
+
+      // D 路：Contextual + Small-to-Big
+      const pathHybrid = BenchmarkCorpusManager.searchContextual(rawChunks, q, {
+        contextualStrategy: "situational-small-to-big",
+        parentSize: 1400,
+        topK: 12,
+        rerankTopN: 2,
+      });
+
+      const effectiveApiKey = apiKey || process.env.LLM_API_KEY || "";
+
+      const pack = (label: string, outcome: typeof pathRaw) => ({
+        label,
+        content: outcome.hits.map((h) => h.injectedContent).join("\n\n---\n\n"),
+        tokens: outcome.totalInjectedTokens,
+      });
+
+      const pA = pack("无语境原始切片", pathRaw);
+      const pB = pack("结构面包屑增强", pathBreadcrumbs);
+      const pC = pack("Anthropic 情境注标", pathSituational);
+      const pD = pack("Contextual + Small-to-Big", pathHybrid);
+
+      let answerA: string | null = null;
+      let answerB: string | null = null;
+      let answerC: string | null = null;
+      let answerD: string | null = null;
+      let latencyA = 0;
+      let latencyB = 0;
+      let latencyC = 0;
+      let latencyD = 0;
+
+      if (effectiveApiKey) {
+        const client = new LLMClient({
+          apiKey: effectiveApiKey,
+          baseURL: baseURL || process.env.LLM_BASE_URL,
+          defaultModel: model,
+        });
+        const systemPrompt =
+          "你是一个企业级运维架构问答专家。请严格基于提供的参考资料回答问题，并指明出处与触发条件。如果资料中因缺乏主语或前置条件而无法确定，请诚实说明。";
+
+        const runAsk = async (content: string) => {
+          const t0 = Date.now();
+          const res = await client.chatCompletion({
+            messages: [
+              {
+                role: "user",
+                content: `以下是通过检索为你准备的参考资料：\n\n<<<CONTEXT_START>>>\n${content}\n<<<CONTEXT_END>>>\n\n请严格基于上述资料回答问题：${q}`,
+              },
+            ],
+            systemPrompt,
+          });
+          return { answer: res.content, latency: Date.now() - t0 };
+        };
+
+        try {
+          const [rA, rB, rC, rD] = await Promise.all([
+            runAsk(pA.content),
+            runAsk(pB.content),
+            runAsk(pC.content),
+            runAsk(pD.content),
+          ]);
+          answerA = rA.answer;
+          latencyA = rA.latency;
+          answerB = rB.answer;
+          latencyB = rB.latency;
+          answerC = rC.answer;
+          latencyC = rC.latency;
+          answerD = rD.answer;
+          latencyD = rD.latency;
+        } catch (llmErr) {
+          const errNote = `（在线大模型调用异常，已平滑降级至确定性分析沙盘：${llmErr instanceof Error ? llmErr.message : String(llmErr)}）`;
+          answerA = `${errNote}\n\n切片开头写着“这种情况下”，失去先行词主语。模型大概率回答“未知”或发生张冠李戴伪证。`;
+          answerB = `${errNote}\n\n带有章节目录面包屑，能识别出属于容灾切换章节，但仍然缺失段落间具体的 90 秒主备失败条件。`;
+          answerC = `${errNote}\n\n注入 Anthropic 情境注标，明确补齐主语“跨可用区切换失败”与“主备切换90秒未完成”，模型能准确回答。`;
+          answerD = `${errNote}\n\n终极协同：小切片凭借情境注标精准召回，父窗口保证因果全息自洽，信噪比与完整性兼顾。`;
+        }
+      } else {
+        const note = "（未配置 API Key，未调用真实 LLM；此处展示的是将要注入模型的上下文及信噪比对比）";
+        answerA = `${note}\n\n切片开头写着“这种情况下”，失去先行词主语。模型大概率回答“未知”或发生张冠李戴伪证。`;
+        answerB = `${note}\n\n带有章节目录面包屑，能识别出属于容灾切换章节，但仍然缺失段落间具体的 90 秒主备失败条件。`;
+        answerC = `${note}\n\n注入 Anthropic 情境注标，明确补齐主语“跨可用区切换失败”与“主备切换90秒未完成”，模型能准确回答。`;
+        answerD = `${note}\n\n终极协同：小切片凭借情境注标精准召回，父窗口保证因果全息自洽，信噪比与完整性兼顾。`;
+      }
+
+      return Response.json({
+        success: true,
+        query: q,
+        paths: {
+          raw: { ...pA, answer: answerA, latencyMs: latencyA },
+          breadcrumbs: { ...pB, answer: answerB, latencyMs: latencyB },
+          situational: { ...pC, answer: answerC, latencyMs: latencyC },
+          hybrid: { ...pD, answer: answerD, latencyMs: latencyD },
+        },
+        ranWithLLM: Boolean(effectiveApiKey),
       });
     }
 

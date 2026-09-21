@@ -175,6 +175,14 @@ export function Header({
       color: "text-emerald-400",
       badge: "语境保真",
     },
+    {
+      path: "/lessons/context-c11-agentic-retrieval",
+      tag: "C11",
+      title: "第 11 课: 一次 Retrieval 够吗？(Agentic Retrieval)",
+      icon: Zap,
+      color: "text-amber-400",
+      badge: "推理检索",
+    },
   ];
 
   const semester2Lessons = [

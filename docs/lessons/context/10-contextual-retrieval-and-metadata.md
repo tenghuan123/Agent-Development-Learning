@@ -314,4 +314,4 @@ Prompt 结构:
 > **而真实世界的很多复杂任务，检索本身必须是一个“思考与探索的推理闭环”。**
 
 这就是我们在第 11 课即将推开的智能体大门：  
-👉 **第 11 课：一次 Retrieval 够吗？—— Agentic Retrieval（自主多轮检索与路径探索）**
+👉 [**第 11 课：一次 Retrieval 够吗？—— Agentic Retrieval（自主多轮检索与路径探索）**](/docs/lessons/context/11-agentic-retrieval-and-multihop.md) ｜ [🚀 进入 C11 互动实验工作台](/lessons/context-c11-agentic-retrieval)

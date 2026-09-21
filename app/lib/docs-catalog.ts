@@ -54,6 +54,10 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c10-contextual": "/docs/lessons/context/10-contextual-retrieval-and-metadata.md",
   "context-c10-contextual-retrieval": "/docs/lessons/context/10-contextual-retrieval-and-metadata.md",
   "context-10": "/docs/lessons/context/10-contextual-retrieval-and-metadata.md",
+  "context-c11": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
+  "context-c11-agentic": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
+  "context-c11-agentic-retrieval": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
+  "context-11": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
@@ -65,6 +69,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   c8: "/docs/lessons/context/08-chunking-granularity-and-boundaries.md",
   c9: "/docs/lessons/context/09-chunk-retrieval-and-small-to-big.md",
   c10: "/docs/lessons/context/10-contextual-retrieval-and-metadata.md",
+  c11: "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -113,6 +118,7 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "context-08": "/lessons/context-c8-chunking",
   "context-09": "/lessons/context-c9-small-to-big",
   "context-10": "/lessons/context-c10-contextual-retrieval",
+  "context-11": "/lessons/context-c11-agentic-retrieval",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

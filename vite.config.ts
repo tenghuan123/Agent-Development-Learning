@@ -37,11 +37,11 @@ function docsRouteBypassPlugin(): Plugin {
   };
 }
 
+import dotenv from "dotenv";
+dotenv.config();
+
 export default defineConfig({
   plugins: [reactRouter(), tsconfigPaths(), docsRouteBypassPlugin()],
-  define: {
-    "process.env": {},
-  },
   server: {
     port: 5175,
   },

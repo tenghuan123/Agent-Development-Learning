@@ -144,10 +144,11 @@ export async function generateLLMSituationalContext(
   chunk: Chunk,
   options: { apiKey?: string; baseURL?: string; model?: string }
 ): Promise<string> {
+  const env = typeof process !== "undefined" && process?.env ? process.env : ({} as Record<string, string | undefined>);
   const client = new LLMClient({
-    apiKey: options.apiKey || process.env.LLM_API_KEY || "",
-    baseURL: options.baseURL || process.env.LLM_BASE_URL,
-    defaultModel: options.model || "glm-4-flash",
+    apiKey: options.apiKey || env.LLM_API_KEY || "",
+    baseURL: options.baseURL || env.LLM_BASE_URL,
+    defaultModel: options.model || env.LLM_MODEL || "glm-4-flash",
   });
 
   const prompt = `<document>

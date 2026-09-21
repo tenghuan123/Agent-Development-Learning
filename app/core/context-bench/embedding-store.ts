@@ -58,7 +58,10 @@ export function chunkSetFilename(config: ChunkVectorConfig): string {
 }
 
 export function getEmbeddingBasePath(): string {
-  return path.join(process.cwd(), "data", "context-benchmark");
+  if (typeof process !== "undefined" && typeof process.cwd === "function") {
+    return path.join(process.cwd(), "data", "context-benchmark");
+  }
+  return "";
 }
 
 /**

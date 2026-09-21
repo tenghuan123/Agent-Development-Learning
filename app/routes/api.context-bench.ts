@@ -1,3 +1,4 @@
+import "dotenv/config";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { BenchmarkCorpusManager, C7_BENCHMARK_CASES, runTwoStageFunnel } from "~/core/context-bench/corpus";
 import { searchHybridInDocs } from "~/core/context-bench/hybrid";
@@ -11,6 +12,15 @@ import {
   generateLLMSituationalContext,
   evaluateContextualConfig,
 } from "~/core/context-bench/contextual";
+import {
+  MULTI_HOP_BENCHMARK_CASES,
+  CURATED_AGENTIC_TRAJECTORIES,
+  SingleShotEvaluator,
+  generateMultiHopBenchmarkMatrix,
+  runLiveAgenticSearch,
+  streamCuratedAgenticTrajectory,
+  type AgenticTrajectory,
+} from "~/core/context-bench/agentic";
 
 /** C8 基准矩阵的一行配置 */
 interface ChunkingMatrixRow {
@@ -2078,6 +2088,188 @@ ${topDocsContent}
           hybrid: { ...pD, answer: answerD, latencyMs: latencyD },
         },
         ranWithLLM: Boolean(effectiveApiKey),
+      });
+    }
+
+    // =======================================================================
+    // C11 Actions: Agentic Retrieval & Multi-Hop Exploration
+    // =======================================================================
+
+    // 1. 获取 C11 多跳基准用例列表
+    if (requestedAction === "get_c11_benchmark_cases") {
+      return Response.json({
+        success: true,
+        cases: MULTI_HOP_BENCHMARK_CASES.map((c) => ({
+          id: c.id,
+          category: c.category,
+          title: c.title,
+          query: c.query,
+          requiredFactCount: c.requiredFacts.length,
+          expectedAnswerSummary: c.expectedAnswerSummary,
+          isAdversarialTrap: Boolean(c.isAdversarialTrap),
+          goldenReasoning: c.goldenReasoning,
+        })),
+      });
+    }
+
+    // 2. 运行单用例对比 (单次被动检索 vs 多轮自主智能体检索)
+    if (requestedAction === "run_agentic_single") {
+      const targetCaseId = body.caseId || "mh-01";
+      const targetCase = MULTI_HOP_BENCHMARK_CASES.find((c) => c.id === targetCaseId) || MULTI_HOP_BENCHMARK_CASES[0];
+
+      // 单次检索评测结果 (C10 Contextual Small-to-Big Hybrid Pipeline)
+      const singleShotResult = SingleShotEvaluator.runC10ContextualHybrid(targetCase);
+      const singleLexicalResult = SingleShotEvaluator.runLexical(targetCase);
+      const singleDenseResult = SingleShotEvaluator.runDense(targetCase);
+
+      const effectiveApiKey = (apiKey && String(apiKey).trim()) || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = (baseURL && String(baseURL).trim()) || process.env.LLM_BASE_URL || "";
+      const effectiveModel = (model && String(model).trim()) || process.env.LLM_MODEL || "glm-4-flash";
+
+      // 支持实时流式推送调用步骤 (Server-Sent Events)
+      if (body.stream) {
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          async start(controller) {
+            const sendEvent = (event: any) => {
+              const payload = `data: ${JSON.stringify(event)}\n\n`;
+              controller.enqueue(encoder.encode(payload));
+            };
+
+            try {
+              let trajectory: AgenticTrajectory;
+
+              if (effectiveApiKey) {
+                trajectory = await runLiveAgenticSearch({
+                  query: targetCase.query,
+                  apiKey: effectiveApiKey,
+                  baseURL: effectiveBaseURL,
+                  model: effectiveModel,
+                  maxSteps: 6,
+                  targetCase,
+                  onEvent: async (evt) => {
+                    sendEvent(evt);
+                  },
+                });
+              } else {
+                trajectory = await streamCuratedAgenticTrajectory(
+                  targetCase,
+                  async (evt) => {
+                    sendEvent(evt);
+                  },
+                  300
+                );
+              }
+
+              sendEvent({
+                type: "final_result",
+                case: {
+                  id: targetCase.id,
+                  category: targetCase.category,
+                  title: targetCase.title,
+                  query: targetCase.query,
+                  goldenReasoning: targetCase.goldenReasoning,
+                  isAdversarialTrap: Boolean(targetCase.isAdversarialTrap),
+                  requiredFacts: targetCase.requiredFacts.map((rf) => ({
+                    id: rf.id,
+                    fact: rf.fact,
+                    sourceDocId: rf.sourceDocId,
+                  })),
+                },
+                singleShot: singleShotResult,
+                singleLexical: singleLexicalResult,
+                singleDense: singleDenseResult,
+                agentic: trajectory,
+              });
+
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            } catch (err: any) {
+              sendEvent({
+                type: "error",
+                message: err.message || String(err),
+              });
+              controller.close();
+            }
+          },
+        });
+
+        return new Response(stream, {
+          headers: {
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+          },
+        });
+      }
+
+      // 非流式回退模式
+      let trajectory = CURATED_AGENTIC_TRAJECTORIES[targetCase.id];
+      if (effectiveApiKey) {
+        trajectory = await runLiveAgenticSearch({
+          query: targetCase.query,
+          apiKey: effectiveApiKey,
+          baseURL: effectiveBaseURL,
+          model: effectiveModel,
+          maxSteps: 6,
+          targetCase,
+        });
+      }
+
+      return Response.json({
+        success: true,
+        case: {
+          id: targetCase.id,
+          category: targetCase.category,
+          title: targetCase.title,
+          query: targetCase.query,
+          goldenReasoning: targetCase.goldenReasoning,
+          isAdversarialTrap: Boolean(targetCase.isAdversarialTrap),
+          requiredFacts: targetCase.requiredFacts.map((rf) => ({
+            id: rf.id,
+            fact: rf.fact,
+            sourceDocId: rf.sourceDocId,
+          })),
+        },
+        singleShot: singleShotResult,
+        singleLexical: singleLexicalResult,
+        singleDense: singleDenseResult,
+        agentic: trajectory,
+      });
+    }
+
+    // 3. 运行 C11 全景评测对决矩阵
+    if (requestedAction === "run_agentic_matrix") {
+      const rows = generateMultiHopBenchmarkMatrix();
+      return Response.json({
+        success: true,
+        rows,
+        totalCases: rows.length,
+      });
+    }
+
+    // 4. 在线交互式自定义智能体检索
+    if (requestedAction === "run_live_agentic_search") {
+      const userQuery = String(body.query || "").trim();
+      if (!userQuery) {
+        return Response.json({ error: "Query is required" }, { status: 400 });
+      }
+
+      const effectiveApiKey = (apiKey && String(apiKey).trim()) || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = (baseURL && String(baseURL).trim()) || process.env.LLM_BASE_URL || "";
+      const effectiveModel = (model && String(model).trim()) || process.env.LLM_MODEL || "glm-4-flash";
+
+      const trajectory = await runLiveAgenticSearch({
+        query: userQuery,
+        apiKey: effectiveApiKey,
+        baseURL: effectiveBaseURL,
+        model: effectiveModel,
+        maxSteps: 6,
+      });
+
+      return Response.json({
+        success: true,
+        trajectory,
       });
     }
 

@@ -39,9 +39,7 @@ export default [
   route("lessons/context-c8-chunking", "routes/lessons.context-c8.tsx"),
   route("lessons/context-c9-small-to-big", "routes/lessons.context-c9.tsx"),
   route("lessons/context-c10-contextual-retrieval", "routes/lessons.context-c10.tsx"),
-  route("lessons/context-c10", "routes/lessons.context-c10-redirect.ts"),
-  route("lessons/context-10", "routes/lessons.context-c10-redirect.ts", { id: "context-10-alias" }),
-  route("lessons/c10", "routes/lessons.context-c10-redirect.ts", { id: "c10-alias" }),
+  route("lessons/context-c11-agentic-retrieval", "routes/lessons.context-c11.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

@@ -173,9 +173,43 @@ import {
   getC10BenchmarkCases,
   evaluateContextualConfig,
 } from "./contextual";
+export type {
+  AgenticToolName,
+  AgenticToolCall,
+  AgenticStepTrace,
+  AgenticTrajectory,
+  RequiredFact,
+  MultiHopTestCase,
+  StrategyEvalResult,
+  MultiHopCaseMatrixRow,
+  AgenticStreamEvent,
+} from "./agentic";
+import {
+  AgenticRetrievalTools,
+  MULTI_HOP_BENCHMARK_CASES,
+  CURATED_AGENTIC_TRAJECTORIES,
+  SingleShotEvaluator,
+  generateMultiHopBenchmarkMatrix,
+  runLiveAgenticSearch,
+  streamCuratedAgenticTrajectory,
+} from "./agentic";
+export {
+  AgenticRetrievalTools,
+  MULTI_HOP_BENCHMARK_CASES,
+  CURATED_AGENTIC_TRAJECTORIES,
+  SingleShotEvaluator,
+  generateMultiHopBenchmarkMatrix,
+  runLiveAgenticSearch,
+  streamCuratedAgenticTrajectory,
+};
 
 export class BenchmarkCorpusManager {
-  private static basePath = path.join(process.cwd(), "data", "context-benchmark");
+  private static get basePath(): string {
+    if (typeof process !== "undefined" && typeof process.cwd === "function") {
+      return path.join(process.cwd(), "data", "context-benchmark");
+    }
+    return "";
+  }
 
   /**
    * Load all ground truth documents from data/context-benchmark
@@ -465,5 +499,25 @@ export class BenchmarkCorpusManager {
 
   static evaluateContextual(config: Parameters<typeof evaluateContextualConfig>[2]) {
     return evaluateContextualConfig(this.getAllDocuments(), CHUNKING_BENCHMARK_CASES, config);
+  }
+
+  // =========================================================================
+  // C11: Agentic Retrieval & Multi-Hop Exploration
+  // =========================================================================
+
+  static getMultiHopBenchmarkCases() {
+    return MULTI_HOP_BENCHMARK_CASES;
+  }
+
+  static getCuratedAgenticTrajectory(caseId: string) {
+    return CURATED_AGENTIC_TRAJECTORIES[caseId] || null;
+  }
+
+  static generateMultiHopBenchmarkMatrix() {
+    return generateMultiHopBenchmarkMatrix();
+  }
+
+  static runLiveAgenticSearch(options: Parameters<typeof runLiveAgenticSearch>[0]) {
+    return runLiveAgenticSearch(options);
   }
 }

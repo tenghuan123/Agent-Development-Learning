@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLoaderData, Link } from "react-router";
 import { Header } from "~/components/Header";
 import {
@@ -117,11 +117,23 @@ export default function ContextLessonC10() {
   } = useLoaderData<typeof loader>();
 
   const [customApiKey, setCustomApiKey] = useState("");
-  const [customBaseURL, setCustomBaseURL] = useState("");
+  const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
+    if (savedKey) setCustomApiKey(savedKey);
+    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
+    if (savedURL) setCustomBaseURL(savedURL);
+  }, []);
+
   const handleSaveSettings = (settings: { apiKey: string; baseURL: string }) => {
     setCustomApiKey(settings.apiKey);
     setCustomBaseURL(settings.baseURL);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", settings.apiKey);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", settings.baseURL);
   };
+
+  const isKeyAvailable = hasServerKey || Boolean(customApiKey.trim().length > 0);
 
   const [activeTab, setActiveTab] = useState<"studio" | "showdown" | "architecture">("studio");
 
@@ -295,6 +307,13 @@ export default function ContextLessonC10() {
               className="text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors"
             >
               ← 上一课 (C9 Small-to-Big 架构)
+            </Link>
+            <span className="text-slate-700">|</span>
+            <Link
+              to="/lessons/context-c11-agentic-retrieval"
+              className="text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-medium"
+            >
+              下一课 (C11 Agentic Retrieval) →
             </Link>
             <span className="text-slate-700">|</span>
             <Link
@@ -682,7 +701,7 @@ export default function ContextLessonC10() {
                                   </span>
                                 </div>
 
-                                {customApiKey && idx === 0 && (
+                                {isKeyAvailable && idx === 0 && (
                                   <button
                                     onClick={() =>
                                       generateSituationalContextForTopHit(hit.chunk.id, hit.chunk.docId)
@@ -1091,10 +1110,10 @@ export default function ContextLessonC10() {
                 </p>
               </div>
               <Link
-                to="/docs/lessons/context/10-contextual-retrieval-and-metadata.md"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition shrink-0"
+                to="/lessons/context-c11-agentic-retrieval"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold transition shrink-0 shadow-lg shadow-amber-950/40"
               >
-                查看下一课演进全景
+                进入下一课互动实验工作台
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

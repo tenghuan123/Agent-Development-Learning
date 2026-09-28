@@ -251,7 +251,7 @@ Step 9: [触碰最大步数强制中断] 耗尽 1,890 Tokens，延迟 3.4 秒！
 - **如何为 Agent 设置硬性 Token 预算与调用熔断？**
 
 这就是我们在第 12 课即将攻坚的全新领域：  
-👉 **第 12 课：Agent 为什么会过度检索？—— 上下文控制与预算调度（Context Control & Budget Management）**
+👉 [**第 12 课：Agent 为什么会过度检索？—— 上下文控制与预算调度（Context Control & Budget Management）**](/docs/lessons/context/12-context-control-and-budget.md) ｜ [🚀 进入 C12 预算控制工作台](/lessons/context-c12-budget-management)
 
 ---
 
@@ -261,5 +261,6 @@ Step 9: [触碰最大步数强制中断] 耗尽 1,890 Tokens，延迟 3.4 秒！
 | :--- | :--- | :--- |
 | **上一课讲义** | [← 第 10 课：Contextual Retrieval 与上下文感知增强](/docs/lessons/context/10-contextual-retrieval-and-metadata.md) | 攻克孤岛代词与主语失窃，切片自足率达成 100% |
 | **本课工作台** | [🚀 进入第 11 课互动实验工作台 (Multi-Hop Studio)](/lessons/context-c11-agentic-retrieval) | 实时运行五方策略对决、查看多跳推理时序图谱与过度检索陷阱 |
+| **下一课讲义** | [👉 第 12 课：上下文控制、停机准则与预算调度](/docs/lessons/context/12-context-control-and-budget.md) | 攻克过度检索死循环与 Token 爆炸，打造自适应熔断状态机 |
 | **全景总纲** | [📖 Context Engineering 问题驱动全景总纲](/docs/context-learn.md) | 查看 00~17 课全套演进推导与问题链 |
 | **项目主页** | [🏠 返回 Mini Claude Code 课程门户总览](/) | 全课程工作台大厅与技术路线图 |

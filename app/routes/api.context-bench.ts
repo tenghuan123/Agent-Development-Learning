@@ -21,6 +21,13 @@ import {
   streamCuratedAgenticTrajectory,
   type AgenticTrajectory,
 } from "~/core/context-bench/agentic";
+import {
+  BUDGET_BENCHMARK_CASES,
+  CURATED_BUDGET_TRAJECTORIES,
+  generateBudgetBenchmarkMatrix,
+  runLiveControlledSearch,
+  type ControlStrategyName,
+} from "~/core/context-bench/budget-control";
 
 /** C8 基准矩阵的一行配置 */
 interface ChunkingMatrixRow {
@@ -2265,6 +2272,162 @@ ${topDocsContent}
         baseURL: effectiveBaseURL,
         model: effectiveModel,
         maxSteps: 6,
+      });
+
+      return Response.json({
+        success: true,
+        trajectory,
+      });
+    }
+
+    // =========================================================================
+    // C12 Actions: 上下文控制与预算调度 (Context Control & Budget Management)
+    // =========================================================================
+
+    // 1. 获取 C12 基准测试用例列表
+    if (requestedAction === "get_budget_cases") {
+      return Response.json({
+        success: true,
+        cases: BUDGET_BENCHMARK_CASES.map((c) => ({
+          id: c.id,
+          category: c.category,
+          title: c.title,
+          query: c.query,
+          isTrap: c.isTrap,
+          trapType: c.trapType,
+          requiredFactCount: c.requiredFacts.length,
+          expectedBehavior: c.expectedBehavior,
+          goldenAnswerSummary: c.goldenAnswerSummary,
+          difficulty: c.difficulty,
+        })),
+      });
+    }
+
+    // 2. 运行单用例多策略对比与实时受控检索 (支持 SSE 流式)
+    if (requestedAction === "run_budget_single") {
+      const targetCaseId = body.caseId || "mh-01-compat";
+      const selectedStrategy: ControlStrategyName = body.strategy || "adaptive_budget_controller";
+      const targetCase = BUDGET_BENCHMARK_CASES.find((c) => c.id === targetCaseId) || BUDGET_BENCHMARK_CASES[0];
+      const budgetConfig = body.budgetConfig || {};
+
+      const effectiveApiKey = (apiKey && String(apiKey).trim()) || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = (baseURL && String(baseURL).trim()) || process.env.LLM_BASE_URL || "";
+      const effectiveModel = (model && String(model).trim()) || process.env.LLM_MODEL || "glm-4-flash";
+
+      // 支持 SSE 流式传输
+      if (body.stream) {
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          async start(controller) {
+            const sendEvent = (event: any) => {
+              const payload = `data: ${JSON.stringify(event)}\n\n`;
+              controller.enqueue(encoder.encode(payload));
+            };
+
+            try {
+              const trajectory = await runLiveControlledSearch({
+                query: targetCase.query,
+                strategy: selectedStrategy,
+                budgetConfig,
+                apiKey: effectiveApiKey,
+                baseURL: effectiveBaseURL,
+                model: effectiveModel,
+                targetCase,
+                onEvent: async (evt) => {
+                  sendEvent(evt);
+                },
+              });
+
+              sendEvent({
+                type: "final_result",
+                case: targetCase,
+                strategy: selectedStrategy,
+                trajectory,
+              });
+
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            } catch (err: any) {
+              sendEvent({
+                type: "error",
+                message: err.message || String(err),
+              });
+              controller.close();
+            }
+          },
+        });
+
+        return new Response(stream, {
+          headers: {
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+          },
+        });
+      }
+
+      // 非流式回退
+      const cacheKey = `${targetCase.id}_${selectedStrategy}`;
+      let trajectory = CURATED_BUDGET_TRAJECTORIES[cacheKey];
+
+      if (effectiveApiKey) {
+        trajectory = await runLiveControlledSearch({
+          query: targetCase.query,
+          strategy: selectedStrategy,
+          budgetConfig,
+          apiKey: effectiveApiKey,
+          baseURL: effectiveBaseURL,
+          model: effectiveModel,
+          targetCase,
+        });
+      } else if (!trajectory) {
+        trajectory = await runLiveControlledSearch({
+          query: targetCase.query,
+          strategy: selectedStrategy,
+          budgetConfig,
+          targetCase,
+        });
+      }
+
+      return Response.json({
+        success: true,
+        case: targetCase,
+        strategy: selectedStrategy,
+        trajectory,
+      });
+    }
+
+    // 3. 运行 C12 全景策略对决矩阵 (4 策略 x 6 用例)
+    if (requestedAction === "run_budget_matrix") {
+      const rows = generateBudgetBenchmarkMatrix();
+      return Response.json({
+        success: true,
+        rows,
+        totalCases: rows.length,
+      });
+    }
+
+    // 4. 自定义实时受控检索运行
+    if (requestedAction === "run_live_budget_search") {
+      const userQuery = String(body.query || "").trim();
+      if (!userQuery) {
+        return Response.json({ error: "Query is required" }, { status: 400 });
+      }
+
+      const selectedStrategy: ControlStrategyName = body.strategy || "adaptive_budget_controller";
+      const budgetConfig = body.budgetConfig || {};
+
+      const effectiveApiKey = (apiKey && String(apiKey).trim()) || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL = (baseURL && String(baseURL).trim()) || process.env.LLM_BASE_URL || "";
+      const effectiveModel = (model && String(model).trim()) || process.env.LLM_MODEL || "glm-4-flash";
+
+      const trajectory = await runLiveControlledSearch({
+        query: userQuery,
+        strategy: selectedStrategy,
+        budgetConfig,
+        apiKey: effectiveApiKey,
+        baseURL: effectiveBaseURL,
+        model: effectiveModel,
       });
 
       return Response.json({

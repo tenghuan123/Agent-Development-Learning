@@ -40,6 +40,7 @@ export default [
   route("lessons/context-c9-small-to-big", "routes/lessons.context-c9.tsx"),
   route("lessons/context-c10-contextual-retrieval", "routes/lessons.context-c10.tsx"),
   route("lessons/context-c11-agentic-retrieval", "routes/lessons.context-c11.tsx"),
+  route("lessons/context-c12-budget-management", "routes/lessons.context-c12.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

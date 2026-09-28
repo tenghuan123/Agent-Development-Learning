@@ -58,6 +58,10 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c11-agentic": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
   "context-c11-agentic-retrieval": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
   "context-11": "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
+  "context-c12": "/docs/lessons/context/12-context-control-and-budget.md",
+  "context-c12-budget": "/docs/lessons/context/12-context-control-and-budget.md",
+  "context-c12-budget-management": "/docs/lessons/context/12-context-control-and-budget.md",
+  "context-12": "/docs/lessons/context/12-context-control-and-budget.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
@@ -70,6 +74,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   c9: "/docs/lessons/context/09-chunk-retrieval-and-small-to-big.md",
   c10: "/docs/lessons/context/10-contextual-retrieval-and-metadata.md",
   c11: "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
+  c12: "/docs/lessons/context/12-context-control-and-budget.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -119,6 +124,7 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "context-09": "/lessons/context-c9-small-to-big",
   "context-10": "/lessons/context-c10-contextual-retrieval",
   "context-11": "/lessons/context-c11-agentic-retrieval",
+  "context-12": "/lessons/context-c12-budget-management",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

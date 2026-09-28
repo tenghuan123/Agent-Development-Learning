@@ -203,6 +203,41 @@ export {
   streamCuratedAgenticTrajectory,
 };
 
+// ===========================================================================
+// C12: Context Control & Budget Management Exports
+// ===========================================================================
+
+export type {
+  ControlStrategyName,
+  BreakerTripReason,
+  ContextBudgetConfig,
+  CircuitBreakerStatus,
+  BudgetSnapshot,
+  BudgetControlledStep,
+  BudgetControlledTrajectory,
+  BudgetBenchmarkCase,
+  BudgetStrategyResult,
+  BudgetCaseMatrixRow,
+} from "./budget-control";
+
+export {
+  extractBagOfWords,
+  computeJaccardSimilarity,
+  detectQueryLoop,
+  computeMarginalGain,
+  BudgetController,
+  BUDGET_BENCHMARK_CASES,
+  CURATED_BUDGET_TRAJECTORIES,
+  generateBudgetBenchmarkMatrix,
+  runLiveControlledSearch,
+} from "./budget-control";
+import {
+  BUDGET_BENCHMARK_CASES,
+  CURATED_BUDGET_TRAJECTORIES,
+  generateBudgetBenchmarkMatrix,
+  runLiveControlledSearch,
+} from "./budget-control";
+
 export class BenchmarkCorpusManager {
   private static get basePath(): string {
     if (typeof process !== "undefined" && typeof process.cwd === "function") {
@@ -519,5 +554,26 @@ export class BenchmarkCorpusManager {
 
   static runLiveAgenticSearch(options: Parameters<typeof runLiveAgenticSearch>[0]) {
     return runLiveAgenticSearch(options);
+  }
+
+  // =========================================================================
+  // C12: Context Control & Budget Management
+  // =========================================================================
+
+  static getBudgetBenchmarkCases() {
+    return BUDGET_BENCHMARK_CASES;
+  }
+
+  static getCuratedBudgetTrajectory(caseId: string, strategy: Parameters<typeof runLiveControlledSearch>[0]["strategy"] = "adaptive_budget_controller") {
+    const key = `${caseId}_${strategy}`;
+    return CURATED_BUDGET_TRAJECTORIES[key] || null;
+  }
+
+  static generateBudgetBenchmarkMatrix() {
+    return generateBudgetBenchmarkMatrix();
+  }
+
+  static runLiveControlledSearch(options: Parameters<typeof runLiveControlledSearch>[0]) {
+    return runLiveControlledSearch(options);
   }
 }

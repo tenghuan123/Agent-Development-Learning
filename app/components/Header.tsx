@@ -183,6 +183,14 @@ export function Header({
       color: "text-amber-400",
       badge: "推理检索",
     },
+    {
+      path: "/lessons/context-c12-budget-management",
+      tag: "C12",
+      title: "第 12 课: Agent 为什么过度检索？(预算调度与熔断)",
+      icon: ShieldAlert,
+      color: "text-rose-400",
+      badge: "预算熔断",
+    },
   ];
 
   const semester2Lessons = [

@@ -62,6 +62,10 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c12-budget": "/docs/lessons/context/12-context-control-and-budget.md",
   "context-c12-budget-management": "/docs/lessons/context/12-context-control-and-budget.md",
   "context-12": "/docs/lessons/context/12-context-control-and-budget.md",
+  "context-c13": "/docs/lessons/context/13-context-assembly-and-layout.md",
+  "context-c13-assembly": "/docs/lessons/context/13-context-assembly-and-layout.md",
+  "context-c13-context-assembly": "/docs/lessons/context/13-context-assembly-and-layout.md",
+  "context-13": "/docs/lessons/context/13-context-assembly-and-layout.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
@@ -75,6 +79,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   c10: "/docs/lessons/context/10-contextual-retrieval-and-metadata.md",
   c11: "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
   c12: "/docs/lessons/context/12-context-control-and-budget.md",
+  c13: "/docs/lessons/context/13-context-assembly-and-layout.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {

@@ -14,26 +14,32 @@ export const ManageMemoryInputSchema = z.object({
     ),
   category: z
     .enum(["preference", "convention", "learning", "architecture"])
+    .nullable()
     .optional()
     .describe("Category of memory (required for 'save_memory')"),
   key: z
     .string()
+    .nullable()
     .optional()
     .describe("Unique snake_case identifier key (e.g. 'pkg_manager', 'db_port')"),
   content: z
     .string()
+    .nullable()
     .optional()
     .describe("Detailed persistent rule or insight to remember (required for 'save_memory')"),
   tags: z
     .array(z.string())
+    .nullable()
     .optional()
     .describe("Optional search tags for quick retrieval"),
   query: z
     .string()
+    .nullable()
     .optional()
     .describe("Search term or keywords for 'recall_memory'"),
   memoryId: z
     .string()
+    .nullable()
     .optional()
     .describe("Memory ID for 'delete_memory'"),
 });
@@ -72,7 +78,7 @@ Actions:
             category,
             key: itemKey,
             content,
-            tags,
+            tags: tags || undefined,
             source: "agent_saved",
             confidence: 0.95,
           });
@@ -142,11 +148,11 @@ export const ScratchpadInputSchema = z.object({
   action: z
     .enum(["update", "read", "clear"])
     .describe("Scratchpad action: 'update' (add hypothesis/fact/note), 'read' (inspect state), 'clear' (reset)."),
-  focus: z.string().optional().describe("Update current immediate mini-focus"),
-  hypothesis: z.string().optional().describe("Add a working hypothesis to investigate"),
-  resolveHypothesis: z.string().optional().describe("Name of hypothesis resolved"),
-  fact: z.string().optional().describe("Add a verified fact discovered"),
-  note: z.string().optional().describe("Add a brief freeform scratchpad note"),
+  focus: z.string().nullable().optional().describe("Update current immediate mini-focus"),
+  hypothesis: z.string().nullable().optional().describe("Add a working hypothesis to investigate"),
+  resolveHypothesis: z.string().nullable().optional().describe("Name of hypothesis resolved"),
+  fact: z.string().nullable().optional().describe("Add a verified fact discovered"),
+  note: z.string().nullable().optional().describe("Add a brief freeform scratchpad note"),
 });
 
 export type ScratchpadInput = z.infer<typeof ScratchpadInputSchema>;
@@ -169,7 +175,7 @@ Use this to track active hypotheses under investigation, log confirmed facts, re
         case "update": {
           if (focus) workingMemory.setFocus(focus);
           if (hypothesis) workingMemory.addHypothesis(hypothesis);
-          if (resolveHypothesis) workingMemory.resolveHypothesis(resolveHypothesis, fact);
+          if (resolveHypothesis) workingMemory.resolveHypothesis(resolveHypothesis, fact || undefined);
           else if (fact) workingMemory.addFact(fact);
           if (note) workingMemory.addNote(note);
 

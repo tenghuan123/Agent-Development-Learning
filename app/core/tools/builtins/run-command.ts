@@ -14,6 +14,7 @@ export const RunCommandInputSchema = z.object({
     .int()
     .positive()
     .max(60000)
+    .nullable()
     .optional()
     .describe("命令执行超时毫秒数，默认 20000ms (20秒)，最大 60000ms。"),
 });
@@ -61,7 +62,8 @@ export const runCommandTool: ToolDefinition<RunCommandInput, string> = {
     "在工作区终端中安全执行非交互式 Shell 命令行，捕获 Exit Code、Stdout、Stderr 与执行耗时。支持运行测试用例、类型检查、语法验证等构建与验证动作。",
   schema: RunCommandInputSchema,
   execute: async (args, context) => {
-    const { command, timeoutMs = 20000 } = args;
+    const { command } = args;
+    const timeoutMs = args.timeoutMs || 20000;
     const workspaceRoot = path.resolve(context.workspaceDir || process.cwd());
 
     // Security check: Guard against dangerous commands

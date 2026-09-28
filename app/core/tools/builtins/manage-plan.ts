@@ -10,32 +10,38 @@ export const ManagePlanInputSchema = z.object({
     ),
   goal: z
     .string()
+    .nullable()
     .optional()
     .describe("Overall goal of the plan (required when action is 'create_plan')."),
   tasks: z
     .array(
       z.object({
-        id: z.string().optional().describe("Optional task ID for replan (e.g. 'task_1')"),
+        id: z.string().nullable().optional().describe("Optional task ID for replan (e.g. 'task_1')"),
         title: z.string().describe("Clear, actionable task title"),
-        description: z.string().optional().describe("Detailed implementation steps and verification criteria"),
+        description: z.string().nullable().optional().describe("Detailed implementation steps and verification criteria"),
         status: z
           .enum(["pending", "in_progress", "completed", "blocked", "skipped"])
+          .nullable()
           .optional()
           .describe("Task status (defaults to 'pending')"),
       })
     )
+    .nullable()
     .optional()
     .describe("Array of task items (required for 'create_plan' and 'replan')."),
   taskId: z
     .string()
+    .nullable()
     .optional()
     .describe("The task ID to act upon (required for 'start_task', 'complete_task', 'skip_task')."),
   summary: z
     .string()
+    .nullable()
     .optional()
     .describe("Summary of what was accomplished and verified (required for 'complete_task')."),
   reason: z
     .string()
+    .nullable()
     .optional()
     .describe("Reason for replanning or skipping a task."),
 });
@@ -68,7 +74,10 @@ Use this tool to:
             throw new Error("Action 'create_plan' requires a non-empty 'tasks' array.");
           }
           const finalGoal = goal || "Autonomous Engineering Task";
-          const plan = planManager.createPlan(finalGoal, tasks);
+          const plan = planManager.createPlan(
+            finalGoal,
+            tasks.map((t) => ({ title: t.title, description: t.description || undefined }))
+          );
           return `Plan successfully created with ${plan.tasks.length} tasks (Revision 1).\n\n${planManager.renderAttentionAnchor()}`;
         }
 
@@ -101,7 +110,7 @@ Use this tool to:
           if (!taskId) {
             throw new Error("Action 'skip_task' requires 'taskId'.");
           }
-          const task = planManager.skipTask(taskId, reason);
+          const task = planManager.skipTask(taskId, reason || undefined);
           return `Task ${task.id} skipped (${reason || "No reason given"}).\n\n${planManager.renderAttentionAnchor()}`;
         }
 

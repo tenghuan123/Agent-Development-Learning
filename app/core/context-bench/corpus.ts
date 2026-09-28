@@ -238,6 +238,41 @@ import {
   runLiveControlledSearch,
 } from "./budget-control";
 
+// ===========================================================================
+// C13: Context Assembly & Attention Ordering Exports
+// ===========================================================================
+
+export type {
+  ComponentPriority,
+  ComponentKind,
+  ComponentTrustLevel,
+  ContextComponent,
+  AssemblyStrategyName,
+  AssemblyBudgetConfig,
+  SegmentLayoutInfo,
+  PackedPrompt,
+  AssemblyBenchmarkCase,
+  AssemblyStrategyResult,
+  AssemblyCaseMatrixRow,
+} from "./assembly";
+
+export {
+  computeTheoreticalAttention,
+  escapeUntrustedContent,
+  ContextAssembler,
+  ASSEMBLY_BENCHMARK_CASES,
+  CURATED_ASSEMBLY_MATRIX,
+  generateAssemblyBenchmarkMatrix,
+  runLiveAssemblyExperiment,
+  getCuratedAssemblyResult,
+} from "./assembly";
+import {
+  ASSEMBLY_BENCHMARK_CASES,
+  generateAssemblyBenchmarkMatrix,
+  runLiveAssemblyExperiment,
+  getCuratedAssemblyResult,
+} from "./assembly";
+
 export class BenchmarkCorpusManager {
   private static get basePath(): string {
     if (typeof process !== "undefined" && typeof process.cwd === "function") {
@@ -575,5 +610,31 @@ export class BenchmarkCorpusManager {
 
   static runLiveControlledSearch(options: Parameters<typeof runLiveControlledSearch>[0]) {
     return runLiveControlledSearch(options);
+  }
+
+  // =========================================================================
+  // C13: Context Assembly & Attention Ordering
+  // =========================================================================
+
+  static getAssemblyBenchmarkCases() {
+    return ASSEMBLY_BENCHMARK_CASES;
+  }
+
+  static getCuratedAssemblyResult(
+    caseId: string,
+    strategy: Parameters<typeof runLiveAssemblyExperiment>[0]["strategy"] = "structured_priority_knapsack",
+    maxTokens?: number
+  ) {
+    return getCuratedAssemblyResult(caseId, strategy, maxTokens);
+  }
+
+  static generateAssemblyBenchmarkMatrix() {
+    return generateAssemblyBenchmarkMatrix();
+  }
+
+  static runLiveAssemblyExperiment(
+    options: Parameters<typeof runLiveAssemblyExperiment>[0]
+  ) {
+    return runLiveAssemblyExperiment(options);
   }
 }

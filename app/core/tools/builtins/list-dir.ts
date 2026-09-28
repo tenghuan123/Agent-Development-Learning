@@ -6,12 +6,14 @@ import type { ToolDefinition } from "../types";
 export const ListDirInputSchema = z.object({
   dirPath: z
     .string()
+    .nullable()
     .optional()
     .describe(
       "要列出内容的目录相对路径，默认为当前根目录 '.'。例如 'app'、'app/core' 等。"
     ),
   recursive: z
     .boolean()
+    .nullable()
     .optional()
     .describe("是否递归列出子目录中的文件（默认 false，最大深度限制为 3）。"),
 });

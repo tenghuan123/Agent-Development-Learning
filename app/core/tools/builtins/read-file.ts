@@ -13,12 +13,14 @@ export const ReadFileInputSchema = z.object({
     .number()
     .int()
     .positive()
+    .nullable()
     .optional()
     .describe("起始行号（从 1 开始，可选）。如果不传则从第 1 行开始读取。"),
   endLine: z
     .number()
     .int()
     .positive()
+    .nullable()
     .optional()
     .describe("结束行号（可选）。如果不传则读取到文件末尾。"),
 });

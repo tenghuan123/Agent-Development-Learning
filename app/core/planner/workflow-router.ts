@@ -20,6 +20,7 @@ export const RoutingDecisionSchema = z.object({
     .describe("Confidence score between 0 and 1."),
   suggestedSteps: z
     .array(z.string())
+    .nullable()
     .optional()
     .describe("If full_planning, initial 2-5 high-level steps recommended."),
   requiresTools: z
@@ -90,7 +91,10 @@ export class WorkflowRouter {
         });
 
         if (result && result.data) {
-          return result.data;
+          return {
+            ...result.data,
+            suggestedSteps: result.data.suggestedSteps ?? undefined,
+          };
         }
       } catch (err) {
         console.warn(

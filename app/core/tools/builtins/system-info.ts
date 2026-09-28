@@ -5,6 +5,7 @@ import type { ToolDefinition } from "../types";
 export const SystemInfoInputSchema = z.object({
   detailLevel: z
     .enum(["basic", "detailed"])
+    .nullable()
     .optional()
     .describe("获取系统信息的详细级别，默认为 'basic'。"),
 });

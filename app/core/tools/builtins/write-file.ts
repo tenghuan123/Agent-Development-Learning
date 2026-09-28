@@ -14,6 +14,7 @@ export const WriteFileInputSchema = z.object({
     .describe("要写入文件的完整文本内容。创建新文件或小型配置文件时使用。"),
   overwrite: z
     .boolean()
+    .nullable()
     .optional()
     .describe("如果文件已存在，是否允许覆盖写入。默认为 true。"),
 });

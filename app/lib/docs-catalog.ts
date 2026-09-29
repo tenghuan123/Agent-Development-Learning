@@ -66,6 +66,10 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c13-assembly": "/docs/lessons/context/13-context-assembly-and-layout.md",
   "context-c13-context-assembly": "/docs/lessons/context/13-context-assembly-and-layout.md",
   "context-13": "/docs/lessons/context/13-context-assembly-and-layout.md",
+  "context-c14": "/docs/lessons/context/14-context-compaction-and-distillation.md",
+  "context-c14-compaction": "/docs/lessons/context/14-context-compaction-and-distillation.md",
+  "context-c14-context-compaction": "/docs/lessons/context/14-context-compaction-and-distillation.md",
+  "context-14": "/docs/lessons/context/14-context-compaction-and-distillation.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
@@ -80,6 +84,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   c11: "/docs/lessons/context/11-agentic-retrieval-and-multihop.md",
   c12: "/docs/lessons/context/12-context-control-and-budget.md",
   c13: "/docs/lessons/context/13-context-assembly-and-layout.md",
+  c14: "/docs/lessons/context/14-context-compaction-and-distillation.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -130,6 +135,8 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "context-10": "/lessons/context-c10-contextual-retrieval",
   "context-11": "/lessons/context-c11-agentic-retrieval",
   "context-12": "/lessons/context-c12-budget-management",
+  "context-13": "/lessons/context-c13-context-assembly",
+  "context-14": "/lessons/context-c14-compaction",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

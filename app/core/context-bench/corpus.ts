@@ -273,6 +273,39 @@ import {
   getCuratedAssemblyResult,
 } from "./assembly";
 
+// ===========================================================================
+// C14: Context Compaction & State Distillation Exports
+// ===========================================================================
+
+export type {
+  CompactionStrategyName,
+  CompactionStep,
+  VerifiedFactItem,
+  KeyDecisionItem,
+  CompletedWorkItem,
+  NegativeLearningItem,
+  DistilledStateSchema,
+  CompactionBenchmarkCase,
+  StepEvolutionPoint,
+  CompactionStrategyResult,
+  CompactionCaseMatrixRow,
+} from "./compaction";
+
+export {
+  ContextCompactor,
+  COMPACTION_BENCHMARK_CASES,
+  CURATED_COMPACTION_MATRIX,
+  generateCompactionBenchmarkMatrix,
+  runLiveCompactionExperiment,
+  getCuratedCompactionResult,
+} from "./compaction";
+import {
+  COMPACTION_BENCHMARK_CASES,
+  generateCompactionBenchmarkMatrix,
+  runLiveCompactionExperiment,
+  getCuratedCompactionResult,
+} from "./compaction";
+
 export class BenchmarkCorpusManager {
   private static get basePath(): string {
     if (typeof process !== "undefined" && typeof process.cwd === "function") {
@@ -636,5 +669,30 @@ export class BenchmarkCorpusManager {
     options: Parameters<typeof runLiveAssemblyExperiment>[0]
   ) {
     return runLiveAssemblyExperiment(options);
+  }
+
+  // =========================================================================
+  // C14: Context Compaction & State Distillation
+  // =========================================================================
+
+  static getCompactionBenchmarkCases() {
+    return COMPACTION_BENCHMARK_CASES;
+  }
+
+  static getCuratedCompactionResult(
+    caseId: string,
+    strategy: Parameters<typeof getCuratedCompactionResult>[1] = "structured_state_distillation"
+  ) {
+    return getCuratedCompactionResult(caseId, strategy);
+  }
+
+  static generateCompactionBenchmarkMatrix() {
+    return generateCompactionBenchmarkMatrix();
+  }
+
+  static runLiveCompactionExperiment(
+    options: Parameters<typeof runLiveCompactionExperiment>[0]
+  ) {
+    return runLiveCompactionExperiment(options);
   }
 }

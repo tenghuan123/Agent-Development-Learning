@@ -355,7 +355,7 @@ export class ContextAssembler {
 - 即便背包算法能把远期历史一刀切丢弃，智能体也会因**“健忘”**而陷入重复执行之前做过的工作！
 
 单纯的装配裁剪已经触碰了信息保持的上限。我们必须从物理丢弃升级到智能提炼：
-👉 **第 14 课：长任务中的 Context 会爆炸 —— 上下文压缩与状态提炼（Context Compaction & State Distillation）**
+👉 **[第 14 课：长任务中的 Context 会爆炸 —— 上下文压缩与状态提炼（Context Compaction & State Distillation）](/docs/lessons/context/14-context-compaction-and-distillation.md)** ｜ [🚀 直达 C14 上下文压缩工作台](/lessons/context-c14-compaction)
 
 ---
 
@@ -365,5 +365,6 @@ export class ContextAssembler {
 | :--- | :--- | :--- |
 | **上一课讲义** | [← 第 12 课：上下文控制与预算调度 (Budget Management)](/docs/lessons/context/12-context-control-and-budget.md) | 深入自适应停机准则、Jaccard 环路探测与边际增益熔断 |
 | **本课工作台** | [🚀 进入第 13 课交互实验工作台 (Assembly Studio)](/lessons/context-c13-context-assembly) | 实时调节注意力 U 曲线、观察颜色拓扑条、运行四大装配策略 |
-| **全景总纲** | [📖 Context Engineering 问题驱动全景总纲](/docs/context-learn.md) | 查看 00~17 课全套演进推导与问题链 |
+| **下一课讲义** | [→ 第 14 课：长任务上下文压缩与状态提炼 (Compaction Studio)](/docs/lessons/context/14-context-compaction-and-distillation.md) | 攻克 50 步 200K Tokens 爆炸、6 重状态机投影与避坑负向记忆 |
+| **全景总纲** | [📖 Context Engineering 问题驱动全景总纲](/docs/context-learn.md) | 查看 00~19 课全套演进推导与问题链 |
 | **项目主页** | [🏠 返回 Mini Claude Code 课程门户总览](/) | 全课程工作台大厅与技术路线图 |

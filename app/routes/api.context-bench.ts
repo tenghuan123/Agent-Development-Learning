@@ -42,7 +42,11 @@ import {
   runLiveCompactionExperiment,
   ContextCompactor,
   type CompactionStrategyName,
-} from "~/core/context-bench/compaction";
+  MEMORY_BENCHMARK_CASES,
+  runLiveMemoryExperiment,
+  getCuratedMemoryResult,
+  type MemoryStrategyName,
+} from "~/core/context-bench/corpus";
 
 /** C8 基准矩阵的一行配置 */
 interface ChunkingMatrixRow {
@@ -2631,6 +2635,46 @@ ${topDocsContent}
         caseId,
         strategy: selectedStrategy,
         hotWindowSize,
+        customApiKey: effectiveApiKey,
+        customBaseURL: effectiveBaseURL,
+        model: effectiveModel,
+      });
+
+      return Response.json({ success: true, result });
+    }
+
+    // 7. C15: 获取精心校准的长期记忆持久化对比结果
+    if (requestedAction === "get_curated_memory") {
+      const caseId = String(body.caseId || "mem-01-tech-stack-preferences");
+      const selectedStrategy: MemoryStrategyName =
+        body.strategy || "selective_scoped_memory";
+
+      const testCase =
+        MEMORY_BENCHMARK_CASES.find((c) => c.id === caseId) ||
+        MEMORY_BENCHMARK_CASES[0];
+
+      const result = getCuratedMemoryResult(testCase.id, selectedStrategy);
+      return Response.json({ success: true, result });
+    }
+
+    // 8. C15: 实时调用真实 LLM 验证跨会话长期记忆持久化实验
+    if (requestedAction === "run_live_memory") {
+      const caseId = String(body.caseId || "mem-01-tech-stack-preferences");
+      const selectedStrategy: MemoryStrategyName =
+        body.strategy || "selective_scoped_memory";
+
+      const effectiveApiKey =
+        (apiKey && String(apiKey).trim()) || process.env.LLM_API_KEY || "";
+      const effectiveBaseURL =
+        (baseURL && String(baseURL).trim()) || process.env.LLM_BASE_URL || "";
+      const effectiveModel =
+        (model && String(model).trim()) ||
+        process.env.LLM_MODEL ||
+        "glm-4-flash";
+
+      const result = await runLiveMemoryExperiment({
+        caseId,
+        strategy: selectedStrategy,
         customApiKey: effectiveApiKey,
         customBaseURL: effectiveBaseURL,
         model: effectiveModel,

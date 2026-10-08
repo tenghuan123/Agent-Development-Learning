@@ -43,6 +43,7 @@ export default [
   route("lessons/context-c12-budget-management", "routes/lessons.context-c12.tsx"),
   route("lessons/context-c13-context-assembly", "routes/lessons.context-c13.tsx"),
   route("lessons/context-c14-compaction", "routes/lessons.context-c14.tsx"),
+  route("lessons/context-c15-memory-persistence", "routes/lessons.context-c15.tsx"),
 
   // Dedicated Markdown Docs Viewer
   route("docs/*", "routes/docs.$.tsx"),

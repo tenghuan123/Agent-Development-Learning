@@ -205,7 +205,7 @@ $$\lim_{t \to \infty} \text{SNR}(t) \to 0$$
 - 重新启动的 Agent 却对此一无所知，像一个刚出生的婴儿一样向用户重新索要偏好！
 
 单纯的 Context Compaction 随着会话结束而消亡。我们必须跨越会话边界，推导**跨 Session 持久化存储与唤醒**的物理机制：
-👉 **第 15 课：什么时候保存，什么时候遗忘？—— 从短期上下文到跨会话长期记忆（Memory & State Persistence）**
+👉 [**第 15 课：什么时候保存，什么时候遗忘？—— 从短期上下文到跨会话长期记忆（Memory & State Persistence）**](/docs/lessons/context/15-memory-and-state-persistence.md)
 
 ---
 

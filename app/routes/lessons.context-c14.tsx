@@ -7,6 +7,7 @@ import {
   type CompactionBenchmarkCase,
   type CompactionStrategyResult,
   type CompactionStrategyName,
+  type CompactionCaseMatrixRow,
 } from "~/core/context-bench/corpus";
 import {
   Sliders,
@@ -210,7 +211,7 @@ export default function LessonContextC14() {
   // 派生当前选中的测试用例
   const activeCase: CompactionBenchmarkCase = useMemo(() => {
     return (
-      data.cases.find((c) => c.id === selectedCaseId) || data.cases[0]
+      data.cases.find((c: CompactionBenchmarkCase) => c.id === selectedCaseId) || data.cases[0]
     );
   }, [data.cases, selectedCaseId]);
 
@@ -433,7 +434,7 @@ export default function LessonContextC14() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                {data.cases.map((c) => {
+                {data.cases.map((c: CompactionBenchmarkCase) => {
                   const isSelected = c.id === selectedCaseId;
                   return (
                     <button
@@ -1214,7 +1215,7 @@ export default function LessonContextC14() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-sans">
-                  {data.initialMatrix.map((row) => (
+                  {data.initialMatrix.map((row: CompactionCaseMatrixRow) => (
                     <tr
                       key={row.caseId}
                       className={`hover:bg-slate-900/40 transition ${

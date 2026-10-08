@@ -306,6 +306,32 @@ import {
   getCuratedCompactionResult,
 } from "./compaction";
 
+export type {
+  MemoryScope,
+  MemoryCategory,
+  MemoryStrategyName,
+  MemoryEntry,
+  SessionInteractionStep,
+  MemoryPersistenceCase,
+  MemoryStrategyResult,
+  MemoryCaseMatrixRow,
+} from "./memory-persistence";
+
+export {
+  MemoryPersistenceEngine,
+  MEMORY_BENCHMARK_CASES,
+  getCuratedMemoryResult,
+  generateMemoryBenchmarkMatrix,
+  runLiveMemoryExperiment,
+} from "./memory-persistence";
+
+import {
+  MEMORY_BENCHMARK_CASES,
+  generateMemoryBenchmarkMatrix,
+  runLiveMemoryExperiment,
+  getCuratedMemoryResult,
+} from "./memory-persistence";
+
 export class BenchmarkCorpusManager {
   private static get basePath(): string {
     if (typeof process !== "undefined" && typeof process.cwd === "function") {
@@ -694,5 +720,30 @@ export class BenchmarkCorpusManager {
     options: Parameters<typeof runLiveCompactionExperiment>[0]
   ) {
     return runLiveCompactionExperiment(options);
+  }
+
+  // =========================================================================
+  // C15: Memory & State Persistence
+  // =========================================================================
+
+  static getMemoryBenchmarkCases() {
+    return MEMORY_BENCHMARK_CASES;
+  }
+
+  static getCuratedMemoryResult(
+    caseId: string,
+    strategy: Parameters<typeof getCuratedMemoryResult>[1] = "selective_scoped_memory"
+  ) {
+    return getCuratedMemoryResult(caseId, strategy);
+  }
+
+  static generateMemoryBenchmarkMatrix() {
+    return generateMemoryBenchmarkMatrix();
+  }
+
+  static runLiveMemoryExperiment(
+    options: Parameters<typeof runLiveMemoryExperiment>[0]
+  ) {
+    return runLiveMemoryExperiment(options);
   }
 }

@@ -70,6 +70,10 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   "context-c14-compaction": "/docs/lessons/context/14-context-compaction-and-distillation.md",
   "context-c14-context-compaction": "/docs/lessons/context/14-context-compaction-and-distillation.md",
   "context-14": "/docs/lessons/context/14-context-compaction-and-distillation.md",
+  "context-c15": "/docs/lessons/context/15-memory-and-state-persistence.md",
+  "context-c15-memory": "/docs/lessons/context/15-memory-and-state-persistence.md",
+  "context-c15-memory-persistence": "/docs/lessons/context/15-memory-and-state-persistence.md",
+  "context-15": "/docs/lessons/context/15-memory-and-state-persistence.md",
   c0: "/docs/lessons/context/00-setup-and-baseline.md",
   c1: "/docs/lessons/context/01-why-need-context.md",
   c2: "/docs/lessons/context/02-sufficient-vs-maximum-context.md",
@@ -85,6 +89,7 @@ export const WORKBENCH_DOC_MAP: Record<string, string> = {
   c12: "/docs/lessons/context/12-context-control-and-budget.md",
   c13: "/docs/lessons/context/13-context-assembly-and-layout.md",
   c14: "/docs/lessons/context/14-context-compaction-and-distillation.md",
+  c15: "/docs/lessons/context/15-memory-and-state-persistence.md",
 };
 
 export function getLessonDocPath(idOrPath: string): string | null {
@@ -137,6 +142,7 @@ const LESSON_WORKBENCH_MAP: Record<string, string> = {
   "context-12": "/lessons/context-c12-budget-management",
   "context-13": "/lessons/context-c13-context-assembly",
   "context-14": "/lessons/context-c14-compaction",
+  "context-15": "/lessons/context-c15-memory-persistence",
 };
 
 const GUIDES_META: Record<string, { shortTitle: string; badge: string; order: number }> = {

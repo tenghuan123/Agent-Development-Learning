@@ -47,8 +47,9 @@ async function withRetry<T>(
       // Exponential backoff with random jitter
       const jitter = Math.random() * 300;
       const delayMs = initialDelay * Math.pow(2, attempt) + jitter;
+      const safeMessage = message.replace(/(sk-[a-zA-Z0-9_.-]{4})[a-zA-Z0-9_.-]+/g, "$1****");
       console.warn(
-        `[LLMClient] Request failed (${message}). Retrying attempt ${
+        `[LLMClient] Request failed (${safeMessage}). Retrying attempt ${
           attempt + 1
         }/${maxRetries} after ${Math.round(delayMs)}ms...`
       );

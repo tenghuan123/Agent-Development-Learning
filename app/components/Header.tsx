@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import {
   Sparkles,
@@ -30,8 +30,17 @@ import {
   BookOpen,
   Search,
   AlertTriangle,
+  Trash2,
+  Shield,
+  ExternalLink,
 } from "lucide-react";
 import { getLessonDocPath } from "~/lib/docs-catalog";
+import {
+  useLLMClientConfig,
+  PROVIDER_PRESETS,
+  maskApiKey,
+  type ProviderPreset,
+} from "~/lib/llm-client-storage";
 
 export interface HeaderProps {
   hasServerKey: boolean;
@@ -44,6 +53,7 @@ export interface HeaderProps {
   onSaveSettings?: (settings: {
     apiKey: string;
     baseURL: string;
+    model?: string;
   }) => void;
   currentLesson?: {
     id: string;
@@ -67,24 +77,58 @@ export function Header({
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [showLessonDropdown, setShowLessonDropdown] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState("");
 
-  // Form states in modal
-  const [modalApiKey, setModalApiKey] = useState(customApiKey);
-  const [modalBaseURL, setModalBaseURL] = useState(
-    customBaseURL || defaultBaseURL
+  // 基于 useSyncExternalStore 的全局响应式端侧存储 Hook
+  const { config: clientConfig, saveConfig, clearConfig } = useLLMClientConfig({
+    baseURL: defaultBaseURL,
+    model,
+  });
+
+  // 优先级：显式传入的 props > 浏览器端侧 LocalStorage > 服务器默认环境变量
+  const effectiveApiKey =
+    customApiKey && customApiKey.trim().length > 0
+      ? customApiKey.trim()
+      : clientConfig.apiKey;
+  const effectiveBaseURL =
+    customBaseURL && customBaseURL.trim().length > 0
+      ? customBaseURL.trim()
+      : clientConfig.baseURL || defaultBaseURL;
+  const effectiveModel = clientConfig.model || model;
+
+  const currentDocPath = getLessonDocPath(
+    currentLesson?.id || location.pathname
   );
 
-  useEffect(() => {
-    setModalApiKey(customApiKey);
-  }, [customApiKey]);
+  // 弹窗内的表单瞬态
+  const [modalApiKey, setModalApiKey] = useState(effectiveApiKey);
+  const [modalBaseURL, setModalBaseURL] = useState(effectiveBaseURL);
+  const [modalModel, setModalModel] = useState(effectiveModel);
+  const [selectedPresetId, setSelectedPresetId] = useState<string>("zhipu");
 
-  useEffect(() => {
-    setModalBaseURL(customBaseURL || defaultBaseURL);
-  }, [customBaseURL, defaultBaseURL]);
+  const handleOpenModal = () => {
+    setModalApiKey(effectiveApiKey);
+    setModalBaseURL(effectiveBaseURL);
+    setModalModel(effectiveModel);
 
-  const effectiveApiKey = customApiKey || "";
-  const isKeyAvailable = hasServerKey || Boolean(effectiveApiKey.trim().length > 0);
-  const currentDocPath = getLessonDocPath(currentLesson?.id || location.pathname);
+    // 自动匹配预设
+    const matched = PROVIDER_PRESETS.find(
+      (p) => p.baseURL && p.baseURL.toLowerCase() === effectiveBaseURL.toLowerCase()
+    );
+    setSelectedPresetId(matched ? matched.id : "custom");
+    setSaveSuccessMsg("");
+    setShowConfigModal(true);
+  };
+
+  const handleSelectPreset = (preset: ProviderPreset) => {
+    setSelectedPresetId(preset.id);
+    if (preset.baseURL) {
+      setModalBaseURL(preset.baseURL);
+    }
+    if (preset.recommendedModel) {
+      setModalModel(preset.recommendedModel);
+    }
+  };
 
   const contextLessons = [
     {
@@ -358,6 +402,13 @@ export function Header({
   const handleSaveModal = () => {
     const trimmedKey = modalApiKey.trim();
     const trimmedURL = modalBaseURL.trim();
+    const trimmedModel = modalModel.trim();
+
+    saveConfig({
+      apiKey: trimmedKey,
+      baseURL: trimmedURL,
+      model: trimmedModel,
+    });
 
     if (onSaveApiKey) {
       onSaveApiKey(trimmedKey);
@@ -369,9 +420,38 @@ export function Header({
       onSaveSettings({
         apiKey: trimmedKey,
         baseURL: trimmedURL,
+        model: trimmedModel,
       });
     }
-    setShowConfigModal(false);
+
+    setSaveSuccessMsg("配置已保存至本地 LocalStorage，全站立即生效！");
+    setTimeout(() => {
+      setShowConfigModal(false);
+      setSaveSuccessMsg("");
+    }, 600);
+  };
+
+  const handleClearModal = () => {
+    clearConfig();
+    setModalApiKey("");
+    setModalBaseURL(defaultBaseURL);
+    setModalModel(model);
+    setSelectedPresetId("zhipu");
+
+    if (onSaveApiKey) onSaveApiKey("");
+    if (onSaveBaseURL) onSaveBaseURL(defaultBaseURL);
+    if (onSaveSettings) {
+      onSaveSettings({
+        apiKey: "",
+        baseURL: defaultBaseURL,
+        model,
+      });
+    }
+
+    setSaveSuccessMsg("已清空本地浏览器密钥与自定义配置！");
+    setTimeout(() => {
+      setSaveSuccessMsg("");
+    }, 1500);
   };
 
   return (
@@ -605,21 +685,29 @@ export function Header({
 
           {/* Connection Settings Button */}
           <button
-            onClick={() => setShowConfigModal(true)}
+            onClick={handleOpenModal}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono border transition ${
-              isKeyAvailable
-                ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/50"
+              effectiveApiKey
+                ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/50 shadow-sm shadow-emerald-500/10"
+                : hasServerKey
+                ? "bg-blue-950/40 text-blue-300 border-blue-500/40 hover:bg-blue-900/50"
                 : "bg-amber-950/40 text-amber-300 border-amber-500/40 hover:bg-amber-900/50 animate-pulse"
             }`}
-            title="查看或配置 LLM 接口连接"
+            title="查看或配置 LLM 接口连接（端侧安全存储）"
           >
-            <Settings2 className="w-3.5 h-3.5" />
+            {effectiveApiKey ? (
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            ) : hasServerKey ? (
+              <Cpu className="w-3.5 h-3.5 text-blue-400" />
+            ) : (
+              <Settings2 className="w-3.5 h-3.5" />
+            )}
             <span className="hidden sm:inline">
-              {isKeyAvailable
-                ? hasServerKey && !customApiKey
-                  ? "LLM: 已就绪 (.env)"
-                  : "LLM: 已就绪 (自定义)"
-                : "配置 API Key"}
+              {effectiveApiKey
+                ? `私有 Key (${maskApiKey(effectiveApiKey)})`
+                : hasServerKey
+                ? `官方体验线路 (${model})`
+                : "配置 API Key (BYOK)"}
             </span>
           </button>
         </div>
@@ -627,71 +715,86 @@ export function Header({
 
       {/* Unified Connection & Provider Settings Modal */}
       {showConfigModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-lg p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-5 bg-[#0e1424]">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-xl p-6 rounded-2xl border border-slate-700/80 shadow-2xl space-y-4 bg-[#0e1424] max-h-[92vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300">
-                  <Settings2 className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300">
+                  <ShieldCheck className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">
-                    LLM 接口连接配置
+                  <h3 className="font-bold text-white text-base flex items-center gap-2">
+                    <span>LLM 连接与端侧安全配置 (BYOK)</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-normal">
+                      Local-Only
+                    </span>
                   </h3>
-                  <p className="text-[11px] text-slate-400">
-                    模型已由本地环境变量 <code>LLM_MODEL</code> 全局设定
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    自带 API 密钥，所有凭证仅存您本地浏览器，绝不上云、不入数据库
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowConfigModal(false)}
-                className="text-slate-400 hover:text-white text-sm p-1"
+                className="text-slate-400 hover:text-white text-sm p-1 rounded-lg hover:bg-slate-800/60 transition"
               >
                 ✕
               </button>
             </div>
 
-            {/* Current Active Model Info Card */}
-            <div className="p-3 rounded-xl bg-[#131929] border border-purple-500/30 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Cpu className="w-4 h-4 text-purple-400" />
-                <div>
-                  <div className="text-[11px] text-slate-400 font-mono">
-                    当前生效模型 (LLM_MODEL)
-                  </div>
-                  <div className="text-sm font-mono font-bold text-purple-200">
-                    {model}
-                  </div>
-                </div>
+            {/* Provider Quick Presets */}
+            <div className="space-y-1.5">
+              <div className="text-[11px] font-mono text-slate-400 flex items-center justify-between">
+                <span>快捷服务商预设 (点击一键配置地址):</span>
+                <span className="text-[10px] text-slate-500">OpenAI 协议兼容</span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                环境变量驱动
-              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {PROVIDER_PRESETS.map((preset) => {
+                  const isSelected = selectedPresetId === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset)}
+                      className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                        isSelected
+                          ? "bg-purple-950/40 border-purple-500 text-white shadow-md shadow-purple-950/40 ring-1 ring-purple-500/40"
+                          : "bg-[#131929] border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-[#182035]"
+                      }`}
+                    >
+                      <div>
+                        <div className="font-semibold text-xs text-slate-100 flex items-center justify-between">
+                          <span>{preset.name}</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">
+                          {preset.description}
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <span
+                          className={`text-[9px] font-mono px-1.5 py-0.5 rounded border inline-block ${preset.tagColor}`}
+                        >
+                          {preset.badge}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-3.5">
-              {/* Base URL */}
-              <div className="space-y-1">
-                <label className="text-xs font-mono text-slate-300 flex items-center justify-between">
-                  <span>API 接口地址 (Base URL):</span>
-                </label>
-                <input
-                  type="text"
-                  value={modalBaseURL}
-                  onChange={(e) => setModalBaseURL(e.target.value)}
-                  placeholder="https://open.bigmodel.cn/api/paas/v4"
-                  className="w-full bg-[#131929] border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono outline-none focus:border-purple-500 transition"
-                />
-              </div>
-
+            <div className="space-y-3">
               {/* API Key */}
               <div className="space-y-1">
-                <label className="text-xs font-mono text-slate-300 flex items-center justify-between">
-                  <span>API Key 密钥:</span>
-                  <span className="text-[10px] text-slate-500">
-                    保存在本地浏览器或写入 .env
+                <label className="text-xs font-mono text-slate-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 font-semibold text-slate-100">
+                    <span>API Key 密钥:</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>保存在本地浏览器 LocalStorage</span>
                   </span>
                 </label>
                 <div className="relative">
@@ -699,13 +802,17 @@ export function Header({
                     type={showPassword ? "text" : "password"}
                     value={modalApiKey}
                     onChange={(e) => setModalApiKey(e.target.value)}
-                    placeholder="输入你的 API Key (例如智谱 GLM 或 DeepSeek Key)"
+                    placeholder={
+                      PROVIDER_PRESETS.find((p) => p.id === selectedPresetId)?.keyPlaceholder ||
+                      "输入 API Key (sk-...)"
+                    }
                     className="w-full bg-[#131929] border border-slate-700 rounded-lg px-3 py-2 pr-10 text-xs text-slate-100 font-mono outline-none focus:border-purple-500 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                    title={showPassword ? "隐藏密钥" : "显示密钥"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-3.5 h-3.5" />
@@ -716,37 +823,123 @@ export function Header({
                 </div>
               </div>
 
-              {/* Environment Variable Hint */}
-              <div className="p-3 rounded-xl bg-[#090d18] border border-slate-800 text-[11px] text-slate-400 space-y-1">
-                <div className="text-slate-300 font-semibold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span>根目录 <code>.env</code> 环境变量配置示例:</span>
-                </div>
-                <pre className="text-[10px] text-purple-300/90 font-mono overflow-x-auto p-1.5 bg-[#0f1526] rounded border border-slate-800">
-{`LLM_API_KEY=你的API密钥
-LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-LLM_MODEL=${model}`}
-                </pre>
+              {/* Base URL */}
+              <div className="space-y-1">
+                <label className="text-xs font-mono text-slate-200 flex items-center justify-between">
+                  <span className="font-semibold text-slate-100">
+                    API 接口地址 (Base URL):
+                  </span>
+                  <span className="text-[10px] text-slate-500">
+                    兼容 OpenAI 协议端点
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={modalBaseURL}
+                  onChange={(e) => setModalBaseURL(e.target.value)}
+                  placeholder="https://open.bigmodel.cn/api/paas/v4"
+                  className="w-full bg-[#131929] border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono outline-none focus:border-purple-500 transition"
+                />
+              </div>
+
+              {/* Model */}
+              <div className="space-y-1">
+                <label className="text-xs font-mono text-slate-200 flex items-center justify-between">
+                  <span className="font-semibold text-slate-100">
+                    模型标识 (Model):
+                  </span>
+                  <span className="text-[10px] text-slate-500">可选自定义覆盖</span>
+                </label>
+                <input
+                  type="text"
+                  value={modalModel}
+                  onChange={(e) => setModalModel(e.target.value)}
+                  placeholder="glm-4-flash / deepseek-chat"
+                  className="w-full bg-[#131929] border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-mono outline-none focus:border-purple-500 transition"
+                />
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setShowConfigModal(false)}
-                className="px-3.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveModal}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs shadow-lg shadow-purple-600/30 transition flex items-center gap-1.5"
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>保存并生效</span>
-              </button>
+            {/* Zero-Leakage Security Assurance Card */}
+            <div className="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 text-xs space-y-2">
+              <div className="flex items-center justify-between text-emerald-300 font-semibold">
+                <div className="flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                  <span>🔒 隐私与防盗刷安全承诺</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  Zero-Persistence
+                </span>
+              </div>
+              <ul className="text-[11px] text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+                <li>
+                  <strong className="text-white font-medium">端侧沙箱隔离</strong>：您的 API Key
+                  仅保存在当前浏览器的 <code>localStorage</code> 中，本站绝无任何云端用户数据库，请求结束后内存即刻释放。
+                </li>
+                <li>
+                  <strong className="text-white font-medium">F12 网络透明审计</strong>：欢迎按下{" "}
+                  <kbd className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-200">
+                    F12
+                  </kbd>{" "}
+                  打开控制台网络 (Network) 面板审查，绝无任何向第三方偷传 Key 的隐藏请求。
+                </li>
+                <li>
+                  <strong className="text-white font-medium">防盗刷最佳实践</strong>：强烈建议在服务商控制台创建<strong>设置了消费额度硬顶（例如 1~5 元）</strong>的专用测试 Key，彻底无后顾之忧。
+                </li>
+              </ul>
+            </div>
+
+            {/* Feedback notification toast */}
+            {saveSuccessMsg && (
+              <div className="p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{saveSuccessMsg}</span>
+              </div>
+            )}
+
+            {/* Actions Bottom Bar */}
+            <div className="flex items-center justify-between pt-3 border-t border-slate-800 gap-2">
+              <div className="flex items-center gap-2">
+                {(effectiveApiKey || modalApiKey) && (
+                  <button
+                    type="button"
+                    onClick={handleClearModal}
+                    className="flex items-center gap-1 text-[11px] font-mono text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 px-2.5 py-1.5 rounded-lg border border-rose-500/30 transition"
+                    title="彻底清空本地浏览器保存的密钥"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>清除本地配置</span>
+                  </button>
+                )}
+                <a
+                  href="https://github.com/tenghuan123/Agent-Development-Learning"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 px-2 py-1 transition"
+                  title="在 GitHub 审查本项目源码"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  <span>源码审计</span>
+                </a>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowConfigModal(false)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveModal}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs shadow-lg shadow-purple-600/30 transition flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>保存并生效</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

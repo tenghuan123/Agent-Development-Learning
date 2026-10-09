@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLoaderData, Link } from "react-router";
 import { Header } from "~/components/Header";
 import {
@@ -48,51 +48,7 @@ export async function loader() {
   };
 }
 
-export default function CourseIndex() {
-  const { hasServerKey, model, defaultBaseURL } =
-    useLoaderData<typeof loader>();
-
-  const [customApiKey, setCustomApiKey] = useState("");
-  const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
-
-  useEffect(() => {
-    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
-    if (savedKey) {
-      setCustomApiKey(savedKey);
-    }
-    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
-    if (savedURL) {
-      setCustomBaseURL(savedURL);
-    }
-  }, []);
-
-  const saveLocalKey = (key: string) => {
-    setCustomApiKey(key);
-    localStorage.setItem("MINI_CLAUDE_API_KEY", key);
-  };
-
-  const saveLocalBaseURL = (url: string) => {
-    setCustomBaseURL(url);
-    localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
-  };
-
-  const handleSaveSettings = ({
-    apiKey,
-    baseURL,
-  }: {
-    apiKey: string;
-    baseURL: string;
-  }) => {
-    setCustomApiKey(apiKey);
-    setCustomBaseURL(baseURL);
-    localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
-    localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
-  };
-
-  const [activeTrack, setActiveTrack] = useState<"context" | "agent">("context");
-  const [activeSemester, setActiveSemester] = useState<"semester2" | "semester1">("semester2");
-
-  const CONTEXT_LESSONS = [
+const CONTEXT_LESSONS = [
     {
       version: "C0",
       number: "第 00 课",
@@ -103,7 +59,7 @@ export default function CourseIndex() {
       color: "from-purple-600 to-indigo-600",
       borderColor: "border-purple-500/50",
       status: "completed",
-      statusText: "已就绪",
+      statusText: "已上线",
       badge: "实验基石",
       highlights: [
         "标准私有语料库：Alpha, Beta, Gamma 产品规格与售后政策",
@@ -122,7 +78,7 @@ export default function CourseIndex() {
       color: "from-indigo-600 to-cyan-600",
       borderColor: "border-indigo-500/50",
       status: "completed",
-      statusText: "已就绪",
+      statusText: "已上线",
       badge: "第一性原理",
       highlights: [
         "双轨对抗实验室：Zero Context 裸问 vs 注入文档对比",
@@ -141,7 +97,7 @@ export default function CourseIndex() {
       color: "from-cyan-600 to-blue-600",
       borderColor: "border-cyan-500/50",
       status: "completed",
-      statusText: "已就绪",
+      statusText: "已上线",
       badge: "信息密度",
       highlights: [
         "三组对照实验：只有正确文档 vs +10无关文档 vs +100无关片段",
@@ -178,8 +134,8 @@ export default function CourseIndex() {
       icon: Sparkles,
       color: "from-purple-600 to-pink-600",
       borderColor: "border-purple-500/50",
-      status: "current",
-      statusText: "⚡ 最新开启",
+      status: "completed",
+      statusText: "已上线",
       badge: "语义检索",
       highlights: [
         "Embedding 几何空间映射：找'字' vs 找'意思'",
@@ -197,8 +153,8 @@ export default function CourseIndex() {
       icon: AlertTriangle,
       color: "from-rose-600 to-amber-600",
       borderColor: "border-rose-500/50",
-      status: "ready",
-      statusText: "交互工作台",
+      status: "completed",
+      statusText: "已上线",
       badge: "失真边界",
       highlights: [
         "标识符与错误码穿透实验：精确符号 vs 模糊语义检索失真",
@@ -387,9 +343,9 @@ export default function CourseIndex() {
       icon: Brain,
       color: "from-purple-600 to-teal-600",
       borderColor: "border-purple-500/50",
-      status: "completed",
-      statusText: "已上线",
-      badge: "跨会话外脑",
+      status: "current",
+      statusText: "⚡ 最新里程碑",
+      badge: "最新上线",
       highlights: [
         "RAM (瞬态上下文) vs Disk (持久化外脑) 物理架构分层",
         "记忆价值密度法则：瞬态沙箱噪音 100% 门禁拦截过滤",
@@ -638,7 +594,7 @@ export default function CourseIndex() {
       color: "from-purple-600 to-indigo-600",
       borderColor: "border-purple-500/50",
       status: "current",
-      statusText: "⚡ 最新开启",
+      statusText: "⚡ 最新里程碑",
       badge: "LangGraph 状态架构",
       highlights: [
         "双轨对决竞技场：Message-Only (模糊文本扫描) vs Structured Workflow State (O(1) 确定性) 实测",
@@ -857,8 +813,8 @@ export default function CourseIndex() {
       icon: Server,
       color: "from-purple-600 to-emerald-600",
       borderColor: "border-emerald-500/50",
-      status: "current",
-      statusText: "🎓 终局压轴",
+      status: "completed",
+      statusText: "🎓 第一学期结课",
       highlights: [
         "多租户加权公平排队 (WFQ) 与防饥饿动态老化算法",
         "RPM 频控与 TPM 吞吐双轨令牌桶，租户并发槽位隔离",
@@ -867,6 +823,92 @@ export default function CourseIndex() {
       docPath: "docs/lessons/12-production-agent.md",
     },
   ];
+
+export default function CourseIndex() {
+  const { hasServerKey, model, defaultBaseURL } =
+    useLoaderData<typeof loader>();
+
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [customBaseURL, setCustomBaseURL] = useState(defaultBaseURL);
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem("MINI_CLAUDE_API_KEY");
+    if (savedKey) {
+      setCustomApiKey(savedKey);
+    }
+    const savedURL = localStorage.getItem("MINI_CLAUDE_BASE_URL");
+    if (savedURL) {
+      setCustomBaseURL(savedURL);
+    }
+  }, []);
+
+  const saveLocalKey = (key: string) => {
+    setCustomApiKey(key);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", key);
+  };
+
+  const saveLocalBaseURL = (url: string) => {
+    setCustomBaseURL(url);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", url);
+  };
+
+  const handleSaveSettings = ({
+    apiKey,
+    baseURL,
+  }: {
+    apiKey: string;
+    baseURL: string;
+  }) => {
+    setCustomApiKey(apiKey);
+    setCustomBaseURL(baseURL);
+    localStorage.setItem("MINI_CLAUDE_API_KEY", apiKey);
+    localStorage.setItem("MINI_CLAUDE_BASE_URL", baseURL);
+  };
+
+  const [activeTrack, setActiveTrack] = useState<"context" | "agent">("context");
+  const [activeSemester, setActiveSemester] = useState<"semester2" | "semester1">("semester2");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredContextLessons = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return CONTEXT_LESSONS;
+    return CONTEXT_LESSONS.filter(
+      (l) =>
+        l.version.toLowerCase().includes(q) ||
+        l.number.toLowerCase().includes(q) ||
+        l.title.toLowerCase().includes(q) ||
+        l.desc.toLowerCase().includes(q) ||
+        l.badge.toLowerCase().includes(q) ||
+        l.highlights.some((h) => h.toLowerCase().includes(q))
+    );
+  }, [searchQuery]);
+
+  const filteredSemester2Lessons = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return SEMESTER_2_LESSONS;
+    return SEMESTER_2_LESSONS.filter(
+      (l) =>
+        l.version.toLowerCase().includes(q) ||
+        l.number.toLowerCase().includes(q) ||
+        l.title.toLowerCase().includes(q) ||
+        l.desc.toLowerCase().includes(q) ||
+        l.badge.toLowerCase().includes(q) ||
+        l.highlights.some((h) => h.toLowerCase().includes(q))
+    );
+  }, [searchQuery]);
+
+  const filteredSemester1Lessons = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return LESSONS;
+    return LESSONS.filter(
+      (l) =>
+        l.version.toLowerCase().includes(q) ||
+        l.number.toLowerCase().includes(q) ||
+        l.title.toLowerCase().includes(q) ||
+        l.desc.toLowerCase().includes(q) ||
+        l.highlights.some((h) => h.toLowerCase().includes(q))
+    );
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 font-sans selection:bg-purple-500/30 flex flex-col">
@@ -882,35 +924,72 @@ export default function CourseIndex() {
       />
 
       <main className="flex-1 overflow-y-auto p-6 md:p-10 max-w-6xl mx-auto w-full space-y-10">
-        {/* Track Top Switcher */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2 rounded-2xl bg-[#0b101e] border border-slate-800">
-          <div className="flex items-center gap-3 px-3">
-            <span className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider">
-              学术研习轨 (Curriculum Track):
-            </span>
+        {/* 全景核心数据概览 (Panoramic Stats Dashboard) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-4 rounded-2xl bg-[#0b101e] border border-slate-800/80 shadow-lg flex items-center gap-3.5">
+            <div className="p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 shrink-0">
+              <Boxes className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">37+</div>
+              <div className="text-[11px] text-slate-400 truncate">交互式实战实验台</div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="p-4 rounded-2xl bg-[#0b101e] border border-slate-800/80 shadow-lg flex items-center gap-3.5">
+            <div className="p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shrink-0">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xl sm:text-2xl font-black font-mono text-cyan-300 tracking-tight">双轨演进</div>
+              <div className="text-[11px] text-slate-400 truncate">Agent 与 Context 专攻</div>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#0b101e] border border-slate-800/80 shadow-lg flex items-center gap-3.5">
+            <div className="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 shrink-0">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xl sm:text-2xl font-black font-mono text-indigo-300 tracking-tight">40+ 篇</div>
+              <div className="text-[11px] text-slate-400 truncate">沉浸式原理讲义</div>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#0b101e] border border-slate-800/80 shadow-lg flex items-center gap-3.5">
+            <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xl sm:text-2xl font-black font-mono text-emerald-300 tracking-tight">BYOK</div>
+              <div className="text-[11px] text-slate-400 truncate">端侧私密 · 凭证不上云</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Track Top Switcher & Real-time Search */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-2.5 rounded-2xl bg-[#0b101e] border border-slate-800">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
             <button
               type="button"
               onClick={() => setActiveTrack("context")}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                 activeTrack === "context"
                   ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white shadow-lg shadow-purple-600/20"
                   : "bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800"
               }`}
             >
               <Brain className="w-4 h-4 text-purple-300" />
-              <span>Track B: Context Engineering 专项研习轨</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-400/20 text-cyan-200 font-mono">
-                18课 · 新开篇
+              <span>Track B: Context Engineering 专项研习</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-200 font-mono">
+                16课已上线
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTrack("agent")}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                 activeTrack === "agent"
                   ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg shadow-cyan-600/20"
                   : "bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800"
@@ -918,10 +997,32 @@ export default function CourseIndex() {
             >
               <Terminal className="w-4 h-4 text-cyan-300" />
               <span>Track A: Coding Agent 架构与 Runtime</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">
-                V0~V20
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                V0~V20 (21课)
               </span>
             </button>
+          </div>
+
+          {/* Quick Search Input */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="搜索实验台 (如: LangGraph, RRF, Compaction, 沙箱, Diff)..."
+              className="w-full bg-[#111728] border border-slate-700/70 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/80 transition"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs p-0.5 rounded hover:bg-slate-700/50"
+                title="清空搜索"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
@@ -952,36 +1053,36 @@ export default function CourseIndex() {
 
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <Link
-                  to="/lessons/context-c0-setup"
+                  to="/lessons/context-c15-memory-persistence"
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-purple-600/25 transition transform hover:-translate-y-0.5"
                 >
-                  <Database className="w-4 h-4 text-cyan-300" />
-                  <span>进入第 0 课：建立实验环境与私有语料库</span>
+                  <Brain className="w-4 h-4 text-cyan-300" />
+                  <span>进入最新第 15 课：Memory 跨会话外脑持久化</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
                 <Link
-                  to="/lessons/context-c1-why-context"
+                  to="/lessons/context-c0-setup"
                   className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
                 >
-                  <Brain className="w-4 h-4 text-indigo-400" />
-                  <span>第 1 课：模型不知道答案怎么办？(第一性原理)</span>
+                  <Database className="w-4 h-4 text-purple-400" />
+                  <span>第 0 课：私有语料库基准台</span>
                 </Link>
 
                 <Link
-                  to="/lessons/context-c2-sufficient-context"
+                  to="/lessons/context-c6-hybrid-retrieval"
                   className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
                 >
-                  <Scissors className="w-4 h-4 text-cyan-400" />
-                  <span>第 2 课：Context 越多越好吗？(Sufficient Context)</span>
+                  <Network className="w-4 h-4 text-cyan-400" />
+                  <span>第 6 课：Hybrid Retrieval 与 RRF</span>
                 </Link>
 
                 <Link
                   to="/docs/context-learn.md"
                   className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
                 >
-                  <BookOpen className="w-4 h-4 text-cyan-400" />
-                  <span>查阅 18 课完整设计哲学</span>
+                  <BookOpen className="w-4 h-4 text-indigo-400" />
+                  <span>查阅 18 步设计哲学</span>
                 </Link>
               </div>
             </div>
@@ -1016,7 +1117,7 @@ export default function CourseIndex() {
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold text-sm flex items-center gap-2 shadow-xl shadow-indigo-600/25 transition transform hover:-translate-y-0.5"
                 >
                   <Database className="w-4 h-4 text-cyan-300" />
-                  <span>进入第 21 课：Messages 为什么不能当 State？(LangGraph 状态篇)</span>
+                  <span>进入最新第 21 课：Messages 为什么不能当 State？(LangGraph 状态篇)</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
@@ -1034,6 +1135,14 @@ export default function CourseIndex() {
                 >
                   <Award className="w-4 h-4 text-rose-400" />
                   <span>第 18 课：Pi 扩展架构收官</span>
+                </Link>
+
+                <Link
+                  to="/docs/README.md"
+                  className="px-5 py-3 rounded-xl bg-[#131b2e] hover:bg-[#1a253e] text-slate-200 border border-slate-700/80 font-medium text-sm flex items-center gap-2 transition"
+                >
+                  <BookOpen className="w-4 h-4 text-cyan-400" />
+                  <span>查阅 Agent 体系架构讲义</span>
                 </Link>
               </div>
             </div>
@@ -1055,17 +1164,37 @@ export default function CourseIndex() {
 
               <div className="flex items-center gap-1.5 overflow-x-auto pb-2 text-[11px] font-mono text-slate-300 shrink-0">
                 {[
-                  "LLM", "Prompt", "Context", "Grep", "Vector", "Hybrid", "Rerank",
-                  "Chunking", "Contextual", "Agentic", "Budget", "Assembly", "Compaction",
-                  "Memory", "Lifecycle", "Trust", "Security", "Evals",
+                  { name: "LLM", done: true },
+                  { name: "Prompt", done: true },
+                  { name: "Context", done: true },
+                  { name: "Grep", done: true },
+                  { name: "Vector", done: true },
+                  { name: "Hybrid", done: true },
+                  { name: "Rerank", done: true },
+                  { name: "Chunking", done: true },
+                  { name: "Small2Big", done: true },
+                  { name: "Contextual", done: true },
+                  { name: "Agentic", done: true },
+                  { name: "Budget", done: true },
+                  { name: "Assembly", done: true },
+                  { name: "Compaction", done: true },
+                  { name: "Memory", done: true, current: true },
+                  { name: "Lifecycle", done: false },
+                  { name: "Trust", done: false },
+                  { name: "Security", done: false },
+                  { name: "Evals", done: false },
                 ].map((node, idx, arr) => (
-                  <div key={node} className="flex items-center shrink-0">
-                    <span className={`px-2 py-0.5 rounded ${
-                      idx <= 1
-                        ? "bg-purple-600 text-white font-bold"
-                        : "bg-slate-800/80 text-slate-400"
-                    }`}>
-                      {node}
+                  <div key={node.name} className="flex items-center shrink-0">
+                    <span
+                      className={`px-2 py-0.5 rounded ${
+                        node.current
+                          ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white font-bold shadow-sm shadow-purple-500/30 ring-1 ring-cyan-400/50"
+                          : node.done
+                          ? "bg-purple-900/40 text-purple-200 border border-purple-500/30 font-medium"
+                          : "bg-slate-800/80 text-slate-400"
+                      }`}
+                    >
+                      {node.name}
                     </span>
                     {idx < arr.length - 1 && (
                       <span className="text-slate-600 mx-1">→</span>
@@ -1088,105 +1217,124 @@ export default function CourseIndex() {
                   </p>
                 </div>
                 <span className="text-xs font-mono text-purple-300 px-3 py-1 rounded-lg bg-purple-950/40 border border-purple-500/30">
-                  全 18 课演进
+                  {searchQuery ? `匹配到 ${filteredContextLessons.length} 门实验台` : "16 门实战已上线 · 全 18 课"}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {CONTEXT_LESSONS.map((lesson) => {
-                  const Icon = lesson.icon;
-                  const isAvailable = lesson.path !== "#";
-
-                  return (
-                    <div
-                      key={lesson.version}
-                      className={`glass-panel p-6 rounded-2xl border transition relative flex flex-col justify-between ${
-                        lesson.borderColor
-                      } ${
-                        isAvailable
-                          ? "hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/5 bg-[#0e1424]/90"
-                          : "opacity-75 bg-[#0a0e18]"
-                      }`}
-                    >
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                              {lesson.version}
-                            </span>
-                            <span className="text-xs text-slate-400 font-medium">
-                              {lesson.number}
-                            </span>
-                          </div>
-
-                          <span
-                            className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
-                              lesson.status === "current"
-                                ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 font-bold"
-                                : lesson.status === "completed"
-                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                                : lesson.status === "next"
-                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
-                                : "bg-slate-800 text-slate-400 border-slate-700"
-                            }`}
-                          >
-                            {lesson.statusText}
-                          </span>
-                        </div>
-
-                        <div>
-                          <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
-                            <Icon className="w-4 h-4 text-cyan-400" />
-                            <span>{lesson.title}</span>
-                          </h3>
-                          <p className="text-xs text-slate-400 leading-relaxed">
-                            {lesson.desc}
-                          </p>
-                        </div>
-
-                        <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-                          <div className="text-[11px] font-mono text-slate-400 font-semibold">
-                            核心落地内容:
-                          </div>
-                          {lesson.highlights.map((h, i) => (
-                            <div
-                              key={i}
-                              className="flex items-start gap-2 text-xs text-slate-300"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
-                              <span>{h}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="pt-6 flex items-center gap-2">
-                        {isAvailable ? (
-                          <Link
-                            to={lesson.path}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
-                          >
-                            <span>进入实验台 (Workbench)</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </Link>
-                        ) : (
-                          <div className="flex-1 py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
-                            {lesson.statusText}
-                          </div>
-                        )}
-                        {lesson.docPath && (
-                          <Link
-                            to={`/${lesson.docPath}`}
-                            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-purple-300 border border-slate-700/80 transition flex items-center justify-center shrink-0"
-                            title="查阅本课原理讲义"
-                          >
-                            <BookOpen className="w-4 h-4" />
-                          </Link>
-                        )}
-                      </div>
+                {filteredContextLessons.length === 0 ? (
+                  <div className="col-span-full p-10 text-center rounded-2xl bg-[#0c1020] border border-slate-800 space-y-3">
+                    <Search className="w-8 h-8 text-slate-500 mx-auto" />
+                    <div className="text-slate-200 font-semibold text-sm">
+                      未找到与「{searchQuery}」匹配的 Context 实验台
                     </div>
-                  );
-                })}
+                    <p className="text-xs text-slate-400">
+                      请尝试搜索其他关键字，如：Vector、RRF、Chunk、Assembly、Compaction 或 Memory
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/20 text-purple-300 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-medium transition"
+                    >
+                      清空搜索筛选
+                    </button>
+                  </div>
+                ) : (
+                  filteredContextLessons.map((lesson) => {
+                    const Icon = lesson.icon;
+                    const isAvailable = lesson.path !== "#";
+
+                    return (
+                      <div
+                        key={lesson.version}
+                        className={`glass-panel p-6 rounded-2xl border transition relative flex flex-col justify-between ${
+                          lesson.borderColor
+                        } ${
+                          isAvailable
+                            ? "hover:border-purple-400/80 hover:shadow-xl hover:shadow-purple-500/5 bg-[#0e1424]/90"
+                            : "opacity-75 bg-[#0a0e18]"
+                        }`}
+                      >
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                {lesson.version}
+                              </span>
+                              <span className="text-xs text-slate-400 font-medium">
+                                {lesson.number}
+                              </span>
+                            </div>
+
+                            <span
+                              className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
+                                lesson.status === "current"
+                                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 font-bold"
+                                  : lesson.status === "completed"
+                                  ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                                  : lesson.status === "next"
+                                  ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                                  : "bg-slate-800 text-slate-400 border-slate-700"
+                              }`}
+                            >
+                              {lesson.statusText}
+                            </span>
+                          </div>
+
+                          <div>
+                            <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
+                              <Icon className="w-4 h-4 text-cyan-400" />
+                              <span>{lesson.title}</span>
+                            </h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                              {lesson.desc}
+                            </p>
+                          </div>
+
+                          <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+                            <div className="text-[11px] font-mono text-slate-400 font-semibold">
+                              核心落地内容:
+                            </div>
+                            {lesson.highlights.map((h, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-2 text-xs text-slate-300"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                                <span>{h}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="pt-6 flex items-center gap-2">
+                          {isAvailable ? (
+                            <Link
+                              to={lesson.path}
+                              className="flex-1 py-2.5 px-4 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                            >
+                              <span>进入实验台 (Workbench)</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </Link>
+                          ) : (
+                            <div className="flex-1 py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
+                              {lesson.statusText}
+                            </div>
+                          )}
+                          {lesson.docPath && (
+                            <Link
+                              to={`/${lesson.docPath}`}
+                              className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-purple-300 border border-slate-700/80 transition flex items-center justify-center shrink-0"
+                              title="查阅本课原理讲义"
+                            >
+                              <BookOpen className="w-4 h-4" />
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
@@ -1209,17 +1357,17 @@ export default function CourseIndex() {
                   { phase: "P0", name: "实验基石 (C0)", desc: "语料库与最小基线", status: "done" },
                   { phase: "P1", name: "第一性原理 (C1~C2)", desc: "私有数据与充分上下文", status: "done" },
                   { phase: "P2", name: "检索通道演化 (C3~C7)", desc: "Grep, Vector, Hybrid, Rerank", status: "done" },
-                  { phase: "P3", name: "文档切分与保真 (C8~C9)", desc: "Chunking 与 Contextual", status: "current" },
-                  { phase: "P4", name: "推理检索与控制 (C10~C11)", desc: "Agentic 与 Budget", status: "todo" },
-                  { phase: "P5", name: "装配与长程压缩 (C12~C13)", desc: "Assembly 与 Compaction", status: "todo" },
-                  { phase: "P6", name: "状态与时空记忆 (C14~C15)", desc: "Memory 持久化与冲突治理", status: "todo" },
-                  { phase: "P7", name: "可信、安全与评估 (C16~C18)", desc: "Provenance, 防注入与 Evals", status: "todo" },
+                  { phase: "P3", name: "文档切分与保真 (C8~C10)", desc: "Chunking, Small2Big, Contextual", status: "done" },
+                  { phase: "P4", name: "推理检索与控制 (C11~C12)", desc: "Agentic 与 Budget", status: "done" },
+                  { phase: "P5", name: "装配与长程压缩 (C13~C14)", desc: "Assembly 与 Compaction", status: "done" },
+                  { phase: "P6", name: "状态与时空记忆 (C15)", desc: "Memory 持久化外脑", status: "current" },
+                  { phase: "P7", name: "可信、安全与评估 (C16~C19)", desc: "Lifecycle, 防注入与 Evals", status: "todo" },
                 ].map((item) => (
                   <div
                     key={item.phase}
                     className={`p-3 rounded-xl border flex flex-col justify-between text-xs font-mono ${
                       item.status === "current"
-                        ? "bg-purple-950/40 border-purple-500/50 text-purple-200"
+                        ? "bg-purple-950/40 border-purple-500/50 text-purple-200 ring-1 ring-purple-500/30"
                         : item.status === "done"
                         ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-300"
                         : "bg-[#0b101c] border-slate-800 text-slate-400"
@@ -1228,7 +1376,7 @@ export default function CourseIndex() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold">{item.phase}</span>
                       {item.status === "done" && <span className="text-[10px] text-emerald-400">✓</span>}
-                      {item.status === "current" && <span className="text-[10px] text-cyan-400 animate-pulse">●</span>}
+                      {item.status === "current" && <span className="text-[10px] text-cyan-400 animate-pulse font-bold">● 最新</span>}
                     </div>
                     <div className="font-sans font-semibold text-slate-200 truncate">{item.name}</div>
                     <div className="font-sans text-[10px] text-slate-500 mt-1 truncate">{item.desc}</div>
@@ -1281,155 +1429,217 @@ export default function CourseIndex() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {(activeSemester === "semester2" ? SEMESTER_2_LESSONS : LESSONS).map((lesson) => {
-                const Icon = lesson.icon;
-                const isAvailable = lesson.path !== "#";
-
-                return (
-                  <div
-                    key={lesson.version}
-                    className={`glass-panel p-6 rounded-2xl border transition relative flex flex-col justify-between ${
-                      lesson.borderColor
-                    } ${
-                      isAvailable
-                        ? "hover:border-indigo-400/80 hover:shadow-xl hover:shadow-indigo-500/5 bg-[#0e1424]/90"
-                        : "opacity-75 bg-[#0a0e18]"
-                    }`}
-                  >
-                    <div className="space-y-4">
-                      {/* Top Status & Tags */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                            {lesson.version}
-                          </span>
-                          <span className="text-xs text-slate-400 font-medium">
-                            {lesson.number}
-                          </span>
-                        </div>
-
-                        <span
-                          className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
-                            lesson.status === "current"
-                              ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 font-bold"
-                              : lesson.status === "completed"
-                              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                              : "bg-slate-800 text-slate-400 border-slate-700"
-                          }`}
-                        >
-                          {lesson.statusText}
-                        </span>
-                      </div>
-
-                      {/* Lesson Title & Desc */}
-                      <div>
-                        <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-cyan-400" />
-                          <span>{lesson.title}</span>
-                        </h3>
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                          {lesson.desc}
-                        </p>
-                      </div>
-
-                      {/* Key Highlights */}
-                      <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-                        <div className="text-[11px] font-mono text-slate-400 font-semibold">
-                          核心落地内容:
-                        </div>
-                        {lesson.highlights.map((h, i) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-2 text-xs text-slate-300"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
-                            <span>{h}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Action Link */}
-                    <div className="pt-6 flex items-center gap-2">
-                      {isAvailable ? (
-                        <Link
-                          to={lesson.path}
-                          className="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
-                        >
-                          <span>进入实验台 (Workbench)</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
-                      ) : (
-                        <div className="flex-1 py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
-                          {lesson.statusText}
-                        </div>
-                      )}
-                      {lesson.docPath && (
-                        <Link
-                          to={`/${lesson.docPath}`}
-                          className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-indigo-300 border border-slate-700/80 transition flex items-center justify-center shrink-0"
-                          title="查阅本课原理讲义"
-                        >
-                          <BookOpen className="w-4 h-4" />
-                        </Link>
-                      )}
-                    </div>
+              {(activeSemester === "semester2" ? filteredSemester2Lessons : filteredSemester1Lessons).length === 0 ? (
+                <div className="col-span-full p-10 text-center rounded-2xl bg-[#0c1020] border border-slate-800 space-y-3">
+                  <Search className="w-8 h-8 text-slate-500 mx-auto" />
+                  <div className="text-slate-200 font-semibold text-sm">
+                    未找到与「{searchQuery}」匹配的 Agent 实验台
                   </div>
-                );
-              })}
+                  <p className="text-xs text-slate-400">
+                    请尝试搜索其他关键字，如：LangGraph、StateGraph、ReAct、Tool、Branch、Harness 或 MCP
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 border border-indigo-500/30 text-xs font-medium transition"
+                  >
+                    清空搜索筛选
+                  </button>
+                </div>
+              ) : (
+                (activeSemester === "semester2" ? filteredSemester2Lessons : filteredSemester1Lessons).map((lesson) => {
+                  const Icon = lesson.icon;
+                  const isAvailable = lesson.path !== "#";
+
+                  return (
+                    <div
+                      key={lesson.version}
+                      className={`glass-panel p-6 rounded-2xl border transition relative flex flex-col justify-between ${
+                        lesson.borderColor
+                      } ${
+                        isAvailable
+                          ? "hover:border-indigo-400/80 hover:shadow-xl hover:shadow-indigo-500/5 bg-[#0e1424]/90"
+                          : "opacity-75 bg-[#0a0e18]"
+                      }`}
+                    >
+                      <div className="space-y-4">
+                        {/* Top Status & Tags */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                              {lesson.version}
+                            </span>
+                            <span className="text-xs text-slate-400 font-medium">
+                              {lesson.number}
+                            </span>
+                          </div>
+
+                          <span
+                            className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
+                              lesson.status === "current"
+                                ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 font-bold"
+                                : lesson.status === "completed"
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                                : "bg-slate-800 text-slate-400 border-slate-700"
+                            }`}
+                          >
+                            {lesson.statusText}
+                          </span>
+                        </div>
+
+                        {/* Lesson Title & Desc */}
+                        <div>
+                          <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
+                            <Icon className="w-4 h-4 text-cyan-400" />
+                            <span>{lesson.title}</span>
+                          </h3>
+                          <p className="text-xs text-slate-400 leading-relaxed">
+                            {lesson.desc}
+                          </p>
+                        </div>
+
+                        {/* Key Highlights */}
+                        <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+                          <div className="text-[11px] font-mono text-slate-400 font-semibold">
+                            核心落地内容:
+                          </div>
+                          {lesson.highlights.map((h, i) => (
+                            <div
+                              key={i}
+                              className="flex items-start gap-2 text-xs text-slate-300"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                              <span>{h}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Action Link */}
+                      <div className="pt-6 flex items-center gap-2">
+                        {isAvailable ? (
+                          <Link
+                            to={lesson.path}
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                          >
+                            <span>进入实验台 (Workbench)</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </Link>
+                        ) : (
+                          <div className="flex-1 py-2 px-4 rounded-xl bg-slate-900/60 text-slate-500 text-xs text-center border border-slate-800">
+                            {lesson.statusText}
+                          </div>
+                        )}
+                        {lesson.docPath && (
+                          <Link
+                            to={`/${lesson.docPath}`}
+                            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-indigo-300 border border-slate-700/80 transition flex items-center justify-center shrink-0"
+                            title="查阅本课原理讲义"
+                          >
+                            <BookOpen className="w-4 h-4" />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
-            {/* 12-Stage Roadmap Summary */}
-            <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            {/* 双学期完整路线图 (Dual-Semester Architecture Roadmap) */}
+            <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div className="flex items-center gap-2">
                   <Layers className="w-5 h-5 text-amber-400" />
                   <h2 className="text-base font-bold text-white tracking-tight">
-                    Mini Claude Code 12 阶段完整路线图
+                    Mini Claude Code 双学期全景路线图 (V0~V20)
                   </h2>
                 </div>
                 <span className="text-xs font-mono text-slate-400">
-                  V0 → V11 全生命周期
+                  从无状态 LLM 到工业级 StateGraph 完整演进
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {[
-                  { v: "V0", name: "LLM Chat", status: "done" },
-                  { v: "V1", name: "Tool Calling", status: "done" },
-                  { v: "V2", name: "Agent Loop", status: "done" },
-                  { v: "V3", name: "Coding Agent", status: "done" },
-                  { v: "V4", name: "Planning & Workflow", status: "done" },
-                  { v: "V5", name: "Context Engine", status: "done" },
-                  { v: "V6", name: "Memory & State", status: "done" },
-                  { v: "V7", name: "Harness & Sandbox", status: "done" },
-                  { v: "V8", name: "MCP 标准协议", status: "done" },
-                  { v: "V9", name: "Durable Exec", status: "current" },
-                  { v: "V10", name: "Eval & Tracing", status: "next" },
-                  { v: "V11", name: "Production Agent", status: "todo" },
-                ].map((item) => (
-                  <div
-                    key={item.v}
-                    className={`p-3 rounded-xl border flex items-center justify-between text-xs font-mono ${
-                      item.status === "current"
-                        ? "bg-cyan-950/30 border-cyan-500/50 text-cyan-200"
-                        : item.status === "done"
-                        ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-300"
-                        : "bg-[#0b101c] border-slate-800 text-slate-400"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">{item.v}</span>
-                      <span className="font-sans text-[11px]">{item.name}</span>
-                    </div>
-                    {item.status === "done" && (
+              {/* Semester 1 Roadmap */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono font-semibold text-slate-400">
+                  <span className="flex items-center gap-1.5 text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>第一学期 · 手写引擎基石 (V0 ~ V11 · 12 阶段全部结课)</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-400/80">12 / 12 ✓</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                  {[
+                    { v: "V0", name: "LLM Chat" },
+                    { v: "V1", name: "Tool Calling" },
+                    { v: "V2", name: "Agent Loop" },
+                    { v: "V3", name: "Coding Agent" },
+                    { v: "V4", name: "Planning" },
+                    { v: "V5", name: "Context Engine" },
+                    { v: "V6", name: "Memory" },
+                    { v: "V7", name: "Harness" },
+                    { v: "V8", name: "MCP 协议" },
+                    { v: "V9", name: "Durable Exec" },
+                    { v: "V10", name: "Eval & Tracing" },
+                    { v: "V11", name: "Production" },
+                  ].map((item) => (
+                    <div
+                      key={item.v}
+                      className="p-2.5 rounded-xl border bg-emerald-950/20 border-emerald-500/30 text-emerald-300 flex items-center justify-between text-xs font-mono"
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-bold">{item.v}</span>
+                        <span className="font-sans text-[11px] truncate">{item.name}</span>
+                      </div>
                       <span className="text-[10px] text-emerald-400">✓</span>
-                    )}
-                    {item.status === "current" && (
-                      <span className="text-[10px] text-cyan-400 animate-pulse">●</span>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Semester 2 Roadmap */}
+              <div className="space-y-2 pt-2 border-t border-slate-800/60">
+                <div className="flex items-center justify-between text-xs font-mono font-semibold text-slate-400">
+                  <span className="flex items-center gap-1.5 text-cyan-400">
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>第二学期 · 进阶 Runtime 与工作流图 (V12 ~ V20 · 9 阶段)</span>
+                  </span>
+                  <span className="text-[10px] text-cyan-400/80">Pi 微内核 + LangGraph 状态图</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                  {[
+                    { v: "V12", name: "Pi Runtime", status: "done" },
+                    { v: "V13", name: "Event-Driven", status: "done" },
+                    { v: "V14", name: "Session 时空", status: "done" },
+                    { v: "V15", name: "Branch DAG", status: "done" },
+                    { v: "V16", name: "Compaction", status: "done" },
+                    { v: "V17", name: "TS Extensions", status: "done" },
+                    { v: "V18", name: "While Collapse", status: "done" },
+                    { v: "V19", name: "StateGraph", status: "done" },
+                    { v: "V20", name: "Messages ≠ State", status: "current" },
+                  ].map((item) => (
+                    <div
+                      key={item.v}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono ${
+                        item.status === "current"
+                          ? "bg-purple-950/40 border-purple-500/50 text-purple-200 ring-1 ring-purple-500/30"
+                          : "bg-cyan-950/20 border-cyan-500/30 text-cyan-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-bold">{item.v}</span>
+                        <span className="font-sans text-[11px] truncate">{item.name}</span>
+                      </div>
+                      {item.status === "done" && (
+                        <span className="text-[10px] text-cyan-400">✓</span>
+                      )}
+                      {item.status === "current" && (
+                        <span className="text-[10px] text-purple-300 animate-pulse font-bold">● 最新</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -235,6 +235,30 @@ export function Header({
       color: "text-rose-400",
       badge: "预算熔断",
     },
+    {
+      path: "/lessons/context-c13-context-assembly",
+      tag: "C13",
+      title: "第 13 课: 上下文装配与布局 (Context Assembly)",
+      icon: Layers,
+      color: "text-indigo-400",
+      badge: "装配几何",
+    },
+    {
+      path: "/lessons/context-c14-compaction",
+      tag: "C14",
+      title: "第 14 课: 长任务 Context 提炼 (Context Compaction)",
+      icon: Sliders,
+      color: "text-cyan-400",
+      badge: "状态提炼",
+    },
+    {
+      path: "/lessons/context-c15-memory-persistence",
+      tag: "C15",
+      title: "第 15 课: 跨会话外脑与持久化 (Memory Persistence)",
+      icon: Brain,
+      color: "text-purple-400",
+      badge: "持久外脑",
+    },
   ];
 
   const semester2Lessons = [
